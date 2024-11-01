@@ -6,5 +6,22 @@
       "path": "/graphql",
       "auth": "bearer-token"
     }
+  },
+  "models": {
+    "text-generator": {
+      "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "provider": "hugging-face",
+      "connection": "hypermode"
+    }
+  },
+  "connections": {
+    "zenquotes": {
+      "type": "http",
+      "baseUrl": "https://zenquotes.io/"
+    },
+    "postgres": {
+      "type": "postgresql",
+      "connString": "postgresql://{{USERNAME}}:{{PASSWORD}}@localhost:5433/my-runtime-db?sslmode=disable"
+    }
   }
 }
