@@ -1,6 +1,6 @@
 # Getting Started With Modus
 
-Simple getting started to show how to create a serverless API with Modus.
+Simple getting started demo to show how to create a serverless API with Modus.
 
 Watch the recording:
 
