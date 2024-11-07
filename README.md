@@ -9,3 +9,8 @@ Demo from [Introducing ModusHack: Modus 101 livestream](https://www.youtube.com/
 ## [modus-getting-started](modus-getting-started/)
 
 Code from [Getting Started With Modus video](https://www.youtube.com/watch?v=3CcJTXTmz88).
+
+## [modushack-data-models](modushack-data-models/)
+
+Code from [ModusHack: Working With Data & AI Models](https://www.youtube.com/watch?v=gB-v7YWwkCw&list=PLzOEKEHv-5e3zgRGzDysyUm8KQklHQQgi&index=3) livestream.
+
