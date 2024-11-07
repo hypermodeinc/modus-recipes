@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.hypermode.com/modus.json",
+  "endpoints": {
+    "default": {
+      "type": "graphql",
+      "path": "/graphql",
+      "auth": "bearer-token"
+    }
+  },
+  "connections": {
+    "nyt": {
+      "type": "http",
+      "baseUrl": "https://api.nytimes.com/",
+      "queryParameters": {
+        "api-key": "{{API_KEY}}"
+      }
+    }
+  },
+  "models": {
+    "text-generator": {
+      "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "provider": "hugging-face",
+      "connection": "hypermode"
+    }
+  }
+}
