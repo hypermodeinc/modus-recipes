@@ -44,6 +44,7 @@ export function askQuestion(question: string, prompt:string = "" ): CompletionMe
 
 function tool_get_product_info(): Tool {
   const get_product_info = new Tool();
+  
   get_product_info.function = {
     name: "get_product_info",
     description: `Get information a product in the warehouse. Call this whenever you need to know the price or stock quantity of a product.`,
