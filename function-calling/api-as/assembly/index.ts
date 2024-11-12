@@ -7,7 +7,8 @@ import {
   ResponseFormat,
   CompletionMessage
 } from "@hypermode/modus-sdk-as/models/openai/chat";
-
+import { EnumParam, ObjectParam } from "./params";
+import { get_product_info } from "./warehouse";
 import { models } from "@hypermode/modus-sdk-as";
 
 import { JSON } from "json-as";
@@ -42,14 +43,10 @@ export function askQuestionToWarehouse(question: string): string {
 
   return response
 }
-@json
-class GetProductArguments { 
-  product_name: string="";
-  attribute: string="";
-}
+
 
 function aggregateToolsResponse(toolCalls: ToolCall[]): string {
-  var responses = []
+  var responses :string[] = []
   for (var i = 0; i < toolCalls.length; i++) {
       responses.push(executeToolCall(toolCalls[i]))
   }
@@ -58,8 +55,7 @@ function aggregateToolsResponse(toolCalls: ToolCall[]): string {
 
 function executeToolCall(toolCall: ToolCall): string {
   if (toolCall.function.name == "get_product_info") {
-    const args = JSON.parse<GetProductArguments>(toolCall.function.arguments)
-    return `The ${args.attribute} of ${args.product_name} is 10. `
+    return get_product_info(toolCall.function.arguments)
   }
   return ""
 }
@@ -85,7 +81,10 @@ function getLLMResponse(model: OpenAIChatModel, question: string, context:string
 
 function tool_get_product_info(): Tool {
   const get_product_info = new Tool();
-  
+  const param = new ObjectParam();
+    param.addRequiredProperty("product_name", new EnumParam(["Shoe", "Hat", "Trouser", "Shirt"]));
+    param.addRequiredProperty("attribute", new EnumParam(["qty", "price"],"The product information to return"));
+
   get_product_info.function = {
     name: "get_product_info",
     description: `Get information a product in the warehouse. Call this whenever you need to know the price or stock quantity of a product.`,
@@ -94,6 +93,8 @@ function tool_get_product_info(): Tool {
     // all object in the schema must have "additionalProperties": false
     // 'required' is required to be supplied and to be an array including every key in properties
     // meaning openai expects all fields to be required
+    parameters: param.toString(),
+    /* 
     parameters: `{
           "type": "object",
           "properties": {
@@ -110,8 +111,18 @@ function tool_get_product_info(): Tool {
           "required": ["product_name", "attribute"],
           "additionalProperties": false
         }`,
+        */
 
     strict: true,
   };
+  
   return get_product_info;
+}
+
+export function test(): String {
+  const param = new ObjectParam();
+  param.addRequiredProperty("product_name", new EnumParam(["Shoe", "Hat", "Trouser", "Shirt"]));
+  param.addRequiredProperty("attribute", new EnumParam(["qty", "price"],"The product information to return"));
+
+  return JSON.stringify(param);
 }
