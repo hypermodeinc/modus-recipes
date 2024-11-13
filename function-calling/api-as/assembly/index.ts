@@ -94,24 +94,7 @@ function tool_get_product_info(): Tool {
     // 'required' is required to be supplied and to be an array including every key in properties
     // meaning openai expects all fields to be required
     parameters: param.toString(),
-    /* 
-    parameters: `{
-          "type": "object",
-          "properties": {
-            "product_name": {
-              "type": "string",
-              "enum": ["Shoe", "Hat", "Trouser", "Shirt"]
-            },
-            "attribute": {
-              "type": "string",
-              "description": "The product information to return",
-              "enum": ["qty", "price"]
-            }
-          },
-          "required": ["product_name", "attribute"],
-          "additionalProperties": false
-        }`,
-        */
+
 
     strict: true,
   };
