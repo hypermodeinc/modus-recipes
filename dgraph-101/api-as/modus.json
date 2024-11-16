@@ -7,6 +7,13 @@
       "auth": "bearer-token"
     }
   },
+  "models" : {
+    "minilm":{
+        "sourceModel": "sentence-transformers/all-MiniLM-L6-v2",
+        "connection": "hypermode",
+        "provider": "hugging-face"
+    }
+  },
   "connections": {
     "dgraph-grpc": {
       "type": "dgraph",

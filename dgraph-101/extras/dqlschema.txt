@@ -1,0 +1,5 @@
+<Category.name>: string @index(hash) .
+<Product.category>: uid @reverse .
+<Product.description>: string .
+<Product.id>: string @index(hash) .
+<Product.embedding>: float32vector @index(hnsw) . 
