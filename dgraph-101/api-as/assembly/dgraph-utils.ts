@@ -1,4 +1,6 @@
-
+/**
+ * Utility classes and functions used to interact with Dgraph.
+ */
 import { dgraph } from "@hypermode/modus-sdk-as"
 import { JSON } from "json-as"
 
@@ -15,15 +17,19 @@ export class ListOf<T> {
     list: T[] = [];
 }
 export class NestedEntity {
-
     predicate: string = "";
     type: string = "";
     id_field: string = "";
     id_value: string | null = null;
-
 }
 
+/**
+ * modify the json payload to add the uid of the root and the nested entities when they exist in Dgraph
+ * for non existing entities, a blank uid is generated helping the interpretation of mutation response
+ */
+
 export function injectNodeUid(connection:string, payload: string, nested_entities: NestedEntity[]): string {
+    
     const root_entity = nested_entities[0];
 
     payload = payload.replace("{", `{ \"dgraph.type\":\"${root_entity.type}\",`)
@@ -48,10 +54,23 @@ export function injectNodeUid(connection:string, payload: string, nested_entitie
                 payload = payload.replace(`${locator}`, `${locator} "uid": "_:${nested_entities[i].type}-${nested_entities[i].id_value!}",`)
             }
         } 
-    
     }
   return payload
 }
+
+export function getEntityById<T>(connection: string, predicate: string, id: string, body: string): T | null{
+    const query = new dgraph.Query(`{
+      list(func: eq(${predicate}, "${id}")) {
+          ${body}
+        }
+      }`);
+    const response = dgraph.execute(connection, new dgraph.Request(query));
+    const data = JSON.parse<ListOf<T>>(response.Json);
+    if (data.list.length > 0) {
+      return data.list[0];
+    } 
+    return null;
+  }
 
 function getEntityUid(connection: string,predicate:string, value: string): string | null{
 
