@@ -3,6 +3,7 @@
  */
 import { dgraph } from "@hypermode/modus-sdk-as"
 import { JSON } from "json-as"
+import { JSON as JSON_TREE} from "assemblyscript-json/assembly/index"
 
 @json
 class Uid {
@@ -16,46 +17,63 @@ class UidResult {
 export class ListOf<T> {
     list: T[] = [];
 }
-export class NestedEntity {
-    predicate: string = "";
-    type: string = "";
-    id_field: string = "";
-    id_value: string | null = null;
+export class Relationship {
+    predicate!: string;
+    type!: string;
 }
+export class NodeType {
+    id_field: string = ""
+    relationships : Relationship[] = [];
+}
+export class GraphSchema {
+    node_types: Map<string, NodeType> = new Map<string, NodeType>();
+}
+
 
 /**
  * modify the json payload to add the uid of the root and the nested entities when they exist in Dgraph
  * for non existing entities, a blank uid is generated helping the interpretation of mutation response
  */
 
-export function injectNodeUid(connection:string, payload: string, nested_entities: NestedEntity[]): string {
+export function injectNodeUid(connection:string, payload: string, root_type:string, schema: GraphSchema): string {
     
-    const root_entity = nested_entities[0];
+    const root_node_type = schema.node_types.get(root_type);
 
-    payload = payload.replace("{", `{ \"dgraph.type\":\"${root_entity.type}\",`)
-    
-    for (var i = 1; i < nested_entities.length; i++) {
-        const predicate = nested_entities[i].predicate;
-        const type = nested_entities[i].type;
-        payload = payload.replace(`${predicate}\":{`, `${predicate}\":{ \"dgraph.type\":\"${type}\",`);
-    }
+    const root = <JSON_TREE.Obj>(JSON_TREE.parse(payload));
+    injectNodeType(connection, root, root_type, schema);
 
-    for ( i = 0; i < nested_entities.length; i++) {
-        var locator = `${nested_entities[i].predicate}\":{`
-        if (i == 0) { 
-            locator = "{"
-        } 
-        if(nested_entities[i].id_value != null) {
-            const nodeUid = getEntityUid(connection,`${nested_entities[i].type}.${nested_entities[i].id_field}`, nested_entities[i].id_value!);
-            if (nodeUid != null) {
-                
-                payload = payload.replace(`${locator}`, `${locator} "uid":"${nodeUid}",`)
-            } else {
-                payload = payload.replace(`${locator}`, `${locator} "uid": "_:${nested_entities[i].type}-${nested_entities[i].id_value!}",`)
-            }
-        } 
+    console.log(root.toString())
+
+  return root.toString()
+}
+
+/**
+ * recursively inject the dgraph.type and uid of the entities in the json tree
+ */
+function injectNodeType(connection: string, entity: JSON_TREE.Obj | null, type: string, schema: GraphSchema): void {
+
+    if (entity != null) {
+      entity.set("dgraph.type", type);
+      const node_type = schema.node_types.get(type);
+      for (var i = 0; i < node_type.relationships.length; i++) {
+        const predicate = node_type.relationships[i].predicate;
+        const type = node_type.relationships[i].type;
+        injectNodeType(connection, entity.getObj(predicate), type, schema);
+      }
+
+      const id_field = entity.getString(node_type.id_field)
+      if (id_field != null) {
+        const id_value = entity.getString(node_type.id_field)!.toString();
+        if (id_value != null) {
+          const node_uid = getEntityUid(connection,`${node_type.id_field}`, id_value);
+          if (node_uid != null) {
+            entity.set("uid", node_uid);
+          } else {
+            entity.set("uid", `_:${type}-${id_value}`);
+          }
+        }
+      }
     }
-  return payload
 }
 
 export function getEntityById<T>(connection: string, predicate: string, id: string, body: string): T | null{
@@ -122,4 +140,9 @@ export function searchBySimilarity<T>(connection:string, embedding: f32[],predic
   }
 
 
-  
+  export function addEmbeddingToJson(payload: string, predicate:string, embedding: f32[]): string {
+    // Add the embedding to the payload at root level
+    // TO DO: extend to nested entities and use JSONpath
+    payload = payload.replace("{", `{ \"${predicate}\":\"${JSON.stringify(embedding)}\",`)
+    return payload;
+  }

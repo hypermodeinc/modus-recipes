@@ -3,7 +3,7 @@ import { dgraph } from "@hypermode/modus-sdk-as"
 import { Product } from "./classes"
 import { embedText } from "./embeddings"
 import { buildProductMutationJson } from "./product-helpers"
-import { deleteNodePredicates, ListOf, searchBySimilarity, getEntityById } from "./dgraph-utils"
+import { deleteNodePredicates, ListOf, searchBySimilarity, getEntityById , addEmbeddingToJson} from "./dgraph-utils"
 
 const DGRAPH_CONNECTION="dgraph-grpc"
 
@@ -14,9 +14,9 @@ export function upsertProduct(product: Product): Map<string, string> | null {
   
   var payload = buildProductMutationJson(DGRAPH_CONNECTION,product);
 
-  const embedding = embedText([product.description]);
-  payload = payload.replace("{", `{ \"Product.embedding\":\"${JSON.stringify(embedding[0])}\",`)
-
+  const embedding = embedText([product.description])[0];
+  payload = addEmbeddingToJson(payload, "Product.embedding",embedding);
+ 
   const mutations: dgraph.Mutation[] = [new dgraph.Mutation(payload)];
   const uids = dgraph.execute(DGRAPH_CONNECTION, new dgraph.Request(null, mutations)).Uids;
   
@@ -52,6 +52,7 @@ export function getProductsByCategory(category: string): Product[] {
     list(func: eq(Category.name, "${category}")) {
       list:~Product.category {
         Product.id
+        Product.title
         Product.description
         Product.category {
           Category.name
