@@ -1,0 +1,62 @@
+name: Build Examples
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - '**.go'
+      - '**.ts'
+      - '**.json'
+      - .github/workflows/*
+
+permissions:
+  contents: read
+
+jobs:
+  get-dirs:
+    name: search
+    runs-on: ubuntu-latest
+    outputs:
+      dirs: ${{ steps.get-dirs.outputs.dirs }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Search for go.mod and package.json files
+        id: get-dirs
+        run: echo "dirs=$(find . \( -name 'go.mod' -o -name 'package.json' \) -exec dirname {} \; | sed 's|^\./||' | jq -Rsc 'split("\n")[:-1]')" >> ${GITHUB_OUTPUT}
+
+  build:
+    needs: get-dirs
+    name: build
+    runs-on: warp-ubuntu-latest-x64-4x
+    strategy:
+      matrix:
+        dir: ${{ fromJson(needs.get-dirs.outputs.dirs) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+
+      - name: Setup TinyGo
+        uses: acifani/setup-tinygo@v2
+        with:
+          tinygo-version: "0.34.0"
+
+      - name: Build project
+        run: npx -p @hypermode/modus-cli -y modus build
+        shell: bash
