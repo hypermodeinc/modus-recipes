@@ -59,5 +59,4 @@ jobs:
 
       - name: Build project
         run: npx -p @hypermode/modus-cli -y modus build
-        working-directory: ${{ env.MODUS_DIR }}
         shell: bash
