@@ -1,5 +1,5 @@
 {
-  "name": "infinite-sequence",
+  "name": "modus-press",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "pretty:check": "prettier --check ."
   },
   "dependencies": {
-    "@hypermode/modus-sdk-as": "^0.13.3",
+    "@hypermode/modus-sdk-as": "^0.13.4",
     "json-as": "0.9.26"
   },
   "devDependencies": {
