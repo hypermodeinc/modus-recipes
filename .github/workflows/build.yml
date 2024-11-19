@@ -12,6 +12,8 @@ on:
       - '**.ts'
       - '**.json'
       - .github/workflows/*
+  schedule:
+    - cron: "0 5 * * *"
 
 permissions:
   contents: read
