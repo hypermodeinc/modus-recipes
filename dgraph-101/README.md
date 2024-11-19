@@ -1,6 +1,6 @@
 # dgraph with modus 101
 
-Demo from 11/16/24 ModusHack Webinar.
+From ModusHack livestream - 11/19/24  .
 
 ## Dgraph
 
@@ -38,8 +38,7 @@ The data is saved in Dgraph as a graph.
 This function shows how to easily use the relationships in the graph.
 
 - searchProducts
-Finally we are using an AI model to create text embeddings for our Products.
+Finally we are using an AI model to create text embeddings for our Products: as the embeddings are stored in Dgraph for each Product entity, we can easily expose an API to search by natural language and similarity, leveraging DQL `similar_to` function.
 
-As the embeddings are stored in Dgraph for each Product entity, we can easily expose an API to search by natural language and similarity
 
 
