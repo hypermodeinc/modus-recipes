@@ -65,7 +65,10 @@ export class StringParam extends Param {
     }
 }
 
-    /* example of parameters value 
+/* example of parameters value in JSON format
+
+
+
     parameters: `{
           "type": "object",
           "properties": {

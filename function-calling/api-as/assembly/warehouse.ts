@@ -10,6 +10,7 @@ productInfo.set("Hat", {qty: 20, price: "200"});
 productInfo.set("Trouser", {qty: 30, price: "300"});
 productInfo.set("Shirt", {qty: 40, price: "400"});
 
+
 @json
 export class GetProductArguments { 
   product_name: string="";
@@ -20,9 +21,15 @@ export function get_product_info(string_args: string): string {
     const args = JSON.parse<GetProductArguments>(string_args)
     const product = productInfo.get(args.product_name)
     if (!product) {
-        return `The product ${args.product_name} is not available.`
+        return `The product ${args.product_name} is not available. `+ get_product_types();
     } else {
-        const value = args.attribute == "qty" ? product.qty : product.price
+        const value = args.attribute == "qty" ? product.qty.toString() : product.price
     return `The ${args.attribute} of ${args.product_name} is ${value}. `
     }
 }
+
+export function get_product_types(): string {
+    const product_list = productInfo.keys();
+    
+    return `The available products are: ${product_list.join(", ")}`
+}   
