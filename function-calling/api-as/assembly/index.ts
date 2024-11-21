@@ -16,7 +16,8 @@ const MODEL_NAME: string = "llm"; // refer to modus.json for the model specs
 
 const DEFAULT_PROMPT = `
     You are a warehouse manager only answering questions about the stock and price of products in the warehouse.
-    If you can't reply, just explain your role and expected type of questions. 
+    If you can't reply, try to use one of the tool to get additional information. 
+    If no tool can help, just explain your role and expected type of questions. 
     The response should be a single sentence.
     Reply to the user question using only the data in CONTEXT. 
     If you have a doubt about a product, use the tool to get the list of product names.
@@ -34,13 +35,13 @@ export function askQuestionToWarehouse(question: string): string[] {
     const message = getLLMResponse(model, question, context)
     console.log(`Message: ${JSON.stringify(message)}`)
     if (message.toolCalls.length > 0){
-      const logs = message.toolCalls.map<string>((toolCall) => { return `Calling function ${toolCall.function.name} with ${toolCall.function.arguments}`  })
+      const logs = message.toolCalls.map<string>((toolCall) => { return `Calling function : ${toolCall.function.name} with ${toolCall.function.arguments}`  })
       response = response.concat(logs)
 
       context += aggregateToolsResponse(message.toolCalls)
-      response.push(`Context update : ${context}`)
+      response.push(`Context update   : ${context}`)
     }  else {
-      response.push(message.content)
+      response.push(`Final response   : ${message.content}`)
       break;
     }
   } while (loops++ < 2)
@@ -98,6 +99,7 @@ function getLLMResponse(model: OpenAIChatModel, question: string, context:string
 function tool_get_product_info(): Tool {
   const get_product_info = new Tool();
   const param = new ObjectParam();
+  
   //param.addRequiredProperty("product_name", new EnumParam(["Shoe", "Hat", "Trouser", "Shirt"],"One of the product in the warehouse."));
   param.addRequiredProperty("product_name", new StringParam("One of the product in the warehouse like 'Shoe' or  'Hat'."));
   
@@ -117,6 +119,7 @@ function tool_get_product_info(): Tool {
   
   return get_product_info;
 }
+
 /**
  * Creates a Tool object that can be used to call the get_product_list function in the warehouse.
  * @returns Tool
@@ -124,15 +127,12 @@ function tool_get_product_info(): Tool {
  */
 function tool_get_product_list(): Tool {
   const get_product_list = new Tool();
+  /* this function has no parameters */
   get_product_list.function = {
     name: "get_product_list",
     description: `Get the list of product names in the warehouse. Call this whenever you need to know which product you are able to get information about.`,
-    // parameters is a string that contains the JSON schema for the parameters that the tool expects.
-    // valid json schema cannot have commas for the last item in an object or array
-    // all object in the schema must have "additionalProperties": false
-    // 'required' is required to be supplied and to be an array including every key in properties
-    // meaning openai expects all fields to be required
-
+    parameters: null,
+    strict: false
   };
   
   return get_product_list;
