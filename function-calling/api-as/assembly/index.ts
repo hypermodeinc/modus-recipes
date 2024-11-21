@@ -4,6 +4,7 @@ import {
   ToolCall,
   SystemMessage,
   UserMessage,
+  ToolMessage,
   ResponseFormat,
   CompletionMessage
 } from "@hypermode/modus-sdk-as/models/openai/chat";
@@ -19,43 +20,57 @@ const DEFAULT_PROMPT = `
     If you can't reply, try to use one of the tool to get additional information. 
     If no tool can help, just explain your role and expected type of questions. 
     The response should be a single sentence.
-    Reply to the user question using only the data in CONTEXT. 
+    Reply to the user question using only the data provided by tools. 
     If you have a doubt about a product, use the tool to get the list of product names.
-    """CONTEXT"""
-    `
 
-export function askQuestionToWarehouse(question: string): string[] {
+    `
+@json
+class ResponseWithLogs {
+  response: string = "";
+  logs: string[] = [];
+}
+export function askQuestionToWarehouse(question: string): ResponseWithLogs {
   
   const model = models.getModel<OpenAIChatModel>(MODEL_NAME);
-  var response :string[]=[]
-  var context = ""
-
+  var logs :string[]=[]
+  var final_response = ""
+  var tool_messages :ToolMessage[] = []
+  var message: CompletionMessage | null = null
   var loops = 0
+  // we loop until we get a response or we reach the maximum number of loops (3)
   do {
-    const message = getLLMResponse(model, question, context)
-    console.log(`Message: ${JSON.stringify(message)}`)
+    message = getLLMResponse(model, question, message, tool_messages)
+    /* do we have a tool call to execute */
     if (message.toolCalls.length > 0){
-      const logs = message.toolCalls.map<string>((toolCall) => { return `Calling function : ${toolCall.function.name} with ${toolCall.function.arguments}`  })
-      response = response.concat(logs)
-
-      context += aggregateToolsResponse(message.toolCalls)
-      response.push(`Context update   : ${context}`)
+      for (var i = 0; i < message.toolCalls.length; i++) {
+        logs.push(`Calling function : ${message.toolCalls[i].function.name} with ${message.toolCalls[i].function.arguments}`)
+      }
+      
+      tool_messages = aggregateToolsResponse(message.toolCalls)
+      for (i = 0; i < tool_messages.length; i++) {
+        logs.push(`Tool response    : ${tool_messages[i].content}`)
+      }
     }  else {
-      response.push(`Final response   : ${message.content}`)
+      final_response = message.content;
       break;
     }
   } while (loops++ < 2)
 
-  return response
+  return {response: final_response, logs: logs}
 }
 
-
-function aggregateToolsResponse(toolCalls: ToolCall[]): string {
-  var responses :string[] = []
+/**
+ * Execute the tool calls and return an array of ToolMessage
+ * containing the response of the tools
+ */
+function aggregateToolsResponse(toolCalls: ToolCall[]): ToolMessage[] {
+  var messages :ToolMessage[] = []
   for (var i = 0; i < toolCalls.length; i++) {
-      responses.push(executeToolCall(toolCalls[i]))
+    const content = executeToolCall(toolCalls[i])
+    const toolCallResponse = new ToolMessage(content,toolCalls[i].id)
+    messages.push(toolCallResponse)
   }
-  return responses.join("\n")
+  return messages
 }
 
 function executeToolCall(toolCall: ToolCall): string {
@@ -66,22 +81,29 @@ function executeToolCall(toolCall: ToolCall): string {
   } else {  
     return ""
   }
-
-  
-
 }
 
-function getLLMResponse(model: OpenAIChatModel, question: string, context:string ="" ): CompletionMessage {
+function getLLMResponse(model: OpenAIChatModel, question: string, last_message: CompletionMessage| null = null, tools_messages: ToolMessage[] = [] ): CompletionMessage {
+
   const input = model.createInput([
-    new SystemMessage(DEFAULT_PROMPT+context),
+    new SystemMessage(DEFAULT_PROMPT),
     new UserMessage(question),
   ]);
+  /*
+  * adding tools messages (response from tools) to the input
+  * first we need to add the last completion message so the LLM can match the tool messages with the tool call 
+  */
+  if (last_message != null) {
+    input.messages.push(last_message)
+  }
+  for (var i = 0; i < tools_messages.length; i++) {
+    input.messages.push(tools_messages[i])
+  }
   
   input.responseFormat = ResponseFormat.Text;
   const tools = [
     tool_get_product_list(),
     tool_get_product_info()
-    
   ]
   input.tools = tools;
 
