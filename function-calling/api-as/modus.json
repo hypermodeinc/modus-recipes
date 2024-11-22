@@ -15,10 +15,6 @@
     }
   },
   "connections": {
-    "play": {
-      "type": "http",
-      "baseUrl": "https://play.dgraph.io/"
-    },
     "openai": {
       "type": "http",
       "baseUrl": "https://api.openai.com/",

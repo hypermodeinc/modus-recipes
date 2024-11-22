@@ -10,17 +10,6 @@ class Product {
 }
 
 /**
- * Our fake warehouse DB is a map of product name to product information.
- */
-const productInfo: Map<string,Product> = new Map<string,Product>();
-productInfo.set("Shoe", {qty: 10, price: "100"});
-productInfo.set("Hat", {qty: 20, price: "200"});
-productInfo.set("Trouser", {qty: 30, price: "300"});
-productInfo.set("Shirt", {qty: 40, price: "400"});
-
-
-
-/**
  * Get the list of available products.
  */
 export function get_product_types(): string {
@@ -45,3 +34,12 @@ export class GetProductArguments {
   product_name: string="";
   attribute: string="";
 }
+
+/**
+ * Our fake warehouse DB is a map of product name to product information.
+ */
+const productInfo: Map<string,Product> = new Map<string,Product>();
+productInfo.set("Shoe", {qty: 10, price: "100"});
+productInfo.set("Hat", {qty: 20, price: "200"});
+productInfo.set("Trouser", {qty: 30, price: "300"});
+productInfo.set("Shirt", {qty: 40, price: "400"});
