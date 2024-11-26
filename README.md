@@ -16,5 +16,5 @@ The following recipes have associated recorded content:
 | [modus-getting-started](modus-getting-started/) | [Getting Started With Modus video](https://www.youtube.com/watch?v=3CcJTXTmz88)                                                                    |
 | [modushack-data-models](modushack-data-models/) | [ModusHack: Working With Data & AI Models livestream](https://www.youtube.com/watch?v=gB-v7YWwkCw&list=PLzOEKEHv-5e3zgRGzDysyUm8KQklHQQgi&index=3) |
 | [modus-press](modus-press/)                     | Coming soon                                                                                                                                        |
-| [dgraph-101](dgraph-101/)                     | Coming soon                                                                                                                                        |
-| [function-calling](function-calling/)                     | Coming soon                                                                                                                                        |
+| [dgraph-101](dgraph-101/)      | [Working with Dgraph in Modus](https://youtu.be/Z2fB-nBf4Wo)  |
+| [function-calling](function-calling/)                     | [Use LLM function calling aka tools in Modus.](https://youtu.be/afFk7JzSIm0)                                                                                                                                       |
