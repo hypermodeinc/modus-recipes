@@ -11,6 +11,7 @@ import {
 import { EnumParam,StringParam, ObjectParam } from "./params";
 import { get_product_info, get_product_types } from "./warehouse";
 import { models } from "@hypermode/modus-sdk-as";
+import { llmWithTools, ResponseWithLogs}  from "./tool-helper";
 import { JSON } from "json-as";
 
 const MODEL_NAME: string = "llm"; // refer to modus.json for the model specs
@@ -24,54 +25,22 @@ const DEFAULT_PROMPT = `
     If you have a doubt about a product, use the tool to get the list of product names.
 
     `
-@json
-class ResponseWithLogs {
-  response: string = "";
-  logs: string[] = [];
-}
+
 export function askQuestionToWarehouse(question: string): ResponseWithLogs {
   
   const model = models.getModel<OpenAIChatModel>(MODEL_NAME);
-  var logs :string[]=[]
-  var final_response = ""
-  var tool_messages :ToolMessage[] = []
-  var message: CompletionMessage | null = null
-  var loops = 0
-  // we loop until we get a response or we reach the maximum number of loops (3)
-  do {
-    message = getLLMResponse(model, question, message, tool_messages)
-    /* do we have a tool call to execute */
-    if (message.toolCalls.length > 0){
-      for (var i = 0; i < message.toolCalls.length; i++) {
-        logs.push(`Calling function : ${message.toolCalls[i].function.name} with ${message.toolCalls[i].function.arguments}`)
-      }
-      
-      tool_messages = aggregateToolsResponse(message.toolCalls)
-      for (i = 0; i < tool_messages.length; i++) {
-        logs.push(`Tool response    : ${tool_messages[i].content}`)
-      }
-    }  else {
-      final_response = message.content;
-      break;
-    }
-  } while (loops++ < 2)
+  const loop_limit:u8 = 3; // maximum number of loops
+  return llmWithTools(
+    model, 
+    [tool_get_product_list(), tool_get_product_info()], 
+    DEFAULT_PROMPT, 
+    question, 
+    executeToolCall,
+    loop_limit);
 
-  return {response: final_response, logs: logs}
 }
 
-/**
- * Execute the tool calls and return an array of ToolMessage
- * containing the response of the tools
- */
-function aggregateToolsResponse(toolCalls: ToolCall[]): ToolMessage[] {
-  var messages :ToolMessage[] = []
-  for (var i = 0; i < toolCalls.length; i++) {
-    const content = executeToolCall(toolCalls[i])
-    const toolCallResponse = new ToolMessage(content,toolCalls[i].id)
-    messages.push(toolCallResponse)
-  }
-  return messages
-}
+
 
 function executeToolCall(toolCall: ToolCall): string {
   if (toolCall.function.name == "get_product_list") {
@@ -83,35 +52,6 @@ function executeToolCall(toolCall: ToolCall): string {
   }
 }
 
-function getLLMResponse(model: OpenAIChatModel, question: string, last_message: CompletionMessage| null = null, tools_messages: ToolMessage[] = [] ): CompletionMessage {
-
-  const input = model.createInput([
-    new SystemMessage(DEFAULT_PROMPT),
-    new UserMessage(question),
-  ]);
-  /*
-  * adding tools messages (response from tools) to the input
-  * first we need to add the last completion message so the LLM can match the tool messages with the tool call 
-  */
-  if (last_message != null) {
-    input.messages.push(last_message)
-  }
-  for (var i = 0; i < tools_messages.length; i++) {
-    input.messages.push(tools_messages[i])
-  }
-  
-  input.responseFormat = ResponseFormat.Text;
-  const tools = [
-    tool_get_product_list(),
-    tool_get_product_info()
-  ]
-  input.tools = tools;
-
-  input.toolChoice = "auto"; //  "auto "required" or "none" or  a function in json format
-
-  const message = model.invoke(input).choices[0].message
-  return message
-}
 
 /**
  * Creates a Tool object that can be used to call the get_product_info function in the warehouse.
