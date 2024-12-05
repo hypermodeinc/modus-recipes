@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.hypermode.com/modus.json",
+  "endpoints": {
+    "default": {
+      "type": "graphql",
+      "path": "/graphql",
+      "auth": "bearer-token"
+    }
+  },
+  "models": {
+    "llama": {
+      "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "provider": "hugging-face",
+      "connection": "hypermode"
+    }
+  },
+  "connections": {
+    "moduspressdb": {
+      "type": "postgresql",
+      "connString": "postgresql://{{USERNAME}}@{{HOST}}:{{port}}/{{DBNAME}}"
+    }
+  }
+}
