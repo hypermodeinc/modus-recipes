@@ -1,0 +1,69 @@
+---
+title: Define Collections
+description: "Enable natural language search"
+---
+
+Collections are a key integration aspect with [models](/define-models) to create smart, searchable text.
+The `collections` object in the [project manifest](/manifest) allows you to define groupings of text and functions to embed inserted text with.
+
+```json hypermode.json
+{
+  "collections": {
+    // This defines a collection of products, having two search methods.
+    "myProducts": {
+      "searchMethods": {
+        "searchMethod1": {
+          // The embedder is the name of the function that will be used to generate vector embeddings.
+          // By default, it uses a sequential index.
+          "embedder": "embed"
+        },
+
+        // This is an example of a second search method.
+        // It could use a different embedder or index type, if desired.
+        "searchMethod2": {
+          "embedder": "embed",
+          "index": {
+            "type": "sequential"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Each collection requires a unique name, specified as a key, containing only alphanumeric characters and hyphens.
+
+## Properties
+
+<ResponseField name="searchMethods" type="object">
+  If provided, adds an index on top of the collection. Each key-value pair is a
+  search method and values.
+
+    - `embedder`: An exported function name used by the search method to
+    embed text in the collection. Function must have a call signature with input `string[]` and return type `f32[][]`.
+    <Accordion title="Examples">
+        This example specifies a `searchMethod` with an embedder named `embed`
+        ```json
+        "searchMethod1": {
+          "embedder": "embed"
+        }
+        ```
+    </Accordion>
+
+    - `index`: If provided, describes the index mechanism used by the search method.
+    _By default, set to sequential indexing._
+        - `type`: Specifies the type of the index. For example, "sequential".
+    <Accordion title="Examples">
+        This example specifies a `searchMethod` with an embedder named `embed` and an index with type `sequential`
+        ```json
+        "searchMethod1": {
+          "embedder": "embed"
+          "index": {
+            "type": "sequential"
+          }
+        }
+        ```
+    </Accordion>
+
+  </ResponseField>
