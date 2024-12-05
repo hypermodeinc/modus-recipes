@@ -104,7 +104,7 @@ function _recursiveCharacterTextSplitter(
 
   // max_char is the position of the max_word in the text
   const max_char = text.split(" ").slice(0, max_word).join(" ").length;
-  console.log(text.slice(0, max_char) + "|");
+  // console.log(text.slice(0, max_char) + "|");
   // look for the closest mandatory separator in the text within the max_char limit
   // use the longest separator first
   let sep_pos = max_char;
@@ -112,9 +112,14 @@ function _recursiveCharacterTextSplitter(
 
   for (let i = 0; i < must_split_on.length; i++) {
     const sep = must_split_on[i];
+    var offset = 0;
+    if (text.startsWith(sep)) {
+        offset = sep.length;
+    }
 
-    const pos = text.slice(0, max_char).indexOf(sep);
+    var pos = text.slice(offset, max_char).indexOf(sep);
     if (pos > 0) {
+      pos += offset;
       console.log(`found separator [${sep}] at ${pos}`);
       if (pos < sep_pos) {
         sep_found = sep;
