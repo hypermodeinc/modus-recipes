@@ -1,32 +1,32 @@
 # instant-vector-search
 
-A simplified template demonstrating how to build instant vector search using Hypermode and Modus. This project showcases how to configure collections, embed data, and deploy APIs to perform real-time vector search with minimal setup.
+A simplified example demonstrating how to build instant vector search using Hypermode and Modus. This project showcases how to configure collections, embed data, and deploy APIs to perform real-time vector search with minimal setup.
 
 ## Guide
 
-Check out the guide on how to create a project using this template:
-[Instant Vector Search Guide](TODO)
+Check out the blog post on how to create a project using this example:
+[How to Build an Instant Vector Search App using Hypermode & Modus](https://hypermode.com/blog/instant-vector-search-guide)
 
 ## Semantic Search in Action
 
-This template demonstrates how instant vector search can enhance your application by generating embeddings from user queries and performing vector searches in less than 200ms.
+This example demonstrates how instant vector search can enhance your application by generating embeddings from user queries and performing vector searches in less than 200ms.
 
 ## How to Use the Template
 
 Fork or clone this repository to get started:
 
-```
-git clone https://github.com/hypermodeinc/instant-vector-search.git
-cd instant-vector-search
+```bash
+git clone https://github.com/hypermodeinc/modus-recipes.git
+cd modus-recipes/instant-vector-search
 ```
 
 Install Modus CLI:
 
-```
+```bash
 npm install -g @hypermode/modus-cli
 ```
 
-## Initialize and deploy your app:
+## Initialize and deploy your app
 
 You can deploy using either the Hypermode Console or Hyp CLI.
 
@@ -37,9 +37,15 @@ Option 1: Hypermode Console
 
 Option 2: Hyp CLI
 
+- Install the Hyp CLI
+
+```bash
+npm install -g @hypermode/hyp-cli
+```
+
 - Run the following command to import and deploy your app:
 
-```
+```bash
 hyp init
 ```
 
@@ -57,7 +63,7 @@ Once your data is in place, the embeddings will be generated automatically, and 
 
 You can test the API via the Query page in the Hypermode Console. Run a sample vector search query:
 
-```
+```GraphQL
 query {
   search(query: "your search term here")
 }

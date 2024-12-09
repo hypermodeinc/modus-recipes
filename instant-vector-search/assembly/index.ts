@@ -6,6 +6,9 @@ const textsCollection = "texts";
 const searchMethod = "searchMethod1";
 const embeddingModelName = "minilm";
 
+/**
+ * Add text(s) to the collection
+ */
 export function upsertTexts(ids: string[], texts: string[]): string[] {
   const errors: string[] = [];
 
@@ -24,6 +27,9 @@ export function upsertTexts(ids: string[], texts: string[]): string[] {
   return ids;
 }
 
+/**
+ * Perform a vector search using an embedding of the input string
+ */
 export function search(query: string): string[] {
   const searchResults = collections.search(
     textsCollection,
@@ -48,6 +54,9 @@ export function search(query: string): string[] {
   return searchTexts;
 }
 
+/**
+ * Embed the input text(s) using the miniLM embedding model
+ */
 export function miniLMEmbed(texts: string[]): f32[][] {
   const model = models.getModel<EmbeddingsModel>(embeddingModelName);
   const input = model.createInput(texts);
