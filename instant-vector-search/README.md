@@ -46,7 +46,7 @@ npm install -g @hypermode/hyp-cli
 - Run the following command to import and deploy your app:
 
 ```bash
-hyp init
+hyp link
 ```
 
 ## Uploading Data
