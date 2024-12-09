@@ -10,13 +10,20 @@ Watch the recording here:
 
 Ensure you have the `modus` cli installed:
 
-```
+```bash
 npm i -g @hypermode/modus-cli
+```
+
+Get your free New York Times developer API key, then update `.env`:
+
+```env
+# Create your NYTimes Developer API key at https://developer.nytimes.com/
+MODUS_NYT_API_KEY=<YOUR_API_KEY_HERE>
 ```
 
 Then to build and run the Modus app locally:
 
-```
+```bash
 modus dev
 ```
 
@@ -24,14 +31,14 @@ To use the Meta LLama model hosted on Hypermode you'll need a free Hypermode acc
 
 First install the `hyp` cli:
 
-```
+```bash
 npm install -g @hypermode/hyp-cli
 ```
 
 Then login to Hypermode:
 
-```
+```bash
 hyp login
 ```
 
-You'll be prompted to login / create a Hypermode account after which you'll be able to invokve Hypermode hosted models via your Modus apps locally.
+You'll be prompted to login / create a Hypermode account after which you'll be able to invoke Hypermode hosted models via your Modus apps locally.

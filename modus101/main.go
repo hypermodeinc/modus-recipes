@@ -10,6 +10,7 @@ import (
 	pg "github.com/hypermodeinc/modus/sdk/go/pkg/postgresql"
 )
 
+// Generate text using an AI model
 func GenerateText(prompt string) (*string, error) {
 
 	// The imported ChatModel type follows the OpenAI Chat completion model input format.
@@ -37,11 +38,13 @@ func GenerateText(prompt string) (*string, error) {
 	return &outputStr, nil
 }
 
+// A single quote from the Zenquotes API
 type Quote struct {
 	Quote  string `json:"q"`
 	Author string `json:"a"`
 }
 
+// Fetch a random quote from the Zenquotes API
 func FetchQuote() (*Quote, error) {
 	req := http.NewRequest("https://zenquotes.io/api/random")
 
@@ -60,6 +63,7 @@ func FetchQuote() (*Quote, error) {
 	return &quotes[0], nil
 }
 
+// Use an AI model to generate quote author information
 func FetchQuoteAndAuthorInfo() (quote *Quote, info *string, err error) {
 	quote, err = FetchQuote()
 	if err != nil {
@@ -74,6 +78,7 @@ func FetchQuoteAndAuthorInfo() (quote *Quote, info *string, err error) {
 	return quote, info, nil
 }
 
+// Insert quote into database
 func FetchQuoteAddToDB() (uint, error) {
 	quote, info, err := FetchQuoteAndAuthorInfo()
 	if err != nil {
@@ -88,12 +93,14 @@ func FetchQuoteAddToDB() (uint, error) {
 	return rows, nil
 }
 
+// Quote including author information
 type DBQuote struct {
 	Quote  string `json:"quote"`
 	Author string `json:"author"`
 	Info   string `json:"info"`
 }
 
+// Fetch all quotes from database
 func FetchQuotesFromDB() ([]DBQuote, error) {
 	rows, _, err := pg.Query[DBQuote]("postgres", "SELECT quote, author, info FROM quotes")
 	if err != nil {

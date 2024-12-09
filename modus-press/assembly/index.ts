@@ -14,7 +14,9 @@ import {
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
 
-// This function generates HTML meta description tag content optimized for SEO based on the blog post content
+/**
+ * Generate HTML meta description tag content optimized for SEO based on the blog post content
+ */
 export function genSEO(postContent: string): string {
   const suggestedTag = generateText(
     "You are an SEO expert",
@@ -24,8 +26,10 @@ export function genSEO(postContent: string): string {
   return suggestedTag;
 }
 
-// This function generates a suggested blog post title using the blog post content and category and leverages
-// the author's biography data retrieved from a Postgres database to match the author's style
+/**
+ * Generate a suggested blog post title using the blog post content and category, leveraging
+ * the author's biography data retrieved from a Postgres database to match the author's style
+ */
 export function genTitle(
   postContent: string,
   postCategory: string,
@@ -49,7 +53,9 @@ export function genTitle(
   return suggestedTitle;
 }
 
-// Use our LLM to generate text based on an instruction and prompt
+/**
+ * Use our LLM to generate text based on an instruction and prompt
+ */
 function generateText(instruction: string, prompt: string): string {
   const model = models.getModel<OpenAIChatModel>("llama");
 
@@ -67,7 +73,9 @@ function generateText(instruction: string, prompt: string): string {
 // The connection host for our Postgres database, as defined in modus.json
 const host = "moduspressdb";
 
-// Define a type to represent our author information
+/**
+ * The author information
+ */
 @json
 class Author {
   id: i32 = 0;
@@ -75,7 +83,9 @@ class Author {
   bio!: string;
 }
 
-// Query our database to find author information
+/**
+ * Query our database to find author information
+ */
 function getAuthorByName(name: string): Author {
   const query = "select * from authors where name = $1";
 
