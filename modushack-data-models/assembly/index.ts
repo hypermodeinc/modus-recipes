@@ -8,7 +8,9 @@ import {
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
 
-// Fetch most popular articles and use LLM to copywrite additional title options
+/**
+ * Fetch most popular articles and use LLM to copywrite additional title options
+ */
 export function fetchNews(): Article {
   const response = http.fetch(
     "https://api.nytimes.com/svc/mostpopular/v2/emailed/7.json",
@@ -18,13 +20,15 @@ export function fetchNews(): Article {
   const article = article_result.results[0];
   article.alt_title = generateText(
     "You are a newspaper editor",
-    `Please copywrite the title of a newpaper article based on this description, only respond with the article title text: ${article.description}`,
+    `Please copywrite the title of a newspaper article based on this description, only respond with the article title text: ${article.description}`,
   );
 
   return article;
 }
 
-// Use our LLM to generate text based on an instruction and prompt
+/**
+ * Use our LLM to generate text based on an instruction and prompt
+ */
 export function generateText(instruction: string, prompt: string): string {
   const model = models.getModel<OpenAIChatModel>("text-generator");
 
@@ -37,9 +41,4 @@ export function generateText(instruction: string, prompt: string): string {
   const output = model.invoke(input);
 
   return output.choices[0].message.content.trim();
-}
-
-// Hello world basic example
-export function sayHello(name: string | null = null): string {
-  return `Hello, ${name || "World"}!`;
 }
