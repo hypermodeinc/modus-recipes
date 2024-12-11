@@ -3,15 +3,16 @@
 */
 
 import { models, collections } from "@hypermode/modus-sdk-as";
-import { DocPage, Chunk , ChunkSection, getFlatChunks} from "./chunk"
+import { DocPage, Chunk , RankedChunk, getFlatChunks} from "./chunk"
 import { splitMarkdown, splitMarkdownHeaderText } from "./text-splitters";
 import { RagContext } from "./rag_classes";
+import { Document, rankDocuments, tokenize } from "./bm25";
 import {
   OpenAIChatModel,
   SystemMessage,
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
-import { mutateDoc, computeChunkEmbeddings, removeChunkSections, rank_by_similarity, getPageSubTrees } from "./chunk_dgraph";
+import { mutateDoc, computeChunkEmbeddings, removeChunkSections, rank_by_similarity, getPageSubTrees, rank_by_term } from "./chunk_dgraph";
 import { RankedDocument } from "./ranking";
 
 const RAG_COLLECTION = "ragchunks";
@@ -71,6 +72,19 @@ export function rank(
   return rank_by_similarity(DGRAPH_CONNECTION, query, limit, threshold, namespace); 
 }
 
+export function rank_bm25(
+  query: string,
+  limit: i32 = 10,
+  threshold: f32 = 0.75,
+  namespace: string = "",
+): RankedDocument[] {
+  const chunks = rank_by_term(DGRAPH_CONNECTION, query, limit, threshold, namespace);
+  const documents = chunks.map<Document>((chunk) => {
+    return <Document>{
+      id: chunk.uid,
+      content: chunk.content}})
+  return rankDocuments(tokenize(query), documents);
+}
 export function getMatchingSubPages(
   question: string,
   limit: i32 = 10,

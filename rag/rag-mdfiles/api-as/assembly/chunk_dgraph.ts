@@ -112,6 +112,36 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
     // we don't have to slice the array because the limit is already set in the search function
     return rankedDocuments;
   }
+
+  export function rank_by_term(
+    connection: string,
+    search_string: string,
+    limit: i32 = 10,
+    threshold: f32 = 0.75,
+    namespace: string = "",
+  ): RankedChunk[] {
+
+    const vars = new dgraph.Variables()
+    vars.set("$terms", search_string)
+
+    const dql_query = `
+    query similar($terms: string) {
+          result(func: anyofterms(Chunk.content, $terms)) {
+            Chunk.id
+            Chunk.uid:uid
+            Chunk.docid
+            Chunk.order
+            Chunk.content
+          }
+    }
+    `
+    console.log(dql_query)
+    const query = new dgraph.Query(dql_query, vars);
+    const resp = dgraph.execute(connection, new dgraph.Request(query));
+    const response = JSON.parse<SimilarChunkResult>(resp.Json).result;
+    return response
+    
+  }
   @json
   class DocPageResult {
     result: DocPage[] = [];
