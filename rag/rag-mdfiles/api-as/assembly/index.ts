@@ -2,12 +2,9 @@ export {
   generateResponseFromDoc,
   removePage,
   addMarkdownPage,
-  getChunkContext,
   getRagContext,
-  queryDocChunk,
-  getChunksHierarchy,
   rank,
-  queryRagChunk,
+  getMatchingSubPages
 } from "./rag";
 
 export { embedRagChunk } from "./embeddings";

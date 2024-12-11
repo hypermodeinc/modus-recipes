@@ -2,8 +2,12 @@
 export class Chunk {
   @alias("dgraph.type")
   type: string = "Chunk";
+  @alias("Chunk.uid")
+  uid: string = "";
   @alias("Chunk.id")
   id: string = "";
+  @alias("Chunk.docid")
+  docid: string = "";
   @alias("Chunk.order")
   order: u32 = 0;
   @alias("Chunk.content")
@@ -64,5 +68,5 @@ export function getFlatChunks(section: ChunkSection): Chunk[] {
       
   }
 
-  return flatChunks;
+  return flatChunks.sort((a, b) => (b.id > a.id ? 1 : -1));
 }

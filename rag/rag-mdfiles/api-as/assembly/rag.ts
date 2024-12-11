@@ -5,16 +5,13 @@
 import { models, collections } from "@hypermode/modus-sdk-as";
 import { DocPage, Chunk , ChunkSection, getFlatChunks} from "./chunk"
 import { splitMarkdown, splitMarkdownHeaderText } from "./text-splitters";
-import {
-  removeItemsFromCollection,
-  rankCollection_vector,
-} from "./collections_utils";
+import { RagContext } from "./rag_classes";
 import {
   OpenAIChatModel,
   SystemMessage,
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
-import { mutateDoc, computeChunkEmbeddings, removeChunkSections, rank_by_similarity } from "./chunk_dgraph";
+import { mutateDoc, computeChunkEmbeddings, removeChunkSections, rank_by_similarity, getPageSubTrees } from "./chunk_dgraph";
 import { RankedDocument } from "./ranking";
 
 const RAG_COLLECTION = "ragchunks";
@@ -30,13 +27,7 @@ export class RagChunkInfo {
 }
 
 
-@json
-export class RagContext {
-  text: string = "";
-  chunks: Chunk[] = [];
-  matching_chunk: RankedDocument[] = [];
-  similarity_score: number = 0.0;
-}
+
 
 
 
@@ -70,84 +61,51 @@ export function addMarkdownPage(
 
 
 
-export function queryDocChunk(namespace: string = ""): Map<string, string> {
-  return queryRagChunk(RAG_COLLECTION, namespace);
-}
 
 export function rank(
   query: string,
   limit: i32 = 10,
+  threshold: f32 = 0.75,
   namespace: string = "",
 ): RankedDocument[] {
-  return rank_by_similarity(DGRAPH_CONNECTION, query, limit, namespace);
-
-  
+  return rank_by_similarity(DGRAPH_CONNECTION, query, limit, threshold, namespace); 
 }
 
+export function getMatchingSubPages(
+  question: string,
+  limit: i32 = 10,
+  threshold: f32 = 0.75,
+  namespace: string = "",
+): DocPage[]{ //RagContext
+  /* 
+    get closest chunk to the question
+    build context by traversing the hierarchy of the chunk
+    and concatenating the text of the chunks
+    assuming 
+    - id is in the form of "parent > child > grandchild"
+  */
+  const ranked = rank(question, limit,threshold, namespace);
+   
+  if (ranked.length == 0) {
+    return [];
+  }
+  const ids = ranked.map<string>((chunk) => chunk.id);
+ 
+  const docs = getPageSubTrees(DGRAPH_CONNECTION, ids);
+  return docs
+}
 export function getRagContext(
   question: string,
   limit: i32 = 10,
+  threshold: f32 = 0.75,
   namespace: string = "",
-): RagContext | null {
-  /* 
-    get closest chunk to the question
-    build context by traversing the hierarchy of the chunk
-    and concatenating the text of the chunks
-    assuming 
-    - id is in the form of "parent > child > grandchild"
-  */
-  const chunks = rank(question, limit, namespace);
-
-  if (chunks.length == 0) {
+): RagContext | null{ //RagContext
+  const docs = getMatchingSubPages(question, limit,threshold, namespace);
+  
+  if (docs.length == 0) {
     return null;
   }
-  const context = getChunkContext(
-    RAG_COLLECTION,
-    chunks.map<string>((chunk) => chunk.id),
-  );
-  if (context == null) {
-    return null;
-  }
-  context.matching_chunk = chunks;
-  return context;
-}
-
-export function getChunkContext(
-  collection_name: string,
-  chunk_ids: string[],
-  namespace: string = "",
-): RagContext | null {
-  /* 
-    get closest chunk to the question
-    build context by traversing the hierarchy of the chunk
-    and concatenating the text of the chunks
-    assuming 
-    - id is in the form of "parent > child > grandchild"
-  */
-  const hierarchy = getChunksHierarchy(collection_name, chunk_ids,namespace);
-  const chunks: Chunk[] = [];
-  for (let i = 0; i < hierarchy.length; i++) {
-    const path = hierarchy[i].split(">");
-    path.pop();
-    const parentID = path.join(">");
-    // add level context
-    let line = 0;
-    while (true) {
-      const chunk_id = `${parentID}>${line}`;
-      console.log(`Looking for ${chunk_id}`);
-      const parentText = collections.getText(collection_name, chunk_id);
-
-      if (parentText != "") {
-        line += 1;
-        chunks.push(<Chunk>{
-          id: chunk_id,
-          content: parentText,
-        });
-      } else {
-        break;
-      }
-    }
-  }
+  const chunks = getFlatChunks(docs[0].root);
   // concatenate all the chunks content
   const context = chunks.reduce<string>(
     (context, chunk) => context + "\n" + chunk.content,
@@ -159,71 +117,7 @@ export function getChunkContext(
   };
 }
 
-export function getChunksHierarchy(
-  collection_name: string,
-  chunk_ids: string[],
-  namespace: string = "",
-): string[] {
-  const chunks: Set<string> = new Set<string>();
-  for (let i = 0; i < chunk_ids.length; i++) {
-    const chunk_hierarchy = getChunkHierarchy(
-      collection_name,
-      chunk_ids[i],
-      namespace,
-    );
-    for (let j = 0; j < chunk_hierarchy.length; j++) {
-      chunks.add(chunk_hierarchy[j]);
-    }
-  }
-  return chunks.values().sort((a, b) => a.localeCompare(b));
-}
 
-function getChunkHierarchy(
-  collection_name: string,
-  chunk_id: string,
-  namespace: string = "",
-): string[] {
-  /* 
-    get closest chunk to the question
-    build context by traversing the hierarchy of the chunk
-    and concatenating the text of the chunks
-    assuming 
-    - id is in the form of "parent > child > grandchild"
-  */
-  const chunks: string[] = [];
-  if (collections.getText(collection_name, chunk_id, namespace) != "") {
-    const hierarchy = chunk_id.split(">");
-    hierarchy.pop();
-    while (hierarchy.length > 0) {
-      const parentID = `${hierarchy.join(">")}>0`;
-      if (collections.getText(collection_name, parentID, namespace) != "") {
-        chunks.unshift(parentID);
-      }
-      hierarchy.pop();
-    }
-  }
-  return chunks;
-}
-
-function addPageToCollection(
-  collection_name: string,
-  id: string,
-  mdcontent: string,
-  max_word: i32 = 500,
-  namespace: string = "",
-): Chunk[] {
-  const labels: string[][] = []; // no labels
-  removeItemsFromCollection(collection_name, id, namespace);
-  const chunks = splitMarkdownHeaderText(id, mdcontent, max_word);
-  collections.upsertBatch(
-    collection_name,
-    chunks.map<string>((chunk) => chunk.id),
-    chunks.map<string>((chunk) => chunk.content),
-    labels,
-    namespace,
-  );
-  return chunks;
-}
 function addPageToDgraph(
   connection: string,
   id: string,
@@ -246,22 +140,26 @@ export class RagResponse {
 
 export function generateResponseFromDoc(
   question: string,
+  threshold: f32 = 0.75,
   namespace: string = "",
 ): RagResponse {
   const ranking_limit = 10;
-  const ragContext = getRagContext(
+  const docContext = getRagContext(
     question,
     ranking_limit,
-    namespace,
+    threshold,
+    namespace
   );
-  if (ragContext == null) {
+
+
+  if (docContext == null) {
     return <RagResponse>{
       text: "Can't find any documentation to answer your question.",
       context: null,
     };
   }
-  const response = generateResponse(question, ragContext.text);
-  return <RagResponse>{ text: response, context: ragContext };
+  const response = generateResponse(question, docContext.text);
+  return <RagResponse>{ text: response, context: docContext };
 }
 
 function generateResponse(question: string, context: string): string {
@@ -291,9 +189,4 @@ function generateResponse(question: string, context: string): string {
   return output.choices[0].message.content.trim();
 }
 
-export function queryRagChunk(
-  collection_name: string,
-  namespace: string = "",
-): Map<string, string> {
-  return collections.getTexts(collection_name, namespace);
-}
+

@@ -3,8 +3,8 @@
 <Chunk.content>: string @index(term) .
 <Chunk.id>: string @index(hash) @upsert .
 <Chunk.order>: int .
-<ChunkSection.children>: [uid] .
-<ChunkSection.chunks>: [uid] .
+<ChunkSection.children>: [uid] @reverse .
+<ChunkSection.chunks>: [uid] @reverse .
 <ChunkSection.docid>: string @index(hash) .
 <ChunkSection.id>: string @index(hash) @upsert .
 <ChunkSection.level>: int .

@@ -2,6 +2,7 @@
 @json
 export class RankedDocument {
   id!: string;
+  docid!: string;
   content: string = "";
   score: f64 = 0.0;
 }

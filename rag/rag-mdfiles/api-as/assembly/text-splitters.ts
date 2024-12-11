@@ -194,6 +194,7 @@ export function splitMarkdown(
     let order = current_section.chunks.length
     const chunk = <Chunk>{
       id: current_section.id + ">" + order.toString(),
+      docid: id,
       order: order,
       content: line
     };

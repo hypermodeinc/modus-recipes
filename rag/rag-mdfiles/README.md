@@ -146,3 +146,39 @@ Collections
 Connections
 
 - no connections used in this project.
+
+## Design Notes
+
+Recursive query to get the page sections and chunks 
+See in chunk_drgraph.ts
+
+TO DO : get the chunks of the parent sections 
+
+## Design Ideas
+### Adding ranking on terms
+
+
+use anyofterms + allofterms
+- Get a list of matches
+- get list of terms in the search
+- compute frequency
+- TF-IDF for each -> rank
+Note all the all of terms match should be first with equal score.
+
+
+## DQL 
+
+```
+# showing the pages and the trees
+{
+   docs(func:type(DocPage)) @recurse(depth:6) {
+      label:DocPage.id
+      root:DocPage.root
+      name:ChunkSection.id
+      children:ChunkSection.children
+      chunks:ChunkSection.chunks
+      Chunk.id
+   }
+  
+}
+```

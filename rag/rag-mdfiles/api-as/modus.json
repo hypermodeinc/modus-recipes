@@ -31,14 +31,5 @@
       "type": "dgraph",
       "grpcTarget": "localhost:9080"
     }
-  },
-  "collections": {
-    "ragchunks": {
-      "searchMethods": {
-        "contentEmbedding": {
-          "embedder": "embedRagChunk"
-        }
-      }
-    }
   }
 }

@@ -6,6 +6,7 @@ import { DocPage, RankedChunk, getFlatChunks } from "./chunk"
 import {embedRagChunk} from "./embeddings"
 import { JSON } from "json-as"
 import { RankedDocument } from "./ranking";
+
 /**
  * Upsert a chunk in the dgraph database
  * @param connection - the connection to the dgraph database
@@ -67,6 +68,7 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
     connection: string,
     search_string: string,
     limit: i32 = 10,
+    threshold: f32 = 0.75,
     namespace: string = "",
   ): RankedDocument[] {
     const embedding = embedRagChunk([search_string])[0];
@@ -81,9 +83,11 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
           }
       
       
-        result(func: uid(similarity_score), orderdesc: val(similarity_score)) 
+        result(func: uid(similarity_score), orderdesc: val(similarity_score)) @filter(ge(val(similarity_score), ${threshold}))
         {     
             Chunk.id
+            Chunk.uid:uid
+            Chunk.docid
             Chunk.order
             Chunk.content
             similarity_score: val(similarity_score) 
@@ -99,11 +103,54 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
     const rankedDocuments: RankedDocument[] = [];
     for (let i = 0; i < response.length; i++) {
       rankedDocuments.push(<RankedDocument>{
-        id: response[i].id,
+        id: response[i].uid,
+        docid: response[i].docid,
         score: response[i].similarity_score,
         content: response[i].content,
       });
     }
     // we don't have to slice the array because the limit is already set in the search function
     return rankedDocuments;
+  }
+  @json
+  class DocPageResult {
+    result: DocPage[] = [];
+  }
+
+  export function getPageSubTrees(
+    connection: string,
+    chunk_ids: string[],
+    namespace: string = "",
+  ): DocPage[]  {
+    /* find the chunks hierarchy based on parents and then rebuild a sub-tree for each document */
+
+    const dql_query = `
+    query tree($chunk_ids: string) {
+       
+        c as var(func:uid(${JSON.stringify(chunk_ids).slice(1,-1)}))  @recurse(depth:6)  {
+            s1 as ~ChunkSection.chunks 
+            s2 as ~ChunkSection.children 
+            c2 as ChunkSection.chunks
+            r as ~DocPage.root
+        }
+        
+         result(func:uid(r))  @recurse(depth:5){
+     DocPage.docid
+     DocPage.root
+       ChunkSection.id
+       ChunkSection.level
+       ChunkSection.order
+       Chunk.id
+       Chunk.content
+       Chunk.order
+       ChunkSection.children @filter(uid(s2,s1)) 
+       ChunkSection.chunks  @filter(uid(c,c2)) 
+      
+  }
+    }
+    `
+    const query = new dgraph.Query(dql_query);
+    const resp = dgraph.execute(connection, new dgraph.Request(query));
+    const response = JSON.parse<DocPageResult>(resp.Json).result;
+    return response;
   }
