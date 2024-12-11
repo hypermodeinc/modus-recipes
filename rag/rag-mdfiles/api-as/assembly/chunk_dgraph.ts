@@ -2,10 +2,10 @@
  * Dgraph storage for chunk data
  */
 import {dgraph } from "@hypermode/modus-sdk-as";
-import { DocPage, ChunkSection, getFlatChunks } from "./chunk"
+import { DocPage, RankedChunk, getFlatChunks } from "./chunk"
 import {embedRagChunk} from "./embeddings"
 import { JSON } from "json-as"
-
+import { RankedDocument } from "./ranking";
 /**
  * Upsert a chunk in the dgraph database
  * @param connection - the connection to the dgraph database
@@ -56,4 +56,54 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
 
     dgraph.execute(connection, new dgraph.Request(query,[mutation]))
         
+  }
+
+  @json
+  class SimilarChunkResult {
+    result: RankedChunk[] = [];
+  }
+
+  export function rank_by_similarity(
+    connection: string,
+    search_string: string,
+    limit: i32 = 10,
+    namespace: string = "",
+  ): RankedDocument[] {
+    const embedding = embedRagChunk([search_string])[0];
+    const vars = new dgraph.Variables()
+    vars.set("$vector", JSON.stringify(embedding))
+    vars.set("$limit", limit)
+    const dql_query = `
+    query similar($vector: float32vector, $limit: int) {
+          var(func: similar_to(Chunk.vector_embedding, $limit, $vector)) {
+            v1 as Chunk.vector_embedding
+            similarity_score as Math ((1.0 + (($vector) dot v1)) / 2.0)
+          }
+      
+      
+        result(func: uid(similarity_score), orderdesc: val(similarity_score)) 
+        {     
+            Chunk.id
+            Chunk.order
+            Chunk.content
+            similarity_score: val(similarity_score) 
+        }
+    }
+    `
+    console.log(dql_query)
+    const query = new dgraph.Query(dql_query, vars);
+    const resp = dgraph.execute(connection, new dgraph.Request(query));
+    const response = JSON.parse<SimilarChunkResult>(resp.Json).result;
+    
+    // create a RankedDocument array
+    const rankedDocuments: RankedDocument[] = [];
+    for (let i = 0; i < response.length; i++) {
+      rankedDocuments.push(<RankedDocument>{
+        id: response[i].id,
+        score: response[i].similarity_score,
+        content: response[i].content,
+      });
+    }
+    // we don't have to slice the array because the limit is already set in the search function
+    return rankedDocuments;
   }

@@ -14,7 +14,7 @@ import {
   SystemMessage,
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
-import { mutateDoc, computeChunkEmbeddings, removeChunkSections } from "./chunk_dgraph";
+import { mutateDoc, computeChunkEmbeddings, removeChunkSections, rank_by_similarity } from "./chunk_dgraph";
 import { RankedDocument } from "./ranking";
 
 const RAG_COLLECTION = "ragchunks";
@@ -79,13 +79,9 @@ export function rank(
   limit: i32 = 10,
   namespace: string = "",
 ): RankedDocument[] {
-  return rankCollection_vector(
-    query,
-    RAG_COLLECTION,
-    "contentEmbedding",
-    limit,
-    namespace,
-  );
+  return rank_by_similarity(DGRAPH_CONNECTION, query, limit, namespace);
+
+  
 }
 
 export function getRagContext(

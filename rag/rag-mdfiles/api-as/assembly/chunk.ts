@@ -11,6 +11,11 @@ export class Chunk {
   @alias("Chunk.vector_embedding")
   embedding: string | null = null;
 }
+@json 
+export class RankedChunk extends Chunk {
+  similarity_score: f32 = 0.0;
+}
+
 
 @json
 export class ChunkSection {
