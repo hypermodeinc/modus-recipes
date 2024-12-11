@@ -2,69 +2,8 @@
  * splitter functions
  */
 
-@json
-export class Chunk {
-  id: string = "";
-  content: string = "";
-}
+import { DocPage,Chunk, ChunkSection } from "./chunk";
 
-export function splitMarkdownHeaderText_OLD(
-  id: string,
-  mdcontent: string,
-): Chunk[] {
-  const currentPath = [id];
-  let start = 0;
-  let end = 0;
-  const chunks: Chunk[] = [];
-  let chunk: Chunk;
-  const lines = mdcontent.split("\n");
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const level = getHeaderLevel(line);
-    const currentLevel = currentPath.length - 1;
-    if (level > 0) {
-      chunk = <Chunk>{
-        id: currentPath.join(" > "),
-        content: lines.slice(start, end).join("\n"),
-      };
-      chunks.push(chunk);
-      start = i;
-      end = i + 1;
-      if (level > currentLevel) {
-        while (currentPath.length < level) {
-          currentPath.push(".");
-        }
-        currentPath.push(line);
-      } else {
-        // (level <= currentLevel)
-        while (currentPath.length > level) {
-          currentPath.pop();
-        }
-        currentPath.push(line);
-      }
-    } else {
-      end += 1;
-    }
-  }
-  chunk = <Chunk>{
-    id: currentPath.join(" > "),
-    content: lines.slice(start, end).join("\n"),
-  };
-
-  chunks.push(chunk);
-  return chunks;
-}
-
-function getHeaderLevel(line: string): number {
-  let level = 0;
-  if (line.indexOf("# ") >= 0) {
-    const headStart = line.split(`# `)[0];
-    if (headStart.length == 0 || "##########".indexOf(headStart) == 0) {
-      level = headStart.length + 1;
-    }
-  }
-  return level;
-}
 
 /**
  * Recursively splits text into segments based on a character limit, using an array of separators.
@@ -188,6 +127,74 @@ function _recursiveCharacterTextSplitter(
   );
 
   return result;
+}
+
+export function splitMarkdown(
+  id: string,
+  content: string,
+  max_word: i32 = 500,
+  namespace: string = ""
+): DocPage {
+  // using recursiveCharacterTextSplitter
+  // create chunck based on the header level
+  // unique chunk id is "<id> > L0_1 > L1_1 > L2_3 > line number at this level" -> the 3rd L2 headers in the first L1 header in the document
+  
+  const section_zero = <ChunkSection>{ id: `${id}>L0_1`, docid: id};
+  const doc = <DocPage>{ docid: id, root: section_zero}; 
+  var current_section = section_zero;
+  section_zero.children = [];
+  section_zero.chunks = [];
+  const section_path = [section_zero];
+
+  const lines = recursiveCharacterTextSplitter(
+    content,
+    max_word,
+    ["####", "###", "##", "#"],
+    ["\n\n", "\n", ";", ","],
+  );
+  let index_in_level = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // if the line is a header, update the current path
+    if (line.startsWith("#")) {
+      /* new section 
+      * section level = count the number of # at the beginning of the line
+      */
+      let level:u32 = 1;
+      while (line.charAt(level) == "#") {
+        level += 1;
+      }
+
+      // if the level is lower than the current level, go back to the parent level
+      while (level <= current_section.level) {
+        section_path.pop();
+        current_section = section_path[section_path.length - 1];
+      }
+      const index_in_section = current_section.children!.length;
+      const section = <ChunkSection>{
+        id: `${current_section.id} > L${level}_${index_in_section}`,
+        docid: id,
+        level: level,
+        order: index_in_section,
+      };
+      section.chunks = [];
+      current_section.children!.push(section);
+      current_section = section;
+      
+
+    } 
+    let order = current_section.chunks.length
+    const chunk = <Chunk>{
+      id: current_section.id + ">" + order.toString(),
+      order: order,
+      content: line
+    };
+    current_section.chunks.push(chunk) 
+    
+
+  }
+  return doc;
 }
 
 export function splitMarkdownHeaderText(

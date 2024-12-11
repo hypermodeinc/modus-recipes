@@ -11,4 +11,4 @@ export {
 } from "./rag";
 
 export { embedRagChunk } from "./embeddings";
-export { recursiveCharacterTextSplitter } from "./text-splitters";
+export { recursiveCharacterTextSplitter, splitMarkdown, splitMarkdownHeaderText} from "./text-splitters";

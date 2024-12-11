@@ -3,7 +3,8 @@
 */
 
 import { models, collections } from "@hypermode/modus-sdk-as";
-import { Chunk, splitMarkdownHeaderText } from "./text-splitters";
+import { DocPage, Chunk , ChunkSection, getFlatChunks} from "./chunk"
+import { splitMarkdown, splitMarkdownHeaderText } from "./text-splitters";
 import {
   removeItemsFromCollection,
   rankCollection_vector,
@@ -13,10 +14,11 @@ import {
   SystemMessage,
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
-
+import { mutateDoc, computeChunkEmbeddings, removeChunkSections } from "./chunk_dgraph";
 import { RankedDocument } from "./ranking";
 
 const RAG_COLLECTION = "ragchunks";
+const DGRAPH_CONNECTION = "dgraph-grpc";
 /* model from hypermode.json used to generate text */
 const modelName: string = "text-generator";
 
@@ -40,21 +42,20 @@ export class RagContext {
 
 
 export function removePage(id: string, namespace: string = ""): string {
-  return removeItemsFromCollection(RAG_COLLECTION, id, namespace);
+  removeChunkSections(DGRAPH_CONNECTION, id);
+  return "Success"
 }
+
 export function addMarkdownPage(
   id: string,
   mdcontent: string,
   max_word: i32 = 500,
   namespace: string = "",
 ): Chunk[] {
-  return addPageToCollection(
-    RAG_COLLECTION,
-    id,
-    mdcontent,
-    max_word,
-    namespace,
-  );
+  removePage(id, namespace);
+  const doc = addPageToDgraph(DGRAPH_CONNECTION, id, mdcontent, max_word, namespace);
+  return getFlatChunks(doc.root);
+
 }
 
 /**
@@ -227,7 +228,19 @@ function addPageToCollection(
   );
   return chunks;
 }
-
+function addPageToDgraph(
+  connection: string,
+  id: string,
+  mdcontent: string,
+  max_word: i32 = 500,
+  namespace: string = ""
+): DocPage {
+  const labels: string[][] = []; // no labels
+  const doc = splitMarkdown(id, mdcontent, max_word);
+  computeChunkEmbeddings(doc);
+  mutateDoc(connection, doc);
+  return doc;
+}
 
 @json
 export class RagResponse {
