@@ -78,12 +78,13 @@ export function rank_bm25(
   threshold: f32 = 0.75,
   namespace: string = "",
 ): RankedDocument[] {
-  const chunks = rank_by_term(DGRAPH_CONNECTION, query, limit, threshold, namespace);
+  const clean_query = tokenize(query).join(" ");
+  const chunks = rank_by_term(DGRAPH_CONNECTION, clean_query, limit, threshold, namespace);
   const documents = chunks.map<Document>((chunk) => {
     return <Document>{
       id: chunk.uid,
       content: chunk.content}})
-  return rankDocuments(tokenize(query), documents);
+  return rankDocuments(tokenize(query), documents).slice(0, limit);
 }
 export function getMatchingSubPages(
   question: string,
