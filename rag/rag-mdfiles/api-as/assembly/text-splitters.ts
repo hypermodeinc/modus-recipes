@@ -59,7 +59,7 @@ function _recursiveCharacterTextSplitter(
     var pos = text.slice(offset, max_char).indexOf(sep);
     if (pos > 0) {
       pos += offset;
-      console.log(`found separator [${sep}] at ${pos}`);
+      // console.log(`found separator [${sep}] at ${pos}`);
       if (pos < sep_pos) {
         sep_found = sep;
         sep_pos = pos;
@@ -140,10 +140,10 @@ export function splitMarkdown(
   // unique chunk id is "<id> > L0_1 > L1_1 > L2_3 > line number at this level" -> the 3rd L2 headers in the first L1 header in the document
   
   const section_zero = <ChunkSection>{ id: `${id}>L0_1`, docid: id};
-  const doc = <DocPage>{ docid: id, root: section_zero}; 
-  var current_section = section_zero;
   section_zero.children = [];
   section_zero.chunks = [];
+  const doc = <DocPage>{ docid: id, root: section_zero}; 
+  var current_section = section_zero;
   const section_path = [section_zero];
 
   const lines = recursiveCharacterTextSplitter(
@@ -165,11 +165,17 @@ export function splitMarkdown(
       while (line.charAt(level) == "#") {
         level += 1;
       }
-
+      console.log(`new level ${level} current ${current_section.level}`);
       // if the level is lower than the current level, go back to the parent level
       while (level <= current_section.level) {
-        section_path.pop();
-        current_section = section_path[section_path.length - 1];
+        if (section_path.length == 0) {
+          console.log(`error, no parent section`);
+          break;
+        } else {
+           section_path.pop();
+           current_section = section_path[section_path.length - 1];
+        }
+        console.log(`pop to ${current_section.id} level ${current_section.level}`);
       }
       const index_in_section = current_section.children!.length;
       const section = <ChunkSection>{
@@ -181,7 +187,8 @@ export function splitMarkdown(
       section.chunks = [];
       current_section.children!.push(section);
       current_section = section;
-      
+      section_path.push(section);
+      console.log(`new section ${section.id}`);
 
     } 
     let order = current_section.chunks.length
@@ -190,6 +197,7 @@ export function splitMarkdown(
       order: order,
       content: line
     };
+    console.log(`adding new chunk ${chunk.id}`);
     current_section.chunks.push(chunk) 
     
 
