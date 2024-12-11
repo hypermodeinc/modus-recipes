@@ -1,10 +1,12 @@
 # Modus Recipes
 
-Code recipes for cooking with [Modus](https://github.com/hypermodeinc/modus), the open source serverless framework for building intelligent APIs, powered by WebAssembly.
+Code recipes for cooking with [Modus](https://github.com/hypermodeinc/modus), the open source
+serverless framework for building intelligent APIs, powered by WebAssembly.
 
 ## 🚀 Getting started with Modus
 
-For more information on getting started with Modus, check out [the docs](https://docs.hypermode.com/modus/overview).
+For more information on getting started with Modus, check out
+[the docs](https://docs.hypermode.com/modus/overview).
 
 ## 📺 Video walkthroughs
 

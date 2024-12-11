@@ -1,6 +1,8 @@
 # instant-vector-search
 
-A simplified example demonstrating how to build instant vector search using Hypermode and Modus. This project showcases how to configure collections, embed data, and deploy APIs to perform real-time vector search with minimal setup.
+A simplified example demonstrating how to build instant vector search using Hypermode and Modus.
+This project showcases how to configure collections, embed data, and deploy APIs to perform
+real-time vector search with minimal setup.
 
 ## Guide
 
@@ -9,7 +11,8 @@ Check out the blog post on how to create a project using this example:
 
 ## Semantic Search in Action
 
-This example demonstrates how instant vector search can enhance your application by generating embeddings from user queries and performing vector searches in less than 200ms.
+This example demonstrates how instant vector search can enhance your application by generating
+embeddings from user queries and performing vector searches in less than 200ms.
 
 ## How to Use the Template
 
@@ -55,9 +58,11 @@ Once your app is deployed, upload your data to the texts collection to enable ve
 
 From the Hypermode Console: Upload a CSV directly using the dashboard.
 
-Using the `upsertTexts` function: Upload data programmatically by calling the function from your code.
+Using the `upsertTexts` function: Upload data programmatically by calling the function from your
+code.
 
-Once your data is in place, the embeddings will be generated automatically, and your system will be ready to handle real-time vector searches.
+Once your data is in place, the embeddings will be generated automatically, and your system will be
+ready to handle real-time vector searches.
 
 ## Making API Calls
 
@@ -73,7 +78,9 @@ query {
 
 This template leverages Hypermode and Modus to power your backend functions:
 
-[Hypermode](https://docs.hypermode.com/introduction) is a managed service that provides the infrastructure and tools for creating AI-powered applications, including assistants, APIs, and backend services. It offers:
+[Hypermode](https://docs.hypermode.com/introduction) is a managed service that provides the
+infrastructure and tools for creating AI-powered applications, including assistants, APIs, and
+backend services. It offers:
 
 - Automatic building and deployment of functions with each git push
 - A live, scalable API for previewing, testing, and production
@@ -81,7 +88,8 @@ This template leverages Hypermode and Modus to power your backend functions:
 - Integrated console for observability and control
 - GraphQL API generation for easy integration
 
-[Modus](https://docs.hypermode.com/modus/overview) is an open-source, serverless framework that’s part of the Hypermode ecosystem. It focuses on:
+[Modus](https://docs.hypermode.com/modus/overview) is an open-source, serverless framework that’s
+part of the Hypermode ecosystem. It focuses on:
 
 - Building functions and APIs using WebAssembly
 - Supporting multiple programming languages (currently Go and AssemblyScript)

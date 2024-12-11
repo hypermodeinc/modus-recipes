@@ -1,1 +1,2 @@
-curl -X POST localhost:8080/alter --silent   --data-binary  '@dqlschema.txt'
+#!/bin/bash
+curl -X POST localhost:8080/alter --silent --data-binary '@dqlschema.txt'
