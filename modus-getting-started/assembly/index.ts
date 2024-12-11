@@ -6,6 +6,9 @@ import {
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
 
+/**
+ * Generate text from a LLM model
+ */
 export function generateText(instruction: string, prompt: string): string {
   const model = models.getModel<OpenAIChatModel>("text-generator");
 
@@ -20,7 +23,9 @@ export function generateText(instruction: string, prompt: string): string {
   return output.choices[0].message.content.trim();
 }
 
-
+/**
+ * A single quote from the Zenquotes API
+ */
 @json
 class Quote {
 
@@ -32,6 +37,9 @@ class Quote {
   author!: string;
 }
 
+/**
+ * Fetch random quote from the Zenquotes API
+ */
 export function getRandomQuote(): Quote {
   const request = new http.Request("https://zenquotes.io/api/random");
 
@@ -45,6 +53,9 @@ export function getRandomQuote(): Quote {
   return response.json<Quote[]>()[0];
 }
 
+/**
+ * Basic Hello World example
+ */
 export function sayHello(name: string | null = null): string {
   return `Hello, ${name || "World"}!`;
 }
