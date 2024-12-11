@@ -165,9 +165,8 @@ export function searchBySimilarity<T>(
 }
 
 export function addEmbeddingToJson(payload: string, predicate: string, embedding: f32[]): string {
-  const embeddingString = JSON.stringify(embedding)
-  const jsonObject = { [predicate]: embeddingString }
-  const jsonString = JSON.stringify(jsonObject)
-  payload = payload.replace("{", `{ ${jsonString.substring(1)}`)
+  // Add the embedding to the payload at root level
+  // TO DO: extend to nested entities and use JSONpath
+  payload = payload.replace("{", `{ \"${predicate}\":\"${JSON.stringify(embedding)}\",`)
   return payload
 }
