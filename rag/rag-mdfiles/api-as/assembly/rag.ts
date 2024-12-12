@@ -12,7 +12,7 @@ import {
   SystemMessage,
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
-import { mutateDoc, computeChunkEmbeddings, removeChunkSections, rank_by_similarity, getPageSubTrees, rank_by_term } from "./chunk_dgraph";
+import { mutateDoc, computeChunkEmbeddings, removeChunkSections, rank_by_similarity, getPageSubTrees, search_by_term } from "./chunk_dgraph";
 import { RankedDocument } from "./ranking";
 
 const RAG_COLLECTION = "ragchunks";
@@ -79,7 +79,7 @@ export function rank_bm25(
   namespace: string = "",
 ): RankedDocument[] {
   const clean_query = tokenize(query).join(" ");
-  const chunks = rank_by_term(DGRAPH_CONNECTION, clean_query, limit, threshold, namespace);
+  const chunks = search_by_term(DGRAPH_CONNECTION, clean_query, limit, threshold, namespace);
   const documents = chunks.map<Document>((chunk) => {
     return <Document>{
       id: chunk.uid,
@@ -181,7 +181,7 @@ function generateResponse(question: string, context: string): string {
   const model = models.getModel<OpenAIChatModel>(modelName);
   const instruction = `Reply to the user question using only information from the text in triple quotes. 
     The response starts with a short and concise sentence, followed by a more detailed explanation.
-    If the answer isn't easily available in the context, reply  "I don't know".
+  
 
     """
     ${context}

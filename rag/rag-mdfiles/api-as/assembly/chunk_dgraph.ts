@@ -113,7 +113,7 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
     return rankedDocuments;
   }
 
-  export function rank_by_term(
+  export function search_by_term(
     connection: string,
     search_string: string,
     limit: i32 = 10,
@@ -142,6 +142,7 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
     return response
     
   }
+  
   @json
   class DocPageResult {
     result: DocPage[] = [];
