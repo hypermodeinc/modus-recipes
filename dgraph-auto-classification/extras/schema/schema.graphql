@@ -1,0 +1,11 @@
+type Category {
+    id: ID!
+    name: String! @search(by: [term])
+    embedding: [Float!] @embedding  @search(by: ["hnsw(metric: euclidean, exponent: 4)"])
+}
+type Project {
+    id: ID!
+    title: String! @search(by: [term])
+    category: Category 
+    embedding: [Float!] @embedding  @search(by: ["hnsw(metric: euclidean, exponent: 4)"])
+}
