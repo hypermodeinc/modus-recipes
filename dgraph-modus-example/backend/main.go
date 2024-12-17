@@ -51,6 +51,36 @@ func FetchMovieById(uid string) (string, error) {
 	return executeDgraphQuery(query)
 }
 
+func GetRelatedMovies(uid string) (string, error) {
+	query := fmt.Sprintf(`
+	{
+		relatedMovies(func: uid(%q)) {
+			genre {
+				genreMovies as genre
+			}
+			starring {
+				performance.actor {
+					actorMovies as uid
+				}
+			}
+		}
+
+		genreMovies(func: uid(genreMovies), first: 4) {
+			uid
+			name@en
+			initial_release_date
+		}
+
+		actorMovies(func: uid(actorMovies), first: 4) {
+			uid
+			name@en
+			initial_release_date
+		}
+	}`, uid)
+
+	return executeDgraphQuery(query)
+}
+
 func buildSearchFilter(search string) string {
 	if search == "" {
 		return ""
@@ -72,10 +102,8 @@ func executeDgraphQuery(query string) (string, error) {
 	request := http.NewRequest("https://play.dgraph.io/query?respFormat=json", options)
 	response, err := http.Fetch(request)
 	if err != nil {
-		fmt.Println("Error fetching data from Dgraph:", err)
-		return "", err
+		return "", fmt.Errorf("Error fetching data from Dgraph: %w", err)
 	}
 
-	fmt.Println("Response:", string(response.Body))
 	return string(response.Body), nil
 }
