@@ -31,7 +31,7 @@ const fetchQuery = async ({ query, variables }: FetchQueryProps) => {
 export async function fetchMovies(page: number = 1, search: string = "") {
   const graphqlQuery = `
     query FetchMovies($page: Int!, $search: String!) {
-      fetchMoviesAndActorsWithPagination(page: $page, search: $search)
+      fetchMoviesWithPaginationAndSearch(page: $page, search: $search)
     }
   `;
 
@@ -46,7 +46,7 @@ export async function fetchMovies(page: number = 1, search: string = "") {
   }
 
   try {
-    const parsedData = JSON.parse(data.fetchMoviesAndActorsWithPagination);
+    const parsedData = JSON.parse(data.fetchMoviesWithPaginationAndSearch);
     return { movies: parsedData.data.movies || [] };
   } catch (err) {
     console.error("Error parsing response:", err);
