@@ -6,16 +6,22 @@ import (
 )
 
 func FetchMoviesAndActorsWithPagination(page int, search string) (string, error) {
-	offset := page * 20
+	offset := page * 10
 
 	query := fmt.Sprintf(`
 	{
-		movies(func: has(initial_release_date), first: 20, offset: %d) %s {
+		movies(func: has(initial_release_date), first: 10, offset: %d) %s {
 			uid
 			name@en
 			initial_release_date
-			starring {
+			genre {
 				name@en
+			}
+			starring {
+			performance.actor {
+					uid
+					name@en
+				}
 			}
 		}
 	}`, offset, buildSearchFilter(search))
