@@ -18,7 +18,7 @@ func FetchMoviesAndActorsWithPagination(page int, search string) (string, error)
 				name@en
 			}
 			starring {
-			performance.actor {
+				performance.actor {
 					uid
 					name@en
 				}
@@ -26,6 +26,39 @@ func FetchMoviesAndActorsWithPagination(page int, search string) (string, error)
 		}
 	}`, offset, buildSearchFilter(search))
 
+	return executeDgraphQuery(query)
+}
+
+func FetchMovieByID(movieID string) (string, error) {
+	query := fmt.Sprintf(`
+	{
+		movie(func: uid(%s)) {
+			uid
+			name@en
+			initial_release_date
+			genre {
+				name@en
+			}
+			starring {
+				performance.actor {
+					uid
+					name@en
+				}
+			}
+		}
+	}`, movieID)
+
+	return executeDgraphQuery(query)
+}
+
+func buildSearchFilter(search string) string {
+	if search == "" {
+		return ""
+	}
+	return fmt.Sprintf(`@filter(anyofterms(name@en, "%s") OR anyofterms(starring.name@en, "%s"))`, search, search)
+}
+
+func executeDgraphQuery(query string) (string, error) {
 	queryPayload := map[string]string{"query": query}
 
 	options := &http.RequestOptions{
@@ -45,11 +78,4 @@ func FetchMoviesAndActorsWithPagination(page int, search string) (string, error)
 
 	fmt.Println("Response:", string(response.Body))
 	return string(response.Body), nil
-}
-
-func buildSearchFilter(search string) string {
-	if search == "" {
-		return ""
-	}
-	return fmt.Sprintf(`@filter(anyofterms(name@en, "%s") OR anyofterms(starring.name@en, "%s"))`, search, search)
 }
