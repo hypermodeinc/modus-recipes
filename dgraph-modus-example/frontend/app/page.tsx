@@ -42,7 +42,10 @@ export default async function Home({
           response.movies.map((movie: any) => (
             <Link
               key={movie.uid}
-              href={`/${movie.uid}`}
+              href={{
+                pathname: `/${movie.uid}`,
+                query: { search: searchQuery },
+              }}
               passHref
               className="p-4 w-full rounded bg-white/10 mb-4 shadow-md"
             >

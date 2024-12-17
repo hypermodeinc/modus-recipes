@@ -1,15 +1,23 @@
-import { fetchMovieById } from "@/app/actions";
+import { fetchMovieById, fetchRecommendations } from "@/app/actions";
 
 export default async function MoviePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   const movieId = (await params).id;
+  const searchQuery = (await searchParams).search || "";
 
+  console.log(searchQuery);
   const rsponse = await fetchMovieById(movieId);
   const movie = rsponse.movie;
-
+  const recommendations = await fetchRecommendations(
+    movie["name@en"],
+    searchQuery
+  );
+  console.log(recommendations);
   if (!movie) {
     return <div className="p-6 text-red-500">Movie not found</div>;
   }

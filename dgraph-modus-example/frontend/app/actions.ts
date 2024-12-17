@@ -78,3 +78,32 @@ export async function fetchMovieById(uid: string) {
     return { movie: {} };
   }
 }
+
+export async function fetchRecommendations(
+  movieName: string,
+  searchQuery: string = ""
+) {
+  const graphqlQuery = `
+    query($movieName: String!, $searchQuery: String!) {
+        fetchRecommendations(movieName: $movieName, searchQuery: $searchQuery)
+    }
+    `;
+
+  const { data, error } = await fetchQuery({
+    query: graphqlQuery,
+    variables: { movieName, searchQuery },
+  });
+  console.log(data);
+
+  if (error) {
+    console.error("Error fetching recommendations:", error);
+    return { recommendations: [] };
+  }
+
+  try {
+    return { recommendations: data?.generateRecommendations || "" };
+  } catch (err) {
+    console.error("Error parsing recommendations:", err);
+    return { recommendations: "" };
+  }
+}

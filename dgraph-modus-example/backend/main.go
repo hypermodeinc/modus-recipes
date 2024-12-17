@@ -126,7 +126,7 @@ func generateRecommendations(prompt string) (*string, error) {
 }
 
 // Example function to call GenerateRecommendations
-func FetchAndDisplayRecommendations(movieName string, searchQuery string) {
+func FetchRecommendations(movieName string, searchQuery string) {
 	prompt := fmt.Sprintf("Based on the movie '%s' and the search query '%s', recommend 5 similar movies based on what the movie is about, the genre, and the director. Recommend movies that the user is most likely to enjoy.", movieName, searchQuery)
 
 	// Generate recommendations
@@ -136,6 +136,6 @@ func FetchAndDisplayRecommendations(movieName string, searchQuery string) {
 		return
 	}
 
-	fmt.Println("Movie Recommendations:", *recommendations)
+	return *recommendations, nil
 }
 
