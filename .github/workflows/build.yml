@@ -8,12 +8,12 @@ on:
       - reopened
       - ready_for_review
     paths:
-      - '**.go'
-      - '**.ts'
-      - '**.json'
+      - "**.go"
+      - "**.ts"
+      - "**.json"
       - .github/workflows/*
   schedule:
-    - cron: "0 5 * * *"
+    - cron: 0 5 * * *
 
 permissions:
   contents: read
@@ -30,7 +30,9 @@ jobs:
 
       - name: Search for go.mod and package.json files
         id: get-dirs
-        run: echo "dirs=$(find . \( -name 'go.mod' -o -name 'package.json' \) -exec dirname {} \; | sed 's|^\./||' | jq -Rsc 'split("\n")[:-1]')" >> ${GITHUB_OUTPUT}
+        run:
+          echo "dirs=$(find . \( -name 'go.mod' -o -name 'package.json' \) -exec dirname {} \; | sed
+          's|^\./||' | jq -Rsc 'split("\n")[:-1]')" >> ${GITHUB_OUTPUT}
 
   build:
     needs: get-dirs
@@ -57,7 +59,7 @@ jobs:
       - name: Setup TinyGo
         uses: acifani/setup-tinygo@v2
         with:
-          tinygo-version: "0.34.0"
+          tinygo-version: 0.34.0
 
       - name: Build project
         run: npx -p @hypermode/modus-cli -y modus build

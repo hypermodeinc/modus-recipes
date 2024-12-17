@@ -1,6 +1,7 @@
 # ModusHack Livestream #2: Data and Models
 
-This example shows how to fetch the most recent articles from the New York Times API and use the Meta LLama LLM model to copywrite additional article titles based on the description.
+This example shows how to fetch the most recent articles from the New York Times API and use the
+Meta LLama LLM model to copywrite additional article titles based on the description.
 
 Watch the recording here:
 
@@ -41,4 +42,5 @@ Then login to Hypermode:
 hyp login
 ```
 
-You'll be prompted to login / create a Hypermode account after which you'll be able to invoke Hypermode hosted models via your Modus apps locally.
+You'll be prompted to login / create a Hypermode account after which you'll be able to invoke
+Hypermode hosted models via your Modus apps locally.

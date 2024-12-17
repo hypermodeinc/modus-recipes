@@ -1,4 +1,3 @@
-
 /* 
     This file contains the classes that are used in our App.
     The classes are annotated with the @json decorator 
@@ -6,26 +5,30 @@
     @alias is used to rename the properties in the json string to match Dgraph best practices.
 */
 
-
 @json
 export class Product {
-  
+
   @alias("Product.id")
-  id!: string;
-  
+  id!: string
+
+
   @alias("Product.title")
-  title: string = "";
+  title: string = ""
+
 
   @alias("Product.description")
-  description: string = "";
+  description: string = ""
+
 
   @alias("Product.category")
   @omitnull()
-  category: Category | null = null;
+  category: Category | null = null
 }
+
 
 @json
 export class Category {
+
   @alias("Category.name")
-  name: string = "";
+  name: string = ""
 }
