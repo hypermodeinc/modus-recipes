@@ -1,4 +1,5 @@
 import { fetchMovies } from "./actions";
+import Link from "next/link";
 
 export default async function Home({
   searchParams,
@@ -39,8 +40,10 @@ export default async function Home({
           <p>No movies found</p>
         ) : (
           response.movies.map((movie: any) => (
-            <div
+            <Link
               key={movie.uid}
+              href={`/${movie.uid}`}
+              passHref
               className="p-4 w-full rounded bg-white/10 mb-4 shadow-md"
             >
               <h2 className="text-xl font-bold">{movie["name@en"]}</h2>
@@ -68,7 +71,7 @@ export default async function Home({
                   .slice(0, 5)
                   .join(", ") || "No actors listed"}
               </p>
-            </div>
+            </Link>
           ))
         )}
       </div>

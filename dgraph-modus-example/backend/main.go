@@ -29,7 +29,7 @@ func FetchMoviesAndActorsWithPagination(page int, search string) (string, error)
 	return executeDgraphQuery(query)
 }
 
-func FetchMovieByID(movieID string) (string, error) {
+func FetchMovieById(uid string) (string, error) {
 	query := fmt.Sprintf(`
 	{
 		movie(func: uid(%s)) {
@@ -46,7 +46,7 @@ func FetchMovieByID(movieID string) (string, error) {
 				}
 			}
 		}
-	}`, movieID)
+	}`, uid)
 
 	return executeDgraphQuery(query)
 }
