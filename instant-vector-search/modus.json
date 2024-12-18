@@ -10,14 +10,20 @@
   "models": {
     "minilm": {
       "sourceModel": "sentence-transformers/all-MiniLM-L6-v2",
-      "connection": "hypermode",
-      "provider": "hugging-face"
+      "provider": "hugging-face",
+      "connection": "hypermode"
     }
   },
-  "connections": {
-    "dgraph-grpc": {
-      "type": "dgraph",
-      "grpcTarget": "localhost:9080"
+  "collections": {
+    "texts": {
+      "searchMethods": {
+        "searchMethod1": {
+          "embedder": "miniLMEmbed",
+          "index": {
+            "type": "sequential"
+          }
+        }
+      }
     }
   }
 }

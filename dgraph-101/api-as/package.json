@@ -9,7 +9,7 @@
     "pretty:check": "prettier --check ."
   },
   "dependencies": {
-    "@hypermode/modus-sdk-as": "^0.14.0",
+    "@hypermode/modus-sdk-as": "^0.15.0",
     "assemblyscript-json": "^1.1.0",
     "json-as": "0.9.26"
   },
