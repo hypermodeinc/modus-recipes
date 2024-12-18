@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import { useState, FormEvent, useRef, useEffect } from "react";
-import { PaperPlaneTilt } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
-import Button from "./button";
-import { Input } from "./input";
-import { chat , Message} from "@/app/action";
-import ReactMarkdown from "react-markdown";
+import { useState, FormEvent, useRef, useEffect } from "react"
+import { PaperPlaneTilt } from "@phosphor-icons/react"
+import { motion } from "framer-motion"
+import Button from "./button"
+import { Input } from "./input"
+import { chat, Message } from "@/app/action"
+import ReactMarkdown from "react-markdown"
 
 const LoadingDot = ({ delay }: { delay: number }) => (
   <motion.div
@@ -21,7 +21,7 @@ const LoadingDot = ({ delay }: { delay: number }) => (
       delay: delay,
     }}
   />
-);
+)
 
 export const LoadingChatBubble: React.FC = () => {
   return (
@@ -39,29 +39,26 @@ export const LoadingChatBubble: React.FC = () => {
         </div>
       </div>
     </motion.div>
-  );
-};
-
-
-
+  )
+}
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, content: "Hello! How can I help you today?", role: "assistant" },
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  ])
+  const [input, setInput] = useState("")
+  const [loading, setLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
 
-  useEffect(scrollToBottom, [messages]);
-  const fetchResponse =  async (input) => {
+  useEffect(scrollToBottom, [messages])
+  const fetchResponse = async (input) => {
     const response = await chat(input)
     {
-      console.log(response);
+      console.log(response)
       if (response.error) {
         setMessages((prev) => [
           ...prev,
@@ -69,11 +66,9 @@ export default function ChatInterface() {
             id: prev.length + 1,
             content: "Sorry, I didn't catch that.",
             role: "assistant",
-          }
-          
-        ]);
+          },
+        ])
       } else {
-      
         setMessages((prev) => [
           ...prev,
           {
@@ -83,7 +78,7 @@ export default function ChatInterface() {
           },
           {
             id: prev.length + 2,
-            content: "From "+response.data.chat.context.sources[0].docid,
+            content: "From " + response.data.chat.context.sources[0].docid,
             role: "assistant",
           },
           {
@@ -91,24 +86,21 @@ export default function ChatInterface() {
             content: response.data.chat.context.sources[0].text,
             role: "assistant",
           },
-        ]);
+        ])
       }
       setLoading((prev) => false)
-      
     }
   }
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    
+    e.preventDefault()
+
     if (input) {
-      setMessages((prev) => [...prev, { id: prev.length + 1, content: input, role: "user" }]); // Add user message to chat
+      setMessages((prev) => [...prev, { id: prev.length + 1, content: input, role: "user" }]) // Add user message to chat
       setLoading((prev) => true)
-      setInput("");
+      setInput("")
       fetchResponse(input)
     }
-  };
-  
-  
+  }
 
   return (
     <div className="h-full rounded-lg flex flex-col mx-auto bg-gradient-to-b from-gray-50 to-gray-100 shadow-xl">
@@ -124,9 +116,7 @@ export default function ChatInterface() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
-            className={`flex ${
-              message.role === "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <ReactMarkdown
               className={`relative max-w-[85%] px-4 py-2 ${
@@ -159,8 +149,7 @@ export default function ChatInterface() {
           </Button>
         </div>
       </form>
-      <div className="h-16">
-        </div>
+      <div className="h-16"></div>
     </div>
-  );
+  )
 }

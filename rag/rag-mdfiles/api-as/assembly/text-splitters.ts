@@ -2,8 +2,7 @@
  * splitter functions
  */
 
-import { DocPage,Chunk, ChunkSection } from "./chunk";
-
+import { DocPage, Chunk, ChunkSection } from "./chunk";
 
 /**
  * Recursively splits text into segments based on a character limit, using an array of separators.
@@ -53,7 +52,7 @@ function _recursiveCharacterTextSplitter(
     const sep = must_split_on[i];
     var offset = 0;
     if (text.startsWith(sep)) {
-        offset = sep.length;
+      offset = sep.length;
     }
 
     var pos = text.slice(offset, max_char).indexOf(sep);
@@ -133,16 +132,16 @@ export function splitMarkdown(
   id: string,
   content: string,
   max_word: i32 = 500,
-  namespace: string = ""
+  namespace: string = "",
 ): DocPage {
   // using recursiveCharacterTextSplitter
   // create chunck based on the header level
   // unique chunk id is "<id> > L0_1 > L1_1 > L2_3 > line number at this level" -> the 3rd L2 headers in the first L1 header in the document
-  
-  const section_zero = <ChunkSection>{ id: `${id}>L0_1`, docid: id};
+
+  const section_zero = <ChunkSection>{ id: `${id}>L0_1`, docid: id };
   section_zero.children = [];
   section_zero.chunks = [];
-  const doc = <DocPage>{ docid: id, root: section_zero}; 
+  const doc = <DocPage>{ docid: id, root: section_zero };
   var current_section = section_zero;
   const section_path = [section_zero];
 
@@ -158,10 +157,10 @@ export function splitMarkdown(
 
     // if the line is a header, update the current path
     if (line.startsWith("#")) {
-      /* new section 
-      * section level = count the number of # at the beginning of the line
-      */
-      let level:u32 = 1;
+      /* new section
+       * section level = count the number of # at the beginning of the line
+       */
+      let level: u32 = 1;
       while (line.charAt(level) == "#") {
         level += 1;
       }
@@ -172,10 +171,12 @@ export function splitMarkdown(
           console.log(`error, no parent section`);
           break;
         } else {
-           section_path.pop();
-           current_section = section_path[section_path.length - 1];
+          section_path.pop();
+          current_section = section_path[section_path.length - 1];
         }
-        console.log(`pop to ${current_section.id} level ${current_section.level}`);
+        console.log(
+          `pop to ${current_section.id} level ${current_section.level}`,
+        );
       }
       const index_in_section = current_section.children!.length;
       const section = <ChunkSection>{
@@ -189,19 +190,16 @@ export function splitMarkdown(
       current_section = section;
       section_path.push(section);
       console.log(`new section ${section.id}`);
-
-    } 
-    let order = current_section.chunks.length
+    }
+    let order = current_section.chunks.length;
     const chunk = <Chunk>{
       id: current_section.id + ">" + order.toString(),
       docid: id,
       order: order,
-      content: line
+      content: line,
     };
     console.log(`adding new chunk ${chunk.id}`);
-    current_section.chunks.push(chunk) 
-    
-
+    current_section.chunks.push(chunk);
   }
   return doc;
 }

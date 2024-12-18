@@ -1,12 +1,16 @@
 # The Solar System: A Comprehensive Guide
 
-The Solar System is a dynamic and intricate collection of planets, moons, and other celestial bodies, orbiting around the Sun. It has fascinated humanity for millennia, influencing discoveries in science, inspiring artistic works, and guiding space exploration.
+The Solar System is a dynamic and intricate collection of planets, moons, and other celestial
+bodies, orbiting around the Sun. It has fascinated humanity for millennia, influencing discoveries
+in science, inspiring artistic works, and guiding space exploration.
 
 # Sun: The Heart of the Solar System
 
 ## Overview
 
-The **Sun** is a G-type main-sequence star (G2V) located at the center of our Solar System. It accounts for more than 99% of the total mass of the system and emits light and heat necessary for life on Earth.
+The **Sun** is a G-type main-sequence star (G2V) located at the center of our Solar System. It
+accounts for more than 99% of the total mass of the system and emits light and heat necessary for
+life on Earth.
 
 ### Key Facts
 
@@ -17,11 +21,14 @@ The **Sun** is a G-type main-sequence star (G2V) located at the center of our So
 
 ### Discovery
 
-Humans have known and studied the Sun for thousands of years, but it wasn't until the works of **Nicolaus Copernicus** in the 16th century that we understood its role at the center of the solar system.
+Humans have known and studied the Sun for thousands of years, but it wasn't until the works of
+**Nicolaus Copernicus** in the 16th century that we understood its role at the center of the solar
+system.
 
 ### References in Culture
 
-- **Movies**: _Sunshine_ (2007), explores the importance of the Sun and the dangers of its possible extinction.
+- **Movies**: _Sunshine_ (2007), explores the importance of the Sun and the dangers of its possible
+  extinction.
 - **Books**: _Solaris_ by Stanisław Lem portrays a distant planet orbiting two suns.
 
 ---
@@ -30,7 +37,8 @@ Humans have known and studied the Sun for thousands of years, but it wasn't unti
 
 ## Overview
 
-**Mercury** is the smallest and fastest planet in the Solar System, orbiting closest to the Sun. It is a rocky planet with a barren surface filled with craters, resembling our Moon.
+**Mercury** is the smallest and fastest planet in the Solar System, orbiting closest to the Sun. It
+is a rocky planet with a barren surface filled with craters, resembling our Moon.
 
 ### Key Facts
 
@@ -41,12 +49,15 @@ Humans have known and studied the Sun for thousands of years, but it wasn't unti
 
 ### Discovery
 
-First observed by ancient civilizations, Mercury's elliptical orbit was well documented by **Ptolemy**. Its proximity to the Sun made it hard to study until the development of modern telescopes.
+First observed by ancient civilizations, Mercury's elliptical orbit was well documented by
+**Ptolemy**. Its proximity to the Sun made it hard to study until the development of modern
+telescopes.
 
 ### References in Culture
 
 - **Movies**: _The Expanse_ series includes scenes set on Mercury, depicting its harsh environment.
-- **Books**: _The Left Hand of Darkness_ by Ursula K. Le Guin briefly mentions Mercury as a reference to extreme planetary environments.
+- **Books**: _The Left Hand of Darkness_ by Ursula K. Le Guin briefly mentions Mercury as a
+  reference to extreme planetary environments.
 
 ---
 
@@ -54,7 +65,8 @@ First observed by ancient civilizations, Mercury's elliptical orbit was well doc
 
 ## Overview
 
-**Venus**, often referred to as Earth’s twin, is similar in size and composition but vastly different in climate, with a runaway greenhouse effect making it the hottest planet.
+**Venus**, often referred to as Earth’s twin, is similar in size and composition but vastly
+different in climate, with a runaway greenhouse effect making it the hottest planet.
 
 ### Key Facts
 
@@ -66,12 +78,16 @@ First observed by ancient civilizations, Mercury's elliptical orbit was well doc
 
 ### Discovery
 
-Venus has been known since ancient times. It was initially thought to be two separate objects—**Phosphorus** in the morning and **Hesperus** in the evening—until astronomers confirmed its single identity.
+Venus has been known since ancient times. It was initially thought to be two separate
+objects—**Phosphorus** in the morning and **Hesperus** in the evening—until astronomers confirmed
+its single identity.
 
 ### References in Culture
 
-- **Movies**: _Venus_ (2017), explores the complex emotional landscape of identity, metaphorically linked to the planet's dual visibility.
-- **Books**: _Out of the Silent Planet_ by C.S. Lewis uses Venus (Malacandra) as a symbol of beauty and mystery.
+- **Movies**: _Venus_ (2017), explores the complex emotional landscape of identity, metaphorically
+  linked to the planet's dual visibility.
+- **Books**: _Out of the Silent Planet_ by C.S. Lewis uses Venus (Malacandra) as a symbol of beauty
+  and mystery.
 
 ---
 
@@ -79,7 +95,8 @@ Venus has been known since ancient times. It was initially thought to be two sep
 
 ## Overview
 
-**Earth** is the third planet from the Sun and the only planet known to support life. Its surface is mostly water, earning it the nickname "The Blue Planet."
+**Earth** is the third planet from the Sun and the only planet known to support life. Its surface is
+mostly water, earning it the nickname "The Blue Planet."
 
 ### Key Facts
 
@@ -91,12 +108,15 @@ Venus has been known since ancient times. It was initially thought to be two sep
 
 ### Discovery
 
-Though our understanding of Earth has grown, it wasn't until **Galileo**’s observations in the 17th century that we had definitive proof of Earth’s place in the solar system.
+Though our understanding of Earth has grown, it wasn't until **Galileo**’s observations in the 17th
+century that we had definitive proof of Earth’s place in the solar system.
 
 ### References in Culture
 
-- **Movies**: _Interstellar_ (2014) explores the fragility of Earth in a time of environmental catastrophe.
-- **Books**: _The Hitchhiker’s Guide to the Galaxy_ by Douglas Adams humorously portrays Earth as insignificant in the grand scheme of the universe.
+- **Movies**: _Interstellar_ (2014) explores the fragility of Earth in a time of environmental
+  catastrophe.
+- **Books**: _The Hitchhiker’s Guide to the Galaxy_ by Douglas Adams humorously portrays Earth as
+  insignificant in the grand scheme of the universe.
 
 ---
 
@@ -104,7 +124,8 @@ Though our understanding of Earth has grown, it wasn't until **Galileo**’s obs
 
 ## Overview
 
-**Mars** has captured human imagination for centuries, with its red color and the possibility of water under its surface sparking dreams of human colonization.
+**Mars** has captured human imagination for centuries, with its red color and the possibility of
+water under its surface sparking dreams of human colonization.
 
 ### Key Facts
 
@@ -115,7 +136,9 @@ Though our understanding of Earth has grown, it wasn't until **Galileo**’s obs
 
 ### Discovery
 
-Mars was known to ancient astronomers, but modern study began with **Giovanni Schiaparelli** in 1877, who mapped its surface and incorrectly identified canals, leading to theories about Martian life.
+Mars was known to ancient astronomers, but modern study began with **Giovanni Schiaparelli** in
+1877, who mapped its surface and incorrectly identified canals, leading to theories about Martian
+life.
 
 ### References in Culture
 
@@ -128,7 +151,8 @@ Mars was known to ancient astronomers, but modern study began with **Giovanni Sc
 
 ## Overview
 
-**Jupiter** is the largest planet in our solar system and a gas giant with a powerful magnetic field and dozens of moons, including the massive Ganymede.
+**Jupiter** is the largest planet in our solar system and a gas giant with a powerful magnetic field
+and dozens of moons, including the massive Ganymede.
 
 ### Key Facts
 
@@ -139,12 +163,15 @@ Mars was known to ancient astronomers, but modern study began with **Giovanni Sc
 
 ### Discovery
 
-**Galileo Galilei** first observed Jupiter’s largest moons—Io, Europa, Ganymede, and Callisto—in 1610, marking one of the earliest uses of the telescope in astronomy.
+**Galileo Galilei** first observed Jupiter’s largest moons—Io, Europa, Ganymede, and Callisto—in
+1610, marking one of the earliest uses of the telescope in astronomy.
 
 ### References in Culture
 
-- **Movies**: _2001: A Space Odyssey_ (1968) has sequences set near Jupiter, using the planet’s moons as a potential space station location.
-- **Books**: _Jupiter_ by Ben Bova is a hard science fiction novel exploring the planet and its moons.
+- **Movies**: _2001: A Space Odyssey_ (1968) has sequences set near Jupiter, using the planet’s
+  moons as a potential space station location.
+- **Books**: _Jupiter_ by Ben Bova is a hard science fiction novel exploring the planet and its
+  moons.
 
 ---
 
@@ -152,7 +179,8 @@ Mars was known to ancient astronomers, but modern study began with **Giovanni Sc
 
 ## Overview
 
-**Saturn** is famous for its elaborate ring system, made of ice and rock. Like Jupiter, it is a gas giant with dozens of moons.
+**Saturn** is famous for its elaborate ring system, made of ice and rock. Like Jupiter, it is a gas
+giant with dozens of moons.
 
 ### Key Facts
 
@@ -163,7 +191,8 @@ Mars was known to ancient astronomers, but modern study began with **Giovanni Sc
 
 ### Discovery
 
-**Galileo** was the first to observe Saturn’s rings in 1610, although he couldn't explain what they were. It wasn’t until **Christiaan Huygens** in 1655 that the rings were correctly identified.
+**Galileo** was the first to observe Saturn’s rings in 1610, although he couldn't explain what they
+were. It wasn’t until **Christiaan Huygens** in 1655 that the rings were correctly identified.
 
 ### References in Culture
 
@@ -176,7 +205,8 @@ Mars was known to ancient astronomers, but modern study began with **Giovanni Sc
 
 ## Overview
 
-**Uranus** is unique for its extreme axial tilt, rotating on its side. It is an ice giant with a cold atmosphere of hydrogen, helium, and methane.
+**Uranus** is unique for its extreme axial tilt, rotating on its side. It is an ice giant with a
+cold atmosphere of hydrogen, helium, and methane.
 
 ### Key Facts
 
@@ -187,7 +217,8 @@ Mars was known to ancient astronomers, but modern study began with **Giovanni Sc
 
 ### Discovery
 
-Discovered by **William Herschel** in 1781, Uranus was the first planet found with a telescope. Its odd tilt likely resulted from a massive collision early in its history.
+Discovered by **William Herschel** in 1781, Uranus was the first planet found with a telescope. Its
+odd tilt likely resulted from a massive collision early in its history.
 
 ### References in Culture
 
@@ -199,7 +230,8 @@ Discovered by **William Herschel** in 1781, Uranus was the first planet found wi
 
 ## Overview
 
-**Neptune** is the eighth planet from the Sun and is known for its striking blue color, caused by methane in its atmosphere.
+**Neptune** is the eighth planet from the Sun and is known for its striking blue color, caused by
+methane in its atmosphere.
 
 ### Key Facts
 

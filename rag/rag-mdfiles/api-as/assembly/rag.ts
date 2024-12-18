@@ -3,7 +3,7 @@
 */
 
 import { models } from "@hypermode/modus-sdk-as";
-import { DocPage, Chunk , getFlatChunks} from "./chunk"
+import { DocPage, Chunk, getFlatChunks } from "./chunk";
 import { splitMarkdown } from "./text-splitters";
 import { RagContext, RagSource } from "./rag_classes";
 import {
@@ -11,7 +11,15 @@ import {
   SystemMessage,
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
-import { addDocument, getDocument, computeChunkEmbeddings, deleteDocument, rank_by_similarity, getPageSubTrees, search_by_term } from "./chunk_dgraph";
+import {
+  addDocument,
+  getDocument,
+  computeChunkEmbeddings,
+  deleteDocument,
+  rank_by_similarity,
+  getPageSubTrees,
+  search_by_term,
+} from "./chunk_dgraph";
 import { RankedDocument } from "./ranking";
 
 const DGRAPH_CONNECTION = "dgraph-grpc";
@@ -25,20 +33,22 @@ export class RagChunkInfo {
   score: number = 0.0;
 }
 
-
 export function deleteMarkdownDocument(id: string): string {
   deleteDocument(DGRAPH_CONNECTION, id);
-  return "Success"
+  return "Success";
 }
 
-export function getMarkdownDocument(id: string): string  {
+export function getMarkdownDocument(id: string): string {
   const doc = getDocument(DGRAPH_CONNECTION, id);
   if (doc == null) {
     return "";
   }
 
   const chunks = getFlatChunks(doc.root);
-  return chunks.reduce<string>((content, chunk) => content + "\n" + chunk.content, "");
+  return chunks.reduce<string>(
+    (content, chunk) => content + "\n" + chunk.content,
+    "",
+  );
 }
 
 export function addMarkdownDocument(
@@ -48,9 +58,14 @@ export function addMarkdownDocument(
   namespace: string = "",
 ): Chunk[] {
   deleteMarkdownDocument(id);
-  const doc = addPageToDgraph(DGRAPH_CONNECTION, id, mdcontent, max_word, namespace);
+  const doc = addPageToDgraph(
+    DGRAPH_CONNECTION,
+    id,
+    mdcontent,
+    max_word,
+    namespace,
+  );
   return getFlatChunks(doc.root);
-
 }
 
 /**
@@ -63,29 +78,32 @@ export function addMarkdownDocument(
  * @returns RagRanking object with the final ranking and the individual rankings
  * */
 
-
-
-
 export function rank(
   query: string,
   limit: i32 = 10,
   threshold: f32 = 0.75,
   namespace: string = "",
 ): RankedDocument[] {
-  return rank_by_similarity(DGRAPH_CONNECTION, query, limit, threshold, namespace); 
+  return rank_by_similarity(
+    DGRAPH_CONNECTION,
+    query,
+    limit,
+    threshold,
+    namespace,
+  );
 }
-
 
 export function getMatchingSubPages(
   question: string,
   limit: i32 = 10,
   threshold: f32 = 0.75,
   namespace: string = "",
-): DocPage[]{ //RagContext
-  
+): DocPage[] {
+  //RagContext
+
   //get closest chunk to the question
-  const ranked = rank(question, limit,threshold, namespace);
-   
+  const ranked = rank(question, limit, threshold, namespace);
+
   if (ranked.length == 0) {
     return [];
   }
@@ -93,16 +111,17 @@ export function getMatchingSubPages(
   const ids = ranked.map<string>((chunk) => chunk.id);
   //  build context by traversing the hierarchy of the chunk
   const docs = getPageSubTrees(DGRAPH_CONNECTION, ids);
-  return docs
+  return docs;
 }
 export function getRagContext(
   question: string,
   limit: i32 = 10,
   threshold: f32 = 0.75,
   namespace: string = "",
-): RagContext | null{ //RagContext
-  const docs = getMatchingSubPages(question, limit,threshold, namespace);
-  const context : RagContext = new RagContext();
+): RagContext | null {
+  //RagContext
+  const docs = getMatchingSubPages(question, limit, threshold, namespace);
+  const context: RagContext = new RagContext();
 
   if (docs.length == 0) {
     return null;
@@ -116,28 +135,28 @@ export function getRagContext(
     );
     const doc_extract = <RagSource>{
       docid: docs[i].docid,
-      text: extract, 
+      text: extract,
       chunks: chunks,
     };
     context.sources.push(doc_extract);
   }
-  
-  return context
-}
 
+  return context;
+}
 
 function addPageToDgraph(
   connection: string,
   id: string,
   mdcontent: string,
   max_word: i32 = 500,
-  namespace: string = ""
+  namespace: string = "",
 ): DocPage {
   const doc = splitMarkdown(id, mdcontent, max_word);
   computeChunkEmbeddings(doc);
   addDocument(connection, doc);
   return doc;
 }
+
 
 @json
 export class RagResponse {
@@ -151,14 +170,12 @@ export function generateResponseFromDoc(
   threshold: f32 = 0.75,
   namespace: string = "",
 ): RagResponse {
-
   const docContext = getRagContext(
     question,
     ranking_limit,
     threshold,
-    namespace
+    namespace,
   );
-
 
   if (docContext == null) {
     return <RagResponse>{
@@ -166,7 +183,9 @@ export function generateResponseFromDoc(
       context: null,
     };
   }
-  const text = docContext.sources.reduce<string>((text, source) =>  {return text + "\n"+source.text}, "");
+  const text = docContext.sources.reduce<string>((text, source) => {
+    return text + "\n" + source.text;
+  }, "");
   const response = generateResponse(question, text);
   return <RagResponse>{ text: response, context: docContext };
 }
@@ -196,5 +215,3 @@ function generateResponse(question: string, context: string): string {
   // Here we return the trimmed content of the first choice.
   return output.choices[0].message.content.trim();
 }
-
-

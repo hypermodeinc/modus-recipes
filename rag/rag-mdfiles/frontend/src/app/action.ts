@@ -1,9 +1,9 @@
-"use server";
+"use server"
 
 type FetchQueryProps = {
-  query: string;
-  variables?: any;
-};
+  query: string
+  variables?: any
+}
 
 const fetchQuery = async ({ query, variables }: FetchQueryProps) => {
   try {
@@ -18,33 +18,33 @@ const fetchQuery = async ({ query, variables }: FetchQueryProps) => {
         variables,
       }),
       cache: "no-store",
-    });
+    })
 
     if (res.status < 200 || res.status >= 300) {
-      throw new Error(res.statusText);
+      throw new Error(res.statusText)
     }
 
-    const { data, error, errors } = await res.json();
-    return { data, error: error || errors };
+    const { data, error, errors } = await res.json()
+    return { data, error: error || errors }
   } catch (err) {
-    console.error("error in fetchQuery:", err);
-    return { data: null, error: err };
+    console.error("error in fetchQuery:", err)
+    return { data: null, error: err }
   }
-};
+}
 
 export interface Message {
-  id: number;
-  content: string;
-  role: "user" | "assistant";
-  text: string;
-  sources: DocContext[];
+  id: number
+  content: string
+  role: "user" | "assistant"
+  text: string
+  sources: DocContext[]
 }
 interface DocContext {
-  docid: string;
-  text: string;
+  docid: string
+  text: string
 }
 
-export async function chat(query: string ) {
+export async function chat(query: string) {
   const graphqlQuery = `
     query chat($query: String!) {
         chat:generateResponseFromDoc(question: $query) {
@@ -55,16 +55,16 @@ export async function chat(query: string ) {
             
         }
     }
-  `;
+  `
 
   const { error, data } = await fetchQuery({
     query: graphqlQuery,
     variables: { query },
-  });
+  })
 
   if (error) {
-    return { error: Array.isArray(error) ? error[0] : error };
+    return { error: Array.isArray(error) ? error[0] : error }
   } else {
-    return { data };
+    return { data }
   }
 }

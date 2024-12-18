@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
+import type { Metadata } from "next"
+import localFont from "next/font/local"
+import "./globals.css"
 
 const allianceNo2 = localFont({
   src: [
@@ -21,7 +21,7 @@ const allianceNo2 = localFont({
     },
   ],
   variable: "--font-alliance-no2",
-});
+})
 
 const inter = localFont({
   src: [
@@ -67,7 +67,7 @@ const inter = localFont({
     },
   ],
   variable: "--font-inter",
-});
+})
 
 const geistMono = localFont({
   src: [
@@ -78,17 +78,17 @@ const geistMono = localFont({
     },
   ],
   variable: "--font-geist-mono",
-});
+})
 
 export const metadata: Metadata = {
   title: "Hypermode Demo App",
   description: "Created by Hypermode",
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en">
@@ -98,5 +98,5 @@ export default function RootLayout({
         {children}
       </body>
     </html>
-  );
+  )
 }

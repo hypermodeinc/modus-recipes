@@ -1,5 +1,5 @@
-import type { Config } from "tailwindcss";
-import { fontFamily } from "tailwindcss/defaultTheme";
+import type { Config } from "tailwindcss"
+import { fontFamily } from "tailwindcss/defaultTheme"
 
 const config: Omit<Config, "content"> = {
   darkMode: ["class", "[data-theme='dark']"],
@@ -289,5 +289,5 @@ const config: Omit<Config, "content"> = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
-export default config;
+}
+export default config
