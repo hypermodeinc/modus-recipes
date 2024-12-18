@@ -62,6 +62,12 @@ Document info.md added successfully in namespace SOLAR. 44 chunks added.
 
 ```
 
+#### Chat Frontend
+```bash
+cd frontend
+pnpm i && pnpm run dev
+```
+
 ## Design notes
 
 ### md file chunking
@@ -131,7 +137,9 @@ Note all the all of terms match should be first with equal score.
       name:ChunkSection.id
       children:ChunkSection.children
       chunks:ChunkSection.chunks
+      uid
       Chunk.id
+      Chunk.content
    }
   
 }

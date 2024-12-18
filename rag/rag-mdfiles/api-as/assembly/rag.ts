@@ -12,10 +12,9 @@ import {
   SystemMessage,
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
-import { mutateDoc, computeChunkEmbeddings, removeChunkSections, rank_by_similarity, getPageSubTrees, search_by_term } from "./chunk_dgraph";
+import { mutateDoc, computeChunkEmbeddings, deleteDocument, rank_by_similarity, getPageSubTrees, search_by_term } from "./chunk_dgraph";
 import { RankedDocument } from "./ranking";
 
-const RAG_COLLECTION = "ragchunks";
 const DGRAPH_CONNECTION = "dgraph-grpc";
 /* model from hypermode.json used to generate text */
 const modelName: string = "text-generator";
@@ -28,13 +27,8 @@ export class RagChunkInfo {
 }
 
 
-
-
-
-
-
-export function removePage(id: string, namespace: string = ""): string {
-  removeChunkSections(DGRAPH_CONNECTION, id);
+export function removePage(id: string): string {
+  deleteDocument(DGRAPH_CONNECTION, id);
   return "Success"
 }
 
@@ -44,7 +38,7 @@ export function addMarkdownPage(
   max_word: i32 = 500,
   namespace: string = "",
 ): Chunk[] {
-  removePage(id, namespace);
+  removePage(id);
   const doc = addPageToDgraph(DGRAPH_CONNECTION, id, mdcontent, max_word, namespace);
   return getFlatChunks(doc.root);
 
@@ -86,6 +80,7 @@ export function rank_bm25(
       content: chunk.content}})
   return rankDocuments(tokenize(query), documents).slice(0, limit);
 }
+
 export function getMatchingSubPages(
   question: string,
   limit: i32 = 10,
@@ -143,7 +138,6 @@ function addPageToDgraph(
   max_word: i32 = 500,
   namespace: string = ""
 ): DocPage {
-  const labels: string[][] = []; // no labels
   const doc = splitMarkdown(id, mdcontent, max_word);
   computeChunkEmbeddings(doc);
   mutateDoc(connection, doc);
@@ -158,10 +152,11 @@ export class RagResponse {
 
 export function generateResponseFromDoc(
   question: string,
+  ranking_limit: i32 = 10,
   threshold: f32 = 0.75,
   namespace: string = "",
 ): RagResponse {
-  const ranking_limit = 10;
+
   const docContext = getRagContext(
     question,
     ranking_limit,
