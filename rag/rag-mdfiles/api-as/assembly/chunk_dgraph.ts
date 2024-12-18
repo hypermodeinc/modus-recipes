@@ -86,7 +86,7 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
         result(func: uid(similarity_score), orderdesc: val(similarity_score)) @filter(ge(val(similarity_score), ${threshold}))
         {     
             Chunk.id
-            Chunk.uid:uid
+            uid
             Chunk.docid
             Chunk.order
             Chunk.content
@@ -128,7 +128,7 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
     query similar($terms: string) {
           result(func: anyofterms(Chunk.content, $terms)) {
             Chunk.id
-            Chunk.uid:uid
+            uid
             Chunk.docid
             Chunk.order
             Chunk.content
@@ -165,17 +165,17 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
             r as ~DocPage.root
         }
         
-         result(func:uid(r))  @recurse(depth:5){
-     DocPage.docid
-     DocPage.root
-       ChunkSection.id
-       ChunkSection.level
-       ChunkSection.order
-       Chunk.id
-       Chunk.content
-       Chunk.order
-       ChunkSection.children @filter(uid(s2,s1)) 
-       ChunkSection.chunks  @filter(uid(c,c2)) 
+        result(func:uid(r),orderasc:ChunkSection.order, orderasc:Chunk.order)  @recurse(depth:5){
+          DocPage.docid
+          DocPage.root
+          ChunkSection.id
+          ChunkSection.level
+          ChunkSection.order
+          uid
+          Chunk.content
+          Chunk.order
+          ChunkSection.children @filter(uid(s2,s1)) 
+          ChunkSection.chunks  @filter(uid(c,c2)) 
       
   }
     }

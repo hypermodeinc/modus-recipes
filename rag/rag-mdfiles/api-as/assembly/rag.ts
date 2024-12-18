@@ -2,10 +2,10 @@
   functions to handle RAG chunks using Hypermode collections and models
 */
 
-import { models, collections } from "@hypermode/modus-sdk-as";
-import { DocPage, Chunk , RankedChunk, getFlatChunks} from "./chunk"
-import { splitMarkdown, splitMarkdownHeaderText } from "./text-splitters";
-import { RagContext } from "./rag_classes";
+import { models } from "@hypermode/modus-sdk-as";
+import { DocPage, Chunk , getFlatChunks} from "./chunk"
+import { splitMarkdown } from "./text-splitters";
+import { RagContext, RagSource } from "./rag_classes";
 import { Document, rankDocuments, tokenize } from "./bm25";
 import {
   OpenAIChatModel,
@@ -92,20 +92,16 @@ export function getMatchingSubPages(
   threshold: f32 = 0.75,
   namespace: string = "",
 ): DocPage[]{ //RagContext
-  /* 
-    get closest chunk to the question
-    build context by traversing the hierarchy of the chunk
-    and concatenating the text of the chunks
-    assuming 
-    - id is in the form of "parent > child > grandchild"
-  */
+  
+  //get closest chunk to the question
   const ranked = rank(question, limit,threshold, namespace);
    
   if (ranked.length == 0) {
     return [];
   }
+  // use id of the chuks
   const ids = ranked.map<string>((chunk) => chunk.id);
- 
+  //  build context by traversing the hierarchy of the chunk
   const docs = getPageSubTrees(DGRAPH_CONNECTION, ids);
   return docs
 }
@@ -116,20 +112,27 @@ export function getRagContext(
   namespace: string = "",
 ): RagContext | null{ //RagContext
   const docs = getMatchingSubPages(question, limit,threshold, namespace);
-  
+  const context : RagContext = new RagContext();
+
   if (docs.length == 0) {
     return null;
   }
-  const chunks = getFlatChunks(docs[0].root);
-  // concatenate all the chunks content
-  const context = chunks.reduce<string>(
-    (context, chunk) => context + "\n" + chunk.content,
-    "",
-  );
-  return <RagContext>{
-    text: context,
-    chunks: chunks,
-  };
+  for (let i = 0; i < docs.length; i++) {
+    const chunks = getFlatChunks(docs[i].root);
+    // concatenate all the chunks content
+    const extract = chunks.reduce<string>(
+      (context, chunk) => context + "\n" + chunk.content,
+      "",
+    );
+    const doc_extract = <RagSource>{
+      docid: docs[i].docid,
+      text: extract, 
+      chunks: chunks,
+    };
+    context.sources.push(doc_extract);
+  }
+  
+  return context
 }
 
 
@@ -173,15 +176,15 @@ export function generateResponseFromDoc(
       context: null,
     };
   }
-  const response = generateResponse(question, docContext.text);
+  const text = docContext.sources.reduce<string>((text, source) =>  {return text + "\n"+source.text}, "");
+  const response = generateResponse(question, text);
   return <RagResponse>{ text: response, context: docContext };
 }
 
 function generateResponse(question: string, context: string): string {
   const model = models.getModel<OpenAIChatModel>(modelName);
-  const instruction = `Reply to the user question using only information from the text in triple quotes. 
+  const instruction = `Reply to the user question using only information from the CONTEXT provided. 
     The response starts with a short and concise sentence, followed by a more detailed explanation.
-  
 
     """
     ${context}

@@ -1,5 +1,5 @@
 <DocPage.docid>: string @index(hash) @upsert .
-<DocPage.root>: uid .
+<DocPage.root>: uid @reverse .
 <Chunk.content>: string @index(term) .
 <Chunk.id>: string @index(hash) @upsert .
 <Chunk.order>: int .

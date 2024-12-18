@@ -2,7 +2,7 @@
 export class Chunk {
   @alias("dgraph.type")
   type: string = "Chunk";
-  @alias("Chunk.uid")
+  @alias("uid")
   uid: string = "";
   @alias("Chunk.id")
   id: string = "";
