@@ -1,11 +1,12 @@
 export {
   generateResponseFromDoc,
-  removePage,
-  addMarkdownPage,
+  deleteMarkdownDocument,
+  getMarkdownDocument,
+  addMarkdownDocument,
   getRagContext,
-  rank,rank_bm25,
-  getMatchingSubPages
+  rank
 } from "./rag";
-export { rankDocuments } from "./bm25";
+
+
 export { embedRagChunk } from "./embeddings";
 export { recursiveCharacterTextSplitter, splitMarkdown, splitMarkdownHeaderText} from "./text-splitters";

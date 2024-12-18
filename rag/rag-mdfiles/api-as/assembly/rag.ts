@@ -6,13 +6,12 @@ import { models } from "@hypermode/modus-sdk-as";
 import { DocPage, Chunk , getFlatChunks} from "./chunk"
 import { splitMarkdown } from "./text-splitters";
 import { RagContext, RagSource } from "./rag_classes";
-import { Document, rankDocuments, tokenize } from "./bm25";
 import {
   OpenAIChatModel,
   SystemMessage,
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
-import { mutateDoc, computeChunkEmbeddings, deleteDocument, rank_by_similarity, getPageSubTrees, search_by_term } from "./chunk_dgraph";
+import { addDocument, getDocument, computeChunkEmbeddings, deleteDocument, rank_by_similarity, getPageSubTrees, search_by_term } from "./chunk_dgraph";
 import { RankedDocument } from "./ranking";
 
 const DGRAPH_CONNECTION = "dgraph-grpc";
@@ -27,18 +26,28 @@ export class RagChunkInfo {
 }
 
 
-export function removePage(id: string): string {
+export function deleteMarkdownDocument(id: string): string {
   deleteDocument(DGRAPH_CONNECTION, id);
   return "Success"
 }
 
-export function addMarkdownPage(
+export function getMarkdownDocument(id: string): string  {
+  const doc = getDocument(DGRAPH_CONNECTION, id);
+  if (doc == null) {
+    return "";
+  }
+
+  const chunks = getFlatChunks(doc.root);
+  return chunks.reduce<string>((content, chunk) => content + "\n" + chunk.content, "");
+}
+
+export function addMarkdownDocument(
   id: string,
   mdcontent: string,
   max_word: i32 = 500,
   namespace: string = "",
 ): Chunk[] {
-  removePage(id);
+  deleteMarkdownDocument(id);
   const doc = addPageToDgraph(DGRAPH_CONNECTION, id, mdcontent, max_word, namespace);
   return getFlatChunks(doc.root);
 
@@ -66,20 +75,6 @@ export function rank(
   return rank_by_similarity(DGRAPH_CONNECTION, query, limit, threshold, namespace); 
 }
 
-export function rank_bm25(
-  query: string,
-  limit: i32 = 10,
-  threshold: f32 = 0.75,
-  namespace: string = "",
-): RankedDocument[] {
-  const clean_query = tokenize(query).join(" ");
-  const chunks = search_by_term(DGRAPH_CONNECTION, clean_query, limit, threshold, namespace);
-  const documents = chunks.map<Document>((chunk) => {
-    return <Document>{
-      id: chunk.uid,
-      content: chunk.content}})
-  return rankDocuments(tokenize(query), documents).slice(0, limit);
-}
 
 export function getMatchingSubPages(
   question: string,
@@ -140,7 +135,7 @@ function addPageToDgraph(
 ): DocPage {
   const doc = splitMarkdown(id, mdcontent, max_word);
   computeChunkEmbeddings(doc);
-  mutateDoc(connection, doc);
+  addDocument(connection, doc);
   return doc;
 }
 

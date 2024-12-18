@@ -23,7 +23,7 @@ export function computeChunkEmbeddings(doc: DocPage): void {
  * @param doc - the document to save
  * @returns the uids of the inserted nodes
  */
-export function mutateDoc(connection: string, doc: DocPage): Map<string, string> | null {
+export function addDocument(connection: string, doc: DocPage): Map<string, string> | null {
     /* take advantage of the fact that Dgraph can handle JSON with nested objects in mutation */
     const chunk_json = JSON.stringify(doc);
     const mutations: dgraph.Mutation[] = [new dgraph.Mutation(chunk_json)];
@@ -31,6 +31,30 @@ export function mutateDoc(connection: string, doc: DocPage): Map<string, string>
     
     return uids;
   }
+export function getDocument(connection: string, docid: string): DocPage | null {
+  const query = new dgraph.Query(`
+      query { 
+          result(func:eq(DocPage.docid, "${docid}")) @recurse(depth:6) {
+              DocPage.docid
+              DocPage.root
+              ChunkSection.id
+              ChunkSection.level
+              ChunkSection.order
+              uid
+              Chunk.content
+              Chunk.order
+              ChunkSection.children (orderasc:ChunkSection.order)
+              ChunkSection.chunks  (orderasc:Chunk.order)
+          }
+      }
+      `);
+  const resp = dgraph.execute(connection, new dgraph.Request(query));
+  const response = JSON.parse<DocPageResult>(resp.Json).result;
+  if (response.length == 0) {
+    return null;
+  }
+  return response[0];
+}
 
 export function deleteDocument(connection: string, docid: string): void {
   /* delete a document and all its children */
@@ -158,7 +182,7 @@ export function getPageSubTrees(
           r as ~DocPage.root
       }
       
-      result(func:uid(r),orderasc:ChunkSection.order, orderasc:Chunk.order)  @recurse(depth:5){
+      result(func:uid(r))  @recurse(depth:5){
         DocPage.docid
         DocPage.root
         ChunkSection.id
@@ -167,8 +191,8 @@ export function getPageSubTrees(
         uid
         Chunk.content
         Chunk.order
-        ChunkSection.children @filter(uid(s2,s1)) 
-        ChunkSection.chunks  @filter(uid(c,c2)) 
+        ChunkSection.children @filter(uid(s2,s1)) (orderasc:ChunkSection.order)
+        ChunkSection.chunks  @filter(uid(c,c2)) (orderasc:Chunk.order)
     
 }
   }

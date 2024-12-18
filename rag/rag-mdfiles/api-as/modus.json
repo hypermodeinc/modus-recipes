@@ -14,9 +14,9 @@
       "provider": "hugging-face"
     },
     "text-generator": {
-      "sourceModel": "gpt-4o",
-      "connection": "openai",
-      "path": "v1/chat/completions"
+      "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "connection": "hypermode",
+      "provider": "hugging-face"
     }
   },
   "connections": {

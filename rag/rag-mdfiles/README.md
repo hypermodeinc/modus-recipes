@@ -19,13 +19,38 @@ This templates illustrates a type of  Retrieval Augmented Generation (RAG) use c
 
 For this use case we want to expose 2 main API functions
 
-- addMarkdownPage(id: string, mdcontent: string): this API allows user to submit a markdown file to the system. The function splits the text into chunks based on markdown headers and save each chunk with an associated vector embedding as the hierarchical structure.
+- addMarkdownDocument(id: string, mdcontent: string): this API allows user to submit a markdown file to the system. The function splits the text into chunks based on markdown headers and save each chunk with an associated vector embedding as the hierarchical structure.
 
-- askTheDoc(question: string): the function produces a text response to a natural language question about the documents stored in the knowledge graph.
+- generateResponseFromDoc(question: string): the function produces a text response to a natural language question about the documents stored in the knowledge graph.
 
 Additionally
 - getRagContext(question: string) : returns the extracted information used for the RAG context.
 
+### Design
+#### Models
+We are using 
+- `sentence-transformers/all-MiniLM-L6-v2` for the embedding 
+- `meta-llama/Meta-Llama-3.1-8B-Instruct` for text generation
+All models are shared models hosted by Hypermode.
+
+Login to Hypermode to get access to those model before running this project locally.
+> npm install -g @hypermode/hyp-cli
+> hyp login
+#### API
+> cd api-as
+> modus dev
+It will compile the code and start Modus locally.
+Modus servers the API on GraphQL endpoints http://localhost:8686/graphql
+
+#### Lexical Graph
+We are using Dgraph to store the hierarchy of chunks, index vector embeddings and search by similarity.
+
+To start a local instance:
+> cd extras
+> make up
+
+Create indexes in Dgraph
+> make schema-dql
 
 ### Sample data
 
@@ -40,13 +65,11 @@ It contains
 #### load the sample data.
 
 - have python installed (3.11)
-- open a terminal window and access the `extra` directory.
-- `pip install -r requirements.txt` to install the graphql client package.
+- open a terminal window and access the `extras` directory.
+> cd extras
+> pip install -r requirements.txt
+> python loadData.py
 
-
-```sh
-python loadData.py
-```
 
 Command output:
 
@@ -56,17 +79,21 @@ Document info.md added successfully in namespace SOLAR. 44 chunks added.
 
 ```
 
-#### testing some questions
 
-```
+#### Testing 
 
-```
-
-#### Chat Frontend
+Use the Chat Frontend
 ```bash
 cd frontend
+export DGRAPH_GRPC=http://localhost:8686/graphql
 pnpm i && pnpm run dev
 ```
+
+Access the UI at http://localhost:3000
+
+Example of queries
+"which planet has rings?",
+"What is the difference between Venus and Saturn?",
 
 ## Design notes
 
@@ -90,23 +117,7 @@ The idea here, is that a piece of text (chunk) in, let's say, a Header 3 section
 The response is generated using an LLM, in our case openai, which is also declared in the manifest file (hypermode.json).
 We prompt the LLM to generate a response based on the document context.
 
-## Modus design card
 
-The main components of you Modus project are visible on the [Hypermode console](https://hypermode.com/) when the project is deployed.
-
-Functions
-
-- addDocPage
-- askTheDoc
-
-Models
-
-- sentence-transformers/all-MiniLM-L6-v2
-- openai gpt-4o
-
-Connections
-
-- Dgraph
 
 ## Design Notes
 
@@ -114,19 +125,10 @@ Recursive query to get the page sections and chunks
 See in chunk_drgraph.ts
 
 
-## Design Ideas
-### Adding ranking on terms
-
-
-use anyofterms + allofterms
-- Get a list of matches
-- get list of terms in the search
-- compute frequency
-- TF-IDF for each -> rank
-Note all the all of terms match should be first with equal score.
 
 
 ## DQL 
+To Visualize the documents in Ratel:
 
 ```
 # showing the pages and the trees
