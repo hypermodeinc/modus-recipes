@@ -11,9 +11,12 @@ export function computeChunkEmbeddings(doc: DocPage): void {
   /* get flat chunks, build content list and compute embeddings */
   const flatChunks = getFlatChunks(doc.root);
   const content = flatChunks.map<string>((chunk) => chunk.content);
-  const embeddings = embedRagChunk(content);
-  for (let i = 0; i < flatChunks.length; i++) {
-    flatChunks[i].embedding = JSON.stringify(embeddings[i]);
+  /* compute embeddings by batches of 100 */
+  for (let i = 0; i < content.length; i += 100) {
+    const embeddings = embedRagChunk(content.slice(i, i + 100));
+    for (let j = 0; j < embeddings.length; j++) {
+      flatChunks[i + j].embedding = JSON.stringify(embeddings[j]);
+    }
   }
 }
 /**

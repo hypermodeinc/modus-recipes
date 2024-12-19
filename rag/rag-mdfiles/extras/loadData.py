@@ -33,8 +33,8 @@ def addDocument(id, filename, namespace=""):
     with open(filename) as f:
         markdown_document = f.read()
         query = """
-            mutation AddMarkdownPage($id: String!, $content: String!, $namespace: String!) {
-                addMarkdownPage(id:$id, mdcontent: $content, namespace: $namespace) {
+            mutation addMarkdownDocument($id: String!, $content: String!, $namespace: String!) {
+                addMarkdownDocument(id:$id, mdcontent: $content, namespace: $namespace) {
                     id
                     content
                 }
@@ -45,7 +45,7 @@ def addDocument(id, filename, namespace=""):
         if('errors' in resp):
             sys.exit(f"Error in creating item {resp['errors']}")
         else:
-            print(f"Document {id} added successfully in namespace {'default' if namespace == '' else namespace}. {len(resp.get('data').get('addMarkdownPage'))} chunks added.")
+            print(f"Document {id} added successfully in namespace {'default' if namespace == '' else namespace}. {len(resp.get('data').get('addMarkdownDocument'))} chunks added.")
 
 path = "Documents"
 ## Add a single file if a filename is passed as argument
