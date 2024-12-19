@@ -1,21 +1,21 @@
 /**
  * Dgraph storage for chunk data
  */
-import { dgraph } from "@hypermode/modus-sdk-as";
-import { DocPage, RankedChunk, getFlatChunks } from "./chunk";
-import { embedRagChunk } from "./embeddings";
-import { JSON } from "json-as";
-import { RankedDocument } from "./ranking";
+import { dgraph } from "@hypermode/modus-sdk-as"
+import { DocPage, RankedChunk, getFlatChunks } from "./chunk"
+import { embedRagChunk } from "./embeddings"
+import { JSON } from "json-as"
+import { RankedDocument } from "./ranking"
 
 export function computeChunkEmbeddings(doc: DocPage): void {
   /* get flat chunks, build content list and compute embeddings */
-  const flatChunks = getFlatChunks(doc.root);
-  const content = flatChunks.map<string>((chunk) => chunk.content);
+  const flatChunks = getFlatChunks(doc.root)
+  const content = flatChunks.map<string>((chunk) => chunk.content)
   /* compute embeddings by batches of 100 */
   for (let i = 0; i < content.length; i += 100) {
-    const embeddings = embedRagChunk(content.slice(i, i + 100));
+    const embeddings = embedRagChunk(content.slice(i, i + 100))
     for (let j = 0; j < embeddings.length; j++) {
-      flatChunks[i + j].embedding = JSON.stringify(embeddings[j]);
+      flatChunks[i + j].embedding = JSON.stringify(embeddings[j])
     }
   }
 }
@@ -25,19 +25,13 @@ export function computeChunkEmbeddings(doc: DocPage): void {
  * @param doc - the document to save
  * @returns the uids of the inserted nodes
  */
-export function addDocument(
-  connection: string,
-  doc: DocPage,
-): Map<string, string> | null {
+export function addDocument(connection: string, doc: DocPage): Map<string, string> | null {
   /* take advantage of the fact that Dgraph can handle JSON with nested objects in mutation */
-  const chunk_json = JSON.stringify(doc);
-  const mutations: dgraph.Mutation[] = [new dgraph.Mutation(chunk_json)];
-  const uids = dgraph.execute(
-    connection,
-    new dgraph.Request(null, mutations),
-  ).Uids;
+  const chunk_json = JSON.stringify(doc)
+  const mutations: dgraph.Mutation[] = [new dgraph.Mutation(chunk_json)]
+  const uids = dgraph.execute(connection, new dgraph.Request(null, mutations)).Uids
 
-  return uids;
+  return uids
 }
 export function getDocument(connection: string, docid: string): DocPage | null {
   const query = new dgraph.Query(`
@@ -55,13 +49,13 @@ export function getDocument(connection: string, docid: string): DocPage | null {
               ChunkSection.chunks  (orderasc:Chunk.order)
           }
       }
-      `);
-  const resp = dgraph.execute(connection, new dgraph.Request(query));
-  const response = JSON.parse<DocPageResult>(resp.Json).result;
+      `)
+  const resp = dgraph.execute(connection, new dgraph.Request(query))
+  const response = JSON.parse<DocPageResult>(resp.Json).result
   if (response.length == 0) {
-    return null;
+    return null
   }
-  return response[0];
+  return response[0]
 }
 
 export function deleteDocument(connection: string, docid: string): void {
@@ -73,7 +67,7 @@ export function deleteDocument(connection: string, docid: string): void {
               c as ChunkSection.Chunks 
           }
       }
-      `);
+      `)
   const mutation = new dgraph.Mutation(
     "",
     "",
@@ -83,15 +77,15 @@ export function deleteDocument(connection: string, docid: string): void {
       uid(n) * * .
       uid(c) * * .
       `,
-  );
+  )
 
-  dgraph.execute(connection, new dgraph.Request(query, [mutation]));
+  dgraph.execute(connection, new dgraph.Request(query, [mutation]))
 }
 
 
 @json
 class SimilarChunkResult {
-  result: RankedChunk[] = [];
+  result: RankedChunk[] = []
 }
 
 export function rank_by_similarity(
@@ -101,10 +95,10 @@ export function rank_by_similarity(
   threshold: f32 = 0.75,
   namespace: string = "",
 ): RankedDocument[] {
-  const embedding = embedRagChunk([search_string])[0];
-  const vars = new dgraph.Variables();
-  vars.set("$vector", JSON.stringify(embedding));
-  vars.set("$limit", limit);
+  const embedding = embedRagChunk([search_string])[0]
+  const vars = new dgraph.Variables()
+  vars.set("$vector", JSON.stringify(embedding))
+  vars.set("$limit", limit)
   const dql_query = `
   query similar($vector: float32vector, $limit: int) {
         var(func: similar_to(Chunk.vector_embedding, $limit, $vector)) {
@@ -122,24 +116,24 @@ export function rank_by_similarity(
           similarity_score: val(similarity_score) 
       }
   }
-  `;
+  `
 
-  const query = new dgraph.Query(dql_query, vars);
-  const resp = dgraph.execute(connection, new dgraph.Request(query));
-  const response = JSON.parse<SimilarChunkResult>(resp.Json).result;
+  const query = new dgraph.Query(dql_query, vars)
+  const resp = dgraph.execute(connection, new dgraph.Request(query))
+  const response = JSON.parse<SimilarChunkResult>(resp.Json).result
 
   // create a RankedDocument array
-  const rankedDocuments: RankedDocument[] = [];
+  const rankedDocuments: RankedDocument[] = []
   for (let i = 0; i < response.length; i++) {
     rankedDocuments.push(<RankedDocument>{
       id: response[i].uid,
       docid: response[i].docid,
       score: response[i].similarity_score,
       content: response[i].content,
-    });
+    })
   }
   // we don't have to slice the array because the limit is already set in the search function
-  return rankedDocuments;
+  return rankedDocuments
 }
 
 export function search_by_term(
@@ -149,8 +143,8 @@ export function search_by_term(
   threshold: f32 = 0.75,
   namespace: string = "",
 ): RankedChunk[] {
-  const vars = new dgraph.Variables();
-  vars.set("$terms", search_string);
+  const vars = new dgraph.Variables()
+  vars.set("$terms", search_string)
 
   const dql_query = `
   query similar($terms: string) {
@@ -162,18 +156,18 @@ export function search_by_term(
           Chunk.content
         }
   }
-  `;
-  console.log(dql_query);
-  const query = new dgraph.Query(dql_query, vars);
-  const resp = dgraph.execute(connection, new dgraph.Request(query));
-  const response = JSON.parse<SimilarChunkResult>(resp.Json).result;
-  return response;
+  `
+  console.log(dql_query)
+  const query = new dgraph.Query(dql_query, vars)
+  const resp = dgraph.execute(connection, new dgraph.Request(query))
+  const response = JSON.parse<SimilarChunkResult>(resp.Json).result
+  return response
 }
 
 
 @json
 class DocPageResult {
-  result: DocPage[] = [];
+  result: DocPage[] = []
 }
 
 export function getPageSubTrees(
@@ -207,9 +201,9 @@ export function getPageSubTrees(
     
 }
   }
-  `;
-  const query = new dgraph.Query(dql_query);
-  const resp = dgraph.execute(connection, new dgraph.Request(query));
-  const response = JSON.parse<DocPageResult>(resp.Json).result;
-  return response;
+  `
+  const query = new dgraph.Query(dql_query)
+  const resp = dgraph.execute(connection, new dgraph.Request(query))
+  const response = JSON.parse<DocPageResult>(resp.Json).result
+  return response
 }

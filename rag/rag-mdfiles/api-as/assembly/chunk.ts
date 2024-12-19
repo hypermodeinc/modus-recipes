@@ -3,37 +3,37 @@
 export class Chunk {
 
   @alias("dgraph.type")
-  type: string = "Chunk";
+  type: string = "Chunk"
 
 
   @alias("uid")
-  uid: string = "";
+  uid: string = ""
 
 
   @alias("Chunk.id")
-  id: string = "";
+  id: string = ""
 
 
   @alias("Chunk.docid")
-  docid: string = "";
+  docid: string = ""
 
 
   @alias("Chunk.order")
-  order: u32 = 0;
+  order: u32 = 0
 
 
   @alias("Chunk.content")
-  content: string = "";
+  content: string = ""
 
 
   @alias("Chunk.vector_embedding")
-  embedding: string | null = null;
+  embedding: string | null = null
 }
 
 
 @json
 export class RankedChunk extends Chunk {
-  similarity_score: f32 = 0.0;
+  similarity_score: f32 = 0.0
 }
 
 
@@ -41,31 +41,31 @@ export class RankedChunk extends Chunk {
 export class ChunkSection {
 
   @alias("dgraph.type")
-  type: string = "ChunkSection";
+  type: string = "ChunkSection"
 
 
   @alias("ChunkSection.docid")
-  docid!: string;
+  docid!: string
 
 
   @alias("ChunkSection.id")
-  id!: string;
+  id!: string
 
 
   @alias("ChunkSection.level")
-  level: u32 = 0;
+  level: u32 = 0
 
 
   @alias("ChunkSection.order")
-  order: u32 = 0;
+  order: u32 = 0
 
 
   @alias("ChunkSection.chunks")
-  chunks: Chunk[] = [];
+  chunks: Chunk[] = []
 
 
   @alias("ChunkSection.children")
-  children: ChunkSection[] = [];
+  children: ChunkSection[] = []
 }
 
 
@@ -73,36 +73,32 @@ export class ChunkSection {
 export class DocPage {
 
   @alias("dgraph.type")
-  type: string = "DocPage";
+  type: string = "DocPage"
 
 
   @alias("DocPage.docid")
-  docid!: string;
+  docid!: string
 
 
   @alias("DocPage.root")
-  root!: ChunkSection;
+  root!: ChunkSection
 }
 
 export function getFlatChunks(section: ChunkSection): Chunk[] {
-  const stack: ChunkSection[] = [section]; // Initialize the stack with the root section
-  const flatChunks: Chunk[] = [];
+  const stack: ChunkSection[] = [section] // Initialize the stack with the root section
+  const flatChunks: Chunk[] = []
 
   while (stack.length > 0) {
-    const currentSection = stack.pop();
+    const currentSection = stack.pop()
     // If there are children, push them onto the stack
     for (let i = 0; i < currentSection.children!.length; i++) {
-      stack.push(
-        currentSection.children[currentSection.children.length - 1 - i],
-      );
+      stack.push(currentSection.children[currentSection.children.length - 1 - i])
     }
     // Add the chunks of the current section to the flat list
     for (let i = 0; i < currentSection.chunks.length; i++) {
-      flatChunks.push(
-        currentSection.chunks[currentSection.chunks.length - 1 - i],
-      );
+      flatChunks.push(currentSection.chunks[currentSection.chunks.length - 1 - i])
     }
   }
 
-  return flatChunks.sort((a, b) => (b.id > a.id ? 1 : -1));
+  return flatChunks.sort((a, b) => (b.id > a.id ? 1 : -1))
 }
