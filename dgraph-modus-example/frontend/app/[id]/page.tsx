@@ -2,10 +2,13 @@ import { Suspense } from "react";
 import { fetchMovieDetailsAndRecommendations } from "@/app/actions";
 import Link from "next/link";
 
-function LoadingSpinner() {
+function Loading() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-neutral-300"></div>
+    <div className="flex items-center justify-center">
+      <p className="text-lg text-white/60 animate-pulse">
+        Fetching movie details and personalized recommendations from our AI
+        system, please be patient...
+      </p>
     </div>
   );
 }
@@ -125,7 +128,7 @@ export default function MoviePage({
       >
         ← Back to Movies
       </Link>
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={<Loading />}>
         <MovieDetails movieId={movieId} searchQuery={searchQuery} />
       </Suspense>
     </div>
