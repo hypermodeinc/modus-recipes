@@ -34,11 +34,6 @@ lint:
     - shfmt@3.6.0
     - trufflehog@3.86.0
     - yamllint@1.35.1
-  ignore:
-    - linters: [ALL]
-      paths:
-        # Ignore md files from dataset
-        - rag/rag-mdfiles/extras/**
 
 actions:
   enabled:
