@@ -1,0 +1,32 @@
+<DocPage.docid>: string @index(hash) @upsert .
+<DocPage.root>: uid @reverse .
+<Chunk.content>: string @index(term) .
+<Chunk.id>: string @index(hash) @upsert .
+<Chunk.order>: int .
+<ChunkSection.children>: [uid] @reverse .
+<ChunkSection.chunks>: [uid] @reverse .
+<ChunkSection.docid>: string @index(hash) .
+<ChunkSection.id>: string @index(hash) @upsert .
+<ChunkSection.level>: int .
+<ChunkSection.order>: int .
+<Chunk.vector_embedding>: float32vector @index(hnsw(metric:"euclidean")) .
+
+type <DocPage> {
+	DocPage.docid
+	DocPage.root
+}
+
+type <Chunk> {
+	Chunk.content
+	Chunk.id
+	Chunk.order
+    Chunk.vector_embedding
+}
+type <ChunkSection> {
+	ChunkSection.children
+	ChunkSection.docid
+	ChunkSection.chunks
+	ChunkSection.id
+	ChunkSection.level
+	ChunkSection.order
+}
