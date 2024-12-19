@@ -1,18 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"strings" 
+	"strings"
+
 	"github.com/hypermodeinc/modus/sdk/go/pkg/http"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models/openai"
 )
 
+type MovieDetails struct {
+	Name string `json:"name@en"`
+}
+
 func FetchMoviesWithPaginationAndSearch(page int, search string) (string, error) {
 	offset := (page - 1) * 10
 
-	query := fmt.Sprintf(`
-	{
+	query := fmt.Sprintf(`{
 		movies(func: has(initial_release_date), first: 10, offset: %d, orderdesc: initial_release_date) %s {
 			uid
 			name@en
@@ -72,50 +77,80 @@ func generateRecommendations(prompt string) (*string, error) {
 	return &outputStr, nil
 }
 
-
 func FetchMovieDetailsAndRecommendations(uid string, searchQuery string) (string, error) {
-    query := fmt.Sprintf(`
-    {
-        movie(func: uid(%s)) {
-            uid
-            name@en
-            initial_release_date
-            genre {
-                name@en
-            }
-            starring {
-                performance.actor {
-                    name@en
-                }
-            }
-            directed_by: director.film {
-                name@en
-            }
-        }
-    }`, uid)
+	movieDetailsJSON, err := fetchMovieDetails(uid)
+	if err != nil {
+		return "", err
+	}
 
-    movieDetails, err := executeDgraphQuery(query)
-    if err != nil {
-        return "", fmt.Errorf("error fetching movie details: %w", err)
-    }
+	movieName, err := parseMovieName(movieDetailsJSON)
+	if err != nil {
+		return "", err
+	}
 
-	prompt := fmt.Sprintf(
-		"Here is what we know about the movie: %s. Based on this information and the user search query '%s', recommend 5 similar movies. Format the output strictly as a JSON array of objects. Each object must have the following keys: 'name' (movie name as a string), 'release_date' (year as a number), 'genre' (array of strings), and 'director' (string). Do not include any text, explanation, or context outside of this JSON array.",
-		movieDetails,
-		searchQuery,
-	)
+	prompt := generatePrompt(movieName, searchQuery)
 
-    recommendations, err := generateRecommendations(prompt)
+	recommendations, err := generateRecommendations(prompt)
+	if err != nil {
+		return "", fmt.Errorf("error generating recommendations: %w", err)
+	}
 
-    if err != nil {
-        return "", fmt.Errorf("error generating recommendations: %w", err)
-    }
+	combinedResponse := fmt.Sprintf(`{
+		"movieDetails": %q,
+		"recommendations": %q
+	}`, movieDetailsJSON, *recommendations)
 
-    combinedResponse := fmt.Sprintf(`{
-        "movieDetails": %s,
-        "recommendations": %q
-    }`, movieDetails, *recommendations)
-    return combinedResponse, nil
+	return combinedResponse, nil
+}
+
+func fetchMovieDetails(uid string) (string, error) {
+	query := fmt.Sprintf(`{
+		movie(func: uid(%s)) {
+			uid
+			name@en
+			initial_release_date
+			genre {
+				name@en
+			}
+			starring {
+				performance.actor {
+					name@en
+				}
+			}
+			directed_by: director.film {
+				name@en
+			}
+		}
+	}`, uid)
+
+	return executeDgraphQuery(query)
+}
+
+func parseMovieName(movieDetailsJSON string) (string, error) {
+	var parsedDetails struct {
+		Data struct {
+			Movie []MovieDetails `json:"movie"`
+		} `json:"data"`
+	}
+
+	if err := json.Unmarshal([]byte(movieDetailsJSON), &parsedDetails); err != nil {
+		return "", fmt.Errorf("error parsing movie details JSON: %w", err)
+	}
+
+	if len(parsedDetails.Data.Movie) == 0 || parsedDetails.Data.Movie[0].Name == "" {
+		return "", fmt.Errorf("movie name not found in details")
+	}
+
+	return parsedDetails.Data.Movie[0].Name, nil
+}
+
+func generatePrompt(movieName string, searchQuery string) string {
+	prompt := fmt.Sprintf("This movie is called '%s'.", movieName)
+	if searchQuery != "" {
+		prompt += fmt.Sprintf(" The user is interested in '%s'.", searchQuery)
+	}
+	prompt += " Recommend 5 similar movies in HTML format. For each recommendation, include the title, release year, genres, director, and a short description if possible. Use <li> or <h2> for organization. If you have no recommendations, just give 5 movies that are popular in the same genre."
+	return prompt
 }
 
 func executeDgraphQuery(query string) (string, error) {
