@@ -8,11 +8,9 @@ import (
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models/openai"
 )
 
-// FetchMoviesWithPaginationAndSearch fetches movies with pagination and optional search
 func FetchMoviesWithPaginationAndSearch(page int, search string) (string, error) {
-	offset := (page - 1) * 10 // Calculate offset for pagination (10 movies per page)
+	offset := (page - 1) * 10
 
-	// Construct the Dgraph query
 	query := fmt.Sprintf(`
 	{
 		movies(func: has(initial_release_date), first: 10, offset: %d, orderdesc: initial_release_date) %s {
@@ -36,13 +34,11 @@ func FetchMoviesWithPaginationAndSearch(page int, search string) (string, error)
 	return executeDgraphQuery(query)
 }
 
-// buildSearchFilter constructs the @filter condition for the query
 func buildSearchFilter(search string) string {
 	if search == "" {
-		return "" // No filter if search is empty
+		return ""
 	}
 
-	// Use "anyoftext" for fuzzy search across multiple fields
 	return fmt.Sprintf(`@filter(
 		anyoftext(name@en, "%[1]s") OR
 		anyoftext(genre.name@en, "%[1]s") OR
@@ -51,7 +47,77 @@ func buildSearchFilter(search string) string {
 	)`, search)
 }
 
-// executeDgraphQuery sends the query to the Dgraph endpoint and returns the response
+func generateRecommendations(prompt string) (*string, error) {
+	model, err := models.GetModel[openai.ChatModel]("text-generator")
+	if err != nil {
+		return nil, fmt.Errorf("error fetching model: %w", err)
+	}
+
+	input, err := model.CreateInput(
+		openai.NewSystemMessage("You are a movie recommendation assistant. Provide concise suggestions."),
+		openai.NewUserMessage(prompt),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error creating model input: %w", err)
+	}
+
+	input.Temperature = 0.7
+
+	output, err := model.Invoke(input)
+	if err != nil {
+		return nil, fmt.Errorf("error invoking model: %w", err)
+	}
+
+	outputStr := strings.TrimSpace(output.Choices[0].Message.Content)
+	return &outputStr, nil
+}
+
+
+func FetchMovieDetailsAndRecommendations(uid string, searchQuery string) (string, error) {
+    query := fmt.Sprintf(`
+    {
+        movie(func: uid(%s)) {
+            uid
+            name@en
+            initial_release_date
+            genre {
+                name@en
+            }
+            starring {
+                performance.actor {
+                    name@en
+                }
+            }
+            directed_by: director.film {
+                name@en
+            }
+        }
+    }`, uid)
+
+    movieDetails, err := executeDgraphQuery(query)
+    if err != nil {
+        return "", fmt.Errorf("error fetching movie details: %w", err)
+    }
+
+	prompt := fmt.Sprintf(
+		"Here is what we know about the movie: %s. Based on this information and the user search query '%s', recommend 5 similar movies. Format the output strictly as a JSON array of objects. Each object must have the following keys: 'name' (movie name as a string), 'release_date' (year as a number), 'genre' (array of strings), and 'director' (string). Do not include any text, explanation, or context outside of this JSON array.",
+		movieDetails,
+		searchQuery,
+	)
+
+    recommendations, err := generateRecommendations(prompt)
+
+    if err != nil {
+        return "", fmt.Errorf("error generating recommendations: %w", err)
+    }
+
+    combinedResponse := fmt.Sprintf(`{
+        "movieDetails": %s,
+        "recommendations": %q
+    }`, movieDetails, *recommendations)
+    return combinedResponse, nil
+}
+
 func executeDgraphQuery(query string) (string, error) {
 	queryPayload := map[string]string{"query": query}
 
@@ -72,70 +138,3 @@ func executeDgraphQuery(query string) (string, error) {
 
 	return string(response.Body), nil
 }
-
-func FetchMovieById(uid string) (string, error) {
-	query := fmt.Sprintf(`
-	{
-		movie(func: uid(%s)) {
-			uid
-			name@en
-			initial_release_date
-			genre {
-				name@en
-			}
-			starring {
-				performance.actor {
-					uid
-					name@en
-				}
-			}
-		}
-	}`, uid)
-
-	return executeDgraphQuery(query)
-}
-
-func generateRecommendations(prompt string) (*string, error) {
-	// Fetch the model configured in modus.json
-	model, err := models.GetModel[openai.ChatModel]("text-generator")
-	if err != nil {
-		return nil, fmt.Errorf("error fetching model: %w", err)
-	}
-
-	// Create the input prompt for the model
-	input, err := model.CreateInput(
-		openai.NewSystemMessage("You are a movie recommendation assistant. Provide concise suggestions."),
-		openai.NewUserMessage(prompt),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error creating model input: %w", err)
-	}
-
-	// Set model parameters like temperature for creativity
-	input.Temperature = 0.7
-
-	// Invoke the model
-	output, err := model.Invoke(input)
-	if err != nil {
-		return nil, fmt.Errorf("error invoking model: %w", err)
-	}
-
-	// Extract and return the output
-	outputStr := strings.TrimSpace(output.Choices[0].Message.Content)
-	return &outputStr, nil
-}
-
-// Example function to call GenerateRecommendations
-func FetchRecommendations(movieName string, searchQuery string) {
-	prompt := fmt.Sprintf("Based on the movie '%s' and the search query '%s', recommend 5 similar movies based on what the movie is about, the genre, and the director. Recommend movies that the user is most likely to enjoy.", movieName, searchQuery)
-
-	// Generate recommendations
-	recommendations, err := generateRecommendations(prompt)
-	if err != nil {
-		fmt.Println("Error generating recommendations:", err)
-		return
-	}
-
-	return *recommendations, nil
-}
-

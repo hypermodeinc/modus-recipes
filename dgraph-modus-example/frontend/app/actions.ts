@@ -54,56 +54,34 @@ export async function fetchMovies(page: number = 1, search: string = "") {
   }
 }
 
-export async function fetchMovieById(uid: string) {
-  const graphqlQuery = `
-   query FetchMovieById($uid: String!) {
-      fetchMovieById(uid: $uid)
-    }
-  `;
-
-  const { data, error } = await fetchQuery({
-    query: graphqlQuery,
-    variables: { uid },
-  });
-
-  if (error) {
-    console.error("Error fetching movie details:", error);
-    return { movie: null };
-  }
-  try {
-    const parsedData = JSON.parse(data.fetchMovieById);
-    return { movie: parsedData.data.movie[0] || {} };
-  } catch (err) {
-    console.error("Error parsing response:", err);
-    return { movie: {} };
-  }
-}
-
-export async function fetchRecommendations(
-  movieName: string,
+export async function fetchMovieDetailsAndRecommendations(
+  uid: string,
   searchQuery: string = ""
 ) {
   const graphqlQuery = `
-    query($movieName: String!, $searchQuery: String!) {
-        fetchRecommendations(movieName: $movieName, searchQuery: $searchQuery)
-    }
+      query FetchMovieDetailsAndRecommendations($uid: String!, $searchQuery: String!) {
+        fetchMovieDetailsAndRecommendations(uid: $uid, searchQuery: $searchQuery)
+      }
     `;
 
   const { data, error } = await fetchQuery({
     query: graphqlQuery,
-    variables: { movieName, searchQuery },
+    variables: { uid, searchQuery },
   });
-  console.log(data);
 
   if (error) {
-    console.error("Error fetching recommendations:", error);
-    return { recommendations: [] };
+    console.error("Error fetching movie details and recommendations:", error);
+    return { movieDetails: null, recommendations: [] };
   }
 
   try {
-    return { recommendations: data?.generateRecommendations || "" };
+    const parsedData = JSON.parse(data.fetchMovieDetailsAndRecommendations);
+    return {
+      movieDetails: parsedData.movieDetails || {},
+      recommendations: parsedData.recommendations || [],
+    };
   } catch (err) {
-    console.error("Error parsing recommendations:", err);
-    return { recommendations: "" };
+    console.error("Error parsing response:", err);
+    return { movieDetails: null, recommendations: [] };
   }
 }
