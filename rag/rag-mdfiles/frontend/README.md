@@ -1,4 +1,4 @@
-Lightweight chat UI for demoing
+# Lightweight chat UI for demoing
 
 ![chat UI](image.png)
 
