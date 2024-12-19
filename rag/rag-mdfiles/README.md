@@ -1,6 +1,6 @@
-## RAG on mdfiles
+# RAG on mdfiles
 
-### References
+## References
 
 Modus is a framework for building AI powered API. In an Modus project, exported functions from
 `functions/assembly/index.ts` are immediately available as a scalable GraphQL API, allowing direct
@@ -12,7 +12,7 @@ a flexible vector search abstraction) and custom logic.
 For more information on functions, models, connections, collections and project configuration,
 consult [our documentation](https://docs.hypermode.com).
 
-### RAG use case
+## RAG use case
 
 This templates illustrates a type of Retrieval Augmented Generation (RAG) use case.
 
@@ -29,9 +29,9 @@ Additionally
 
 - getRagContext(question: string) : returns the extracted information used for the RAG context.
 
-### Design
+## Design
 
-#### Models
+### Models
 
 We are using
 
@@ -43,12 +43,12 @@ Login to Hypermode to get access to those model before running this project loca
 
 > npm install -g @hypermode/hyp-cli hyp login
 
-#### API
+### API
 
 > cd api-as modus dev It will compile the code and start Modus locally. Modus servers the API on
 > GraphQL endpoints http://localhost:8686/graphql
 
-#### Lexical Graph
+### Lexical Graph
 
 We are using Dgraph to store the hierarchy of chunks, index vector embeddings and search by
 similarity.
@@ -61,7 +61,7 @@ Create indexes in Dgraph
 
 > make schema-dql
 
-### Sample data
+## Sample data
 
 An example is provided in the `extras` folder using a python graphql client. It contains
 
@@ -70,7 +70,7 @@ An example is provided in the `extras` folder using a python graphql client. It 
 - a python script to submit some questions using `askTheDoc` query and to see the generated
   responses.
 
-#### load the sample data.
+### load the sample data
 
 - have python installed (3.11)
 - open a terminal window and access the `extras` directory.
@@ -84,7 +84,7 @@ Document info.md added successfully in namespace SOLAR. 44 chunks added.
 
 ```
 
-#### Testing
+### Testing
 
 Use the Chat Frontend
 
@@ -94,7 +94,7 @@ export DGRAPH_GRPC=http://localhost:8686/graphql
 pnpm i && pnpm run dev
 ```
 
-Access the UI at http://localhost:3000
+Access the UI at `http://localhost:3000`
 
 Example of queries "which planet has rings?", "What is the difference between Venus and Saturn?",
 
@@ -107,13 +107,13 @@ to 5.
 
 ### storage and embeddings
 
-Each Page is strored as a hierarchy of Sections and chuncks. Each chunk is added to Dgraph as a An
-embedding is computed for with every chunck. The embedding function uses the model `minilm`.
+Each Page is stored as a hierarchy of Sections and chunks. Each chunk is added to Dgraph as a An
+embedding is computed for with every chunk. The embedding function uses the model `minilm`.
 
 ### context generation
 
 When receiving a question, we compute a vector embedding and search for the most similar document
-chunk. We build a context by aggregating the content of the chunck, the parent section and all
+chunk. We build a context by aggregating the content of the chunk, the parent section and all
 section 'above' in the document. The idea here, is that a piece of text (chunk) in, let's say, a
 Header 3 section of a document is better understood when considering the text of the associated
 Header 2 and Header 1 sections of the markdown file. This `parent context` is a good tradeoff
@@ -132,19 +132,18 @@ Recursive query to get the page sections and chunks See in chunk_drgraph.ts
 
 To Visualize the documents in Ratel:
 
-```
+```graphql
 # showing the pages and the trees
-{
-   docs(func:type(DocPage)) @recurse(depth:6) {
-      label:DocPage.id
-      root:DocPage.root
-      name:ChunkSection.id
-      children:ChunkSection.children
-      chunks:ChunkSection.chunks
-      uid
-      Chunk.id
-      Chunk.content
-   }
 
+{
+  docs(func:type(DocPage)) @recurse(depth:6) {
+    label:DocPage.id
+    root:DocPage.root
+    name:ChunkSection.id
+    children:ChunkSection.children
+    chunks:ChunkSection.chunks
+    uid Chunk.id
+    Chunk.content
+  }
 }
 ```
