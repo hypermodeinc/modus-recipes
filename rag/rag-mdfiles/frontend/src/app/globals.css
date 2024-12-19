@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --dialog-height: 376px;
+    --dialog-width: 480px;
+    --dialog-inner-content-height: 248px;
+    --border-primary: theme(colors.neutral.100);
+    --border-secondary: theme(colors.neutral.200);
+    --border-fair: theme(colors.neutral.50);
+    --border-inverse: theme(colors.neutral.800);
+    --border-disabled: theme(colors.neutral.300);
+    --border-action: theme(colors.primary.500);
+    --border-error: theme(colors.error.500);
+    --border-warning: theme(colors.warning.500);
+    --border-success: theme(colors.success.500);
+    --border-info: theme(colors.info.500);
+
+    --state-hover: theme(colors.secondary.25);
+    --state-select: theme(colors.secondary.50);
+    --state-subnav-select: theme(colors.primary.500);
+
+    --surface-bg: theme(colors.neutral.800);
+    --surface-primary: theme(colors.neutral.0);
+    --surface-secondary: theme(colors.neutral.50);
+    --surface-inverse: theme(colors.neutral.900);
+    --surface-disabled: theme(colors.neutral.200);
+    --surface-action: theme(colors.primary.500);
+    --surface-bg-modal: theme(colors.neutral.0);
+    --surface-error: theme(colors.error.100);
+    --surface-warning: theme(colors.warning.100);
+    --surface-success: theme(colors.success.100);
+    --surface-info: theme(colors.info.100);
+
+    --text-primary: theme(colors.neutral.900);
+    --text-secondary: theme(colors.neutral.500);
+    --text-inverse: theme(colors.neutral.0);
+    --text-disabled: theme(colors.neutral.400);
+    --text-action: theme(colors.primary.600);
+    --text-button-primary: theme(colors.neutral.0);
+    --text-button-secondary: theme(colors.primary.600);
+    --text-link: theme(colors.secondary.600);
+    --text-error: theme(colors.error.500);
+    --text-warning: theme(colors.warning.500);
+    --text-success: theme(colors.success.500);
+    --text-info: theme(colors.info.500);
+
+    --icon-primary: theme(colors.neutral.800);
+    --icon-secondary: theme(colors.neutral.600);
+    --icon-tertiary: theme(colors.neutral.400);
+    --icon-inverse: theme(colors.neutral.0);
+    --icon-button-primary: theme(colors.neutral.0);
+    --icon-disabled: theme(colors.neutral.400);
+    --icon-action: theme(colors.primary.500);
+    --icon-error: theme(colors.error.500);
+    --icon-warning: theme(colors.warning.500);
+    --icon-success: theme(colors.success.500);
+    --icon-info: theme(colors.info.500);
+
+    --button-surface-primary: theme(colors.primary.500);
+    --button-surface-secondary: theme(colors.neutral.0);
+    --button-border-primary: theme(colors.primary.500);
+    --button-border-secondary: theme(colors.neutral.0);
+    --button-divider-primary: theme(colors.primary.400);
+    --button-divider-secondary: theme(colors.primary.200);
+    --button-surface-disabled: theme(colors.neutral.200);
+    --button-divider-disabled: theme(colors.neutral.300);
+    --button-border-error: theme(colors.error.500);
+    --button-text-error: theme(colors.error.500);
+    --button-icon-error: theme(colors.error.500);
+
+    --modal-surface-header-primary: theme(colors.neutral.0);
+    --modal-surface-footer-primary: theme(colors.neutral.50);
+    --modal-surface-body-primary: theme(colors.neutral.0);
+    --modal-surface-border-primary: theme(colors.neutral.200);
+
+    --nav-surface-primary: theme(colors.neutral.900);
+    --nav-surface-secondary: theme(colors.neutral.700);
+    --nav-logo: theme(colors.neutral.0);
+    --nav-border: theme(colors.neutral.600);
+    --nav-text: theme(colors.neutral.0);
+    --nav-icon: theme(colors.neutral.0);
+    --nav-icon-secondary: theme(colors.neutral.300);
+    --nav-icon-on: theme(colors.neutral.0);
+    --nav-icon-off: theme(colors.secondary.50);
+    --nav-bg-on: theme(colors.primary.500);
+
+    --control-surface-primary: theme(colors.neutral.0);
+    --control-surface-secondary: theme(colors.neutral.200);
+    --control-surface-active: theme(colors.primary.500);
+    --control-surface-disabled: theme(colors.neutral.200);
+    --control-border-primary: theme(colors.neutral.100);
+    --control-border-disabled: theme(colors.neutral.300);
+
+    --form-surface-primary: theme(colors.neutral.0);
+    --form-surface-secondary: theme(colors.neutral.50);
+    --form-border-primary: theme(colors.neutral.100);
+    --form-surface-disabled: theme(colors.neutral.200);
+    --form-border-disabled: theme(colors.neutral.300);
+    --navigation-height: 72px;
+  }
+
+  body {
+    margin: 0;
+    @apply bg-surface-bg text-text-primary font-inter;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code {
+    @apply font-mono;
+  }
+}
