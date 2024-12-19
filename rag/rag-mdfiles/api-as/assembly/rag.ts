@@ -51,7 +51,7 @@ export function getMarkdownDocument(id: string): string {
 export function addMarkdownDocument(
   id: string,
   mdcontent: string,
-  max_word: i32 = 500,
+  max_word: i32 = 200,
   namespace: string = "",
 ): Chunk[] {
   deleteMarkdownDocument(id)

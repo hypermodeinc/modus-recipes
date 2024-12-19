@@ -76,17 +76,22 @@ export default function ChatInterface() {
             content: response.data.chat.content,
             role: "assistant",
           },
-          {
-            id: prev.length + 2,
-            content: "From " + response.data.chat.context.sources[0].docid,
-            role: "assistant",
-          },
-          {
-            id: prev.length + 3,
-            content: response.data.chat.context.sources[0].text,
-            role: "assistant",
-          },
         ])
+        for (let i = 0; i < response.data.chat.context.sources.length; i++) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: prev.length + 1,
+              content: "From " + response.data.chat.context.sources[i].docid,
+              role: "assistant",
+            },
+            {
+              id: prev.length + 2,
+              content: response.data.chat.context.sources[i].text,
+              role: "assistant",
+            },
+          ])
+        }
       }
       setLoading((prev) => false)
     }
