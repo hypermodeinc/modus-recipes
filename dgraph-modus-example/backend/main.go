@@ -40,7 +40,7 @@ func FetchMoviesWithPaginationAndSearch(page int, search string) (string, error)
 			}
 		}
 	}`, offset, buildSearchFilter(search))
-fmt.Println(query)
+
 	return executeDgraphQuery(query)
 }
 
