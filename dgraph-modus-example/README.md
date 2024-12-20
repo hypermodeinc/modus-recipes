@@ -1,15 +1,22 @@
 # Movie Recommendation App
 
-This project demonstrates the power of **Modus** and **Dgraph** by integrating a graph database with a large language model (LLM) to provide AI-driven movie recommendations. The app consists of a backend (powered by Modus and Dgraph) and a frontend (built with Next.js and tailwind).
+This project demonstrates the power of **Modus** and **Dgraph** by integrating a graph database with
+a large language model (LLM) to provide AI-driven movie recommendations. The app consists of a
+backend (powered by Modus and Dgraph) and a frontend (built with Next.js and tailwind).
 
 ## Why Use Modus with Dgraph?
 
-**Modus** simplifies the integration of internal data (from sources like Dgraph) with cutting-edge LLMs. Here's why this combination is powerful:
+**Modus** simplifies the integration of internal data (from sources like Dgraph) with cutting-edge
+LLMs. Here's why this combination is powerful:
 
-- **Rich Data Queries**: Dgraph enables complex queries across interconnected datasets like movies, genres, actors, and directors. This makes it ideal for graph-based recommendations.
-- **Seamless AI Integration**: Modus abstracts the complexity of using LLMs, allowing you to feed internal data into models and retrieve actionable insights tailored to your data.
-- **Rapid Prototyping**: With Modus, you can quickly build and test serverless functions that combine graph-based querying and AI recommendations.
-- **Customizability**: Dynamically construct prompts for LLMs using Dgraph's query results to generate personalized outputs, such as movie recommendations.
+- **Rich Data Queries**: Dgraph enables complex queries across interconnected datasets like movies,
+  genres, actors, and directors. This makes it ideal for graph-based recommendations.
+- **Seamless AI Integration**: Modus abstracts the complexity of using LLMs, allowing you to feed
+  internal data into models and retrieve actionable insights tailored to your data.
+- **Rapid Prototyping**: With Modus, you can quickly build and test serverless functions that
+  combine graph-based querying and AI recommendations.
+- **Customizability**: Dynamically construct prompts for LLMs using Dgraph's query results to
+  generate personalized outputs, such as movie recommendations.
 
 ---
 
@@ -19,14 +26,18 @@ The backend is written in Go using **Modus** and **Dgraph**.
 
 ### Features
 
-- Functions powered by Modus are integrated with a read-only Dgraph database and an LLM from Hugging Face.
+- Functions powered by Modus are integrated with a read-only Dgraph database and an LLM from Hugging
+  Face.
 - Provides a GraphQL endpoint for querying data locally.
-- Demonstrates how to use Modus to create powerful, serverless APIs that leverage Dgraph's capabilities and LLM-driven insights.
+- Demonstrates how to use Modus to create powerful, serverless APIs that leverage Dgraph's
+  capabilities and LLM-driven insights.
 
 ### Prerequisites
 
-- Install **Modus CLI**: Follow the [Modus installation guide](https://docs.hypermode.com/modus/installation).
-- Ensure **Dgraph** is available or connected to the backend (the project uses a read-only Dgraph database).
+- Install **Modus CLI**: Follow the
+  [Modus installation guide](https://docs.hypermode.com/modus/installation).
+- Ensure **Dgraph** is available or connected to the backend (the project uses a read-only Dgraph
+  database).
 
 ### Running Locally
 
@@ -119,10 +130,12 @@ The frontend is built with **Next.js** and **Tailwind**.
 
 ## Learning More
 
-- Modus Documentation: [https://docs.hypermode.com/modus/overview](https://docs.hypermode.com/modus/overview)
+- Modus Documentation:
+  [https://docs.hypermode.com/modus/overview](https://docs.hypermode.com/modus/overview)
 - Dgraph Documentation: [https://dgraph.io/docs](https://dgraph.io/docs)
 - Next.js Documentation: [https://nextjs.org/docs](https://nextjs.org/docs)
 
 ---
 
-This project is an excellent starting point for understanding how to combine the strengths of Dgraph, Modus, and LLMs to create powerful, data-driven applications. 🚀
+This project is an excellent starting point for understanding how to combine the strengths of
+Dgraph, Modus, and LLMs to create powerful, data-driven applications. 🚀

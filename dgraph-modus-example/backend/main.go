@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hypermodeinc/modus/sdk/go/pkg/http" // Modus HTTP library for making API requests
-	"github.com/hypermodeinc/modus/sdk/go/pkg/models" // Modus models library for AI models
+	"github.com/hypermodeinc/modus/sdk/go/pkg/http"          // Modus HTTP library for making API requests
+	"github.com/hypermodeinc/modus/sdk/go/pkg/models"        // Modus models library for AI models
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models/openai" // Modus OpenAI model integration
 )
 
@@ -176,7 +176,6 @@ func generatePrompt(movieName string, searchQuery string) string {
 	prompt += " Recommend 5 similar movies in HTML format. For each recommendation, include the title, release year, genres, director, and a short description if possible. Use <li> or <h2> for organization. If you have no recommendations, just give 5 movies that are popular in the same genre."
 	return prompt
 }
-
 
 // executeDgraphQuery performs the actual query against the Dgraph database
 func executeDgraphQuery(query string) (string, error) {
