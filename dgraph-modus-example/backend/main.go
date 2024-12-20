@@ -21,8 +21,7 @@ type MovieDetails struct {
 func FetchMoviesWithPaginationAndSearch(page int, search string) (string, error) {
 	offset := (page - 1) * 10 // Calculate offset for pagination (10 movies per page)
 
-	// The Dgraph query retrieves movies with pagination, sorting by release date in descending order.
-	// Dgraph's graph structure allows linking genres, actors, and directors, enabling a rich and connected query.
+	// Build the query dynamically with pagination, sorting, and optional search filtering
 	query := fmt.Sprintf(`{
 		movies(func: has(initial_release_date), first: 10, offset: %d, orderdesc: initial_release_date) %s {
 			uid
@@ -41,18 +40,17 @@ func FetchMoviesWithPaginationAndSearch(page int, search string) (string, error)
 			}
 		}
 	}`, offset, buildSearchFilter(search))
-
+fmt.Println(query)
 	return executeDgraphQuery(query)
 }
 
-// buildSearchFilter generates a search filter to include in the Dgraph query
+
 func buildSearchFilter(search string) string {
 	if search == "" {
 		return ""
 	}
 
-	// The @filter clause matches the search term against movie titles, genres, actor names, and director names.
-	// This demonstrates Dgraph's flexibility in querying multiple fields simultaneously.
+	// Generate a Dgraph filter that matches the search term against relevant fields
 	return fmt.Sprintf(`@filter(
 		anyoftext(name@en, "%[1]s") OR
 		anyoftext(genre.name@en, "%[1]s") OR
@@ -60,6 +58,7 @@ func buildSearchFilter(search string) string {
 		anyoftext(directed_by.name@en, "%[1]s")
 	)`, search)
 }
+
 
 // generateRecommendations interacts with Modus to generate AI-driven movie recommendations
 // Modus simplifies integrating internal data with large language models (LLMs),
