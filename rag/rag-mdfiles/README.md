@@ -41,12 +41,19 @@ We are using
 
 Login to Hypermode to get access to those model before running this project locally.
 
+```
 > npm install -g @hypermode/hyp-cli hyp login
+```
 
 ### API
 
-> cd api-as modus dev It will compile the code and start Modus locally. Modus servers the API on
-> GraphQL endpoints http://localhost:8686/graphql
+```sh
+> cd api-as
+> modus dev
+```
+
+Modus compiles the code and starts Modus WASM runtime locally. Modus servers the API on GraphQL
+endpoints http://localhost:8686/graphql
 
 ### Lexical Graph
 
@@ -55,11 +62,16 @@ similarity.
 
 To start a local instance:
 
-> cd extras make up
+```sh
+> cd extras
+> make up
+```
 
 Create indexes in Dgraph
 
+```sh
 > make schema-dql
+```
 
 ## Sample data
 
