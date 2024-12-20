@@ -4,6 +4,7 @@ import { models } from "@hypermode/modus-sdk-as";
 import { EmbeddingsModel } from "@hypermode/modus-sdk-as/models/experimental/embeddings";
 
 import { Movie, MovieResult } from "./classes";
+import { JSON } from "json-as";
 
 // Should match the name of the Neo4j connection declared in modus.json
 const hostName = "neo4j";
@@ -97,7 +98,10 @@ export function findSimilarMovies(title: string, num: i16): MovieResult[] {
   WHERE m.embedding IS NOT NULL
   CALL db.index.vector.queryNodes('movie-index', $num, m.embedding)
   YIELD node AS searchResult, score
-  RETURN searchResult.title AS title, searchResult.plot AS plot, searchResult.imdbRating AS rating, searchResult.imdbId AS id, score
+  RETURN {
+    movie: {title: searchResult.title, plot: searchResult.plot, rating: searchResult.imdbRating, id: searchResult.imdbId},
+    score: score
+  } AS movieResult
   `;
 
   const result = neo4j.executeQuery(hostName, searchQuery, vars);
@@ -105,14 +109,9 @@ export function findSimilarMovies(title: string, num: i16): MovieResult[] {
   const movieResults: MovieResult[] = [];
 
   for (let i = 0; i < result.Records.length; i++) {
-    const record = result.Records[i];
-    const plot = record.getValue<string>("plot");
-    const rating = record.getValue<f32>("rating");
-    const title = record.getValue<string>("title");
-    const id = record.getValue<string>("id");
-    const score = record.getValue<f32>("score");
-    const movie = new Movie(id, title, plot, rating);
-    movieResults.push(new MovieResult(movie, score));
+    const res = result.Records[i].get("movieResult");
+    const searchResult = JSON.parse<MovieResult>(res);
+    movieResults.push(searchResult);
   }
 
   return movieResults;
