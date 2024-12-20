@@ -39,35 +39,34 @@ The backend is written in Go using **Modus** and **Dgraph**.
 - Ensure **Dgraph** is available or connected to the backend (the project uses a read-only Dgraph
   database).
 
-### Running Locally
+### Running Backend Locally
 
-1.  Move into the `backend` directory:
+Move into the `backend` directory:
 
     ```bash
     cd backend
     ```
 
-2.  Install dependencies (if required):
+Install dependencies (if required):
 
     ```bash
     go mod tidy
     ```
 
-3.  Start the backend using Modus:
+Start the backend using Modus:
 
-        ```bash
-        modus dev
-        ```
+    ```bash
+    modus dev
+    ```
 
-4.  Access the local endpoint:
+Access the local endpoint:
 
-    - GraphQL API Explorer: http://localhost:8686/graphql
+    - GraphQL API Explorer: `http://localhost:8686/graphql`
     - Query APIs or explore the auto-generated schema directly in the explorer.
 
-5.  Key Notes
-    - Functions are defined in Go and connected to a read-only Dgraph database.
-    - The backend integrates with an LLM to generate movie recommendations dynamically.
-    - Check the Modus logs to see which endpoints and functions are exposed.
+Key Notes - Functions are defined in Go and connected to a read-only Dgraph database. - The backend
+integrates with an LLM to generate movie recommendations dynamically. - Check the Modus logs to see
+which endpoints and functions are exposed.
 
 ---
 
@@ -75,35 +74,33 @@ The backend is written in Go using **Modus** and **Dgraph**.
 
 The frontend is built with **Next.js** and **Tailwind**.
 
-### Features
+### Frontend Features
 
-    - Search for movies by title or related fields.
-    - View movie details, including release year, genres, and starring actors.
-    - Get AI-driven recommendations for similar movies.
+- Search for movies by title or related fields.
+- View movie details, including release year, genres, and starring actors.
+- Get AI-driven recommendations for similar movies.
 
-### Running Locally
+### Running Frontend Locally
 
-1.  Move into the frontend directory:
+Move into the frontend directory:
 
     ```bash
     cd frontend
     ```
 
-2.  Install dependencies:
+Install dependencies:
 
     ```bash
     npm install
     ```
 
-3.  Start the development server:
+Start the development server:
 
-    ````bash
+    ```bash
     npm run dev
     ```
 
-    ````
-
-4.  Open the app in your browser: http://localhost:3000.
+4.  Open the app in your browser: `http://localhost:3000`.
 
 ### Important
 
