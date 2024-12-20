@@ -5,7 +5,7 @@ import Link from "next/link"
 function Loading() {
   return (
     <div className="flex items-center justify-center">
-      <p className="text-lg text-white/60 animate-pulse">
+      <p className="text-lg text-grey/60 animate-pulse">
         Fetching movie details and personalized recommendations from our AI system, please be
         patient...
       </p>
