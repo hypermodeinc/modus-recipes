@@ -98,6 +98,35 @@ Access the UI at `http://localhost:3000`
 
 Example of queries "which planet has rings?", "What is the difference between Venus and Saturn?",
 
+## Next
+
+You may want to experiment different models. Example, using OpenAI gpt-4o In `modus.json` change the
+text-generator
+
+```
+ "text-generator": {
+      "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "connection": "hypermode",
+      "provider": "hugging-face"
+    },
+```
+
+update the configuration
+
+```
+ "text-generator": {
+      "sourceModel": "gpt-4o",
+      "connection": "openai",
+      "path": "v1/chat/completions"
+    },
+```
+
+add a file `.env.dev.local` in the api-as directory to set your OpeanAI API key
+
+```
+MODUS_OPENAI_API_KEY="sk-...."
+```
+
 ## Design notes
 
 ### md file chunking
