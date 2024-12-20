@@ -165,7 +165,7 @@ export function splitMarkdown(
         }
         console.log(`pop to ${current_section.id} level ${current_section.level}`)
       }
-      const index_in_section = current_section.children!.length
+      const index_in_section = current_section.children.length
       const section = <ChunkSection>{
         id: `${current_section.id} > L${level}_${index_in_section}`,
         docid: id,
@@ -173,7 +173,7 @@ export function splitMarkdown(
         order: index_in_section,
       }
       section.chunks = []
-      current_section.children!.push(section)
+      current_section.children.push(section)
       current_section = section
       section_path.push(section)
       console.log(`new section ${section.id}`)

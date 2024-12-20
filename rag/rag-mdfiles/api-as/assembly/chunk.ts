@@ -91,7 +91,7 @@ export function getFlatChunks(section: ChunkSection): Chunk[] {
   while (stack.length > 0) {
     const currentSection = stack.pop()
     // If there are children, push them onto the stack
-    for (let i = 0; i < currentSection.children!.length; i++) {
+    for (let i = 0; i < currentSection.children.length; i++) {
       stack.push(currentSection.children[currentSection.children.length - 1 - i])
     }
     // Add the chunks of the current section to the flat list
