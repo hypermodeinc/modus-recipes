@@ -7,14 +7,17 @@ type FetchQueryProps = {
 
 const fetchQuery = async ({ query, variables }: FetchQueryProps) => {
   try {
-    const res = await fetch(process.env.HYPERMODE_API_ENDPOINT as string, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const res = await fetch(
+      process.env.HYPERMODE_API_ENDPOINT || ("http://localhost:8686/graphql" as string),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query, variables }),
+        cache: "no-store",
       },
-      body: JSON.stringify({ query, variables }),
-      cache: "no-store",
-    })
+    )
 
     if (!res.ok) throw new Error(res.statusText)
 
