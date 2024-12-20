@@ -31,8 +31,8 @@ jobs:
       - name: Search for go.mod and package.json files
         id: get-dirs
         run:
-          echo "dirs=$(find . \( -name 'go.mod' -o -name 'package.json' \) -exec dirname {} \; | sed
-          's|^\./||' | jq -Rsc 'split("\n")[:-1]')" >> ${GITHUB_OUTPUT}
+          echo "dirs=$(find . \( -name 'go.mod' -o -name 'package.json' -not -path '*/frontend/*' \)
+          -exec dirname {} \; | sed 's|^\./||' | jq -Rsc 'split("\n")[:-1]')" >> ${GITHUB_OUTPUT}
 
   build:
     needs: get-dirs
