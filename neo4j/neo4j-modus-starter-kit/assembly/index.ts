@@ -47,9 +47,9 @@ export function saveEmbeddingsToNeo4j(): Movie[] {
   const query = `
   MATCH (m:Movie) 
   WHERE m.imdbRating > 6.0
-  RETURN m.imdbRating AS rating, m.title AS title, m.plot AS plot, m.imdbId AS id ORDER BY m.imdbRating DESC 
-  LIMIT 100
-  `;
+  RETURN m.imdbRating AS rating, m.title AS title, m.plot AS plot, m.imdbId AS id
+  ORDER BY m.imdbRating DESC
+  LIMIT 100`;
 
   const result = neo4j.executeQuery(hostName, query);
 
