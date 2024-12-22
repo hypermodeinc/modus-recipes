@@ -45,6 +45,10 @@ export function getEmbeddingsForMovies(movies: Movie[]): Movie[] {
  * Update movie nodes in Neo4j with generated embeddings and create a vector index
  */
 export function saveEmbeddingsToNeo4j(): Movie[] {
+  // TODO: find all movies without embeddings
+  // TODO: batch into groups of 100 and generate embeddings
+  // TODO: update neo4j in batches
+
   const query = `
   MATCH (m:Movie) 
   WHERE m.imdbRating > 6.0
@@ -98,21 +102,22 @@ export function findSimilarMovies(title: string, num: i16): MovieResult[] {
   WHERE m.embedding IS NOT NULL
   CALL db.index.vector.queryNodes('movie-index', $num, m.embedding)
   YIELD node AS searchResult, score
-  RETURN {
-    movie: {title: searchResult.title, plot: searchResult.plot, rating: searchResult.imdbRating, id: searchResult.imdbId},
+  RETURN COLLECT({
+    movie: {
+      title: searchResult.title,
+      plot: searchResult.plot,
+      rating: searchResult.imdbRating,
+      id: searchResult.imdbId
+    },
     score: score
-  } AS movieResult
+    }) AS movieResults
   `;
 
   const result = neo4j.executeQuery(hostName, searchQuery, vars);
 
-  const movieResults: MovieResult[] = [];
-
-  for (let i = 0; i < result.Records.length; i++) {
-    const res = result.Records[i].get("movieResult");
-    const searchResult = JSON.parse<MovieResult>(res);
-    movieResults.push(searchResult);
-  }
+  const movieResults: MovieResult[] = JSON.parse<MovieResult[]>(
+    result.Records[0].get("movieResults"),
+  );
 
   return movieResults;
 }
