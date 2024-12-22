@@ -109,7 +109,7 @@ type SearchResult struct {
 }
 
 // UnmarshalJSON implements custom unmarshaling for SearchResult
-func (sr *SearchResult) UnmarshalJSON(data []byte) error {
+func (sr *SearchResult) unmarshalJSON(data []byte) error {
     // First create a map to hold all JSON data
     var rawMap map[string]interface{}
     if err := json.Unmarshal(data, &rawMap); err != nil {
