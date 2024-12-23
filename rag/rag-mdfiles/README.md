@@ -41,7 +41,7 @@ We are using
 
 Login to Hypermode to get access to those model before running this project locally.
 
-```
+```sh
 > npm install -g @hypermode/hyp-cli hyp login
 ```
 
@@ -115,7 +115,7 @@ Example of queries "which planet has rings?", "What is the difference between Ve
 You may want to experiment different models. Example, using OpenAI gpt-4o In `modus.json` change the
 text-generator
 
-```
+```json
  "text-generator": {
       "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
       "connection": "hypermode",
@@ -125,7 +125,7 @@ text-generator
 
 update the configuration
 
-```
+```json
  "text-generator": {
       "sourceModel": "gpt-4o",
       "connection": "openai",
@@ -135,7 +135,7 @@ update the configuration
 
 add a file `.env.dev.local` in the api-as directory to set your OpeanAI API key
 
-```
+```sh
 MODUS_OPENAI_API_KEY="sk-...."
 ```
 
