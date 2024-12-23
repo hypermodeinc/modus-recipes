@@ -44,7 +44,6 @@ func FetchMoviesWithPaginationAndSearch(page int, search string) (string, error)
 	return executeDgraphQuery(query)
 }
 
-
 func buildSearchFilter(search string) string {
 	if search == "" {
 		return ""
@@ -58,7 +57,6 @@ func buildSearchFilter(search string) string {
 		anyoftext(directed_by.name@en, "%[1]s")
 	)`, search)
 }
-
 
 // generateRecommendations interacts with Modus to generate AI-driven movie recommendations
 // Modus simplifies integrating internal data with large language models (LLMs),
