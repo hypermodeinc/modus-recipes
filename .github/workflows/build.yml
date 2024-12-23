@@ -28,12 +28,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Search for go.mod and package.json files
+      - name: Search for modus.json files
         id: get-dirs
-        run:
-          echo "dirs=$(find . \( -name 'go.mod' -o -name 'package.json' -not -path '*/frontend/*' \)
-          -exec dirname {} \; | sed 's|^\./||' | jq -Rsc 'split("\n")[:-1]')" >> ${GITHUB_OUTPUT}
-
+        run: |
+          echo "dirs=$(find . -name 'modus.json' -exec dirname {} \; | sed 's|^\./||' | jq -Rsc 'split("\n")[:-1]')" >> ${GITHUB_OUTPUT}
   build:
     needs: get-dirs
     name: build
