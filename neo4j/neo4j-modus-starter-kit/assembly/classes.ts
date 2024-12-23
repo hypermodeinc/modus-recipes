@@ -15,6 +15,7 @@ export class Movie {
     this.title = title;
     this.plot = plot;
     this.rating = rating;
+    this.embedding = [];
   }
 }
 

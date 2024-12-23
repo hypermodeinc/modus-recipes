@@ -44,14 +44,10 @@ export function getEmbeddingsForMovies(movies: Movie[]): Movie[] {
  *
  * Update movie nodes in Neo4j with generated embeddings and create a vector index
  */
-export function saveEmbeddingsToNeo4j(): Movie[] {
-  // TODO: find all movies without embeddings
-  // TODO: batch into groups of 100 and generate embeddings
-  // TODO: update neo4j in batches
-
+export function saveEmbeddingsToNeo4j(): i32 {
   const query = `
   MATCH (m:Movie) 
-  WHERE m.imdbRating > 6.0
+  WHERE m.embedding IS NULL AND m.plot IS NOT NULL AND m.imdbRating > 0.0
   RETURN m.imdbRating AS rating, m.title AS title, m.plot AS plot, m.imdbId AS id
   ORDER BY m.imdbRating DESC
   LIMIT 100`;
@@ -69,24 +65,38 @@ export function saveEmbeddingsToNeo4j(): Movie[] {
     movies.push(new Movie(id, title, plot, rating));
   }
 
-  const embeddedMovies = getEmbeddingsForMovies(movies);
+  // Batch calls to embedding model in chunks of 100
 
-  const vars = new neo4j.Variables();
-  vars.set("movies", embeddedMovies);
+  const movieChunks: Movie[][] = [];
+  for (let i = 0; i < movies.length; i += 100) {
+    movieChunks.push(movies.slice(i, i + 100));
+  }
 
-  const updateQuery = `
+  for (let i = 0, len = movieChunks.length; i < len; i++) {
+    let movieChunk = movieChunks[i];
+
+    // Generate embeddings for a chunk of movies
+    const embeddedMovies = getEmbeddingsForMovies(movieChunk);
+
+    // Update the Movie.embedding property in Neo4j with the new embedding values
+    const vars = new neo4j.Variables();
+    vars.set("movies", embeddedMovies);
+
+    const updateQuery = `
   UNWIND $movies AS embeddedMovie
   MATCH (m:Movie {imdbId: embeddedMovie.id})
   SET m.embedding = embeddedMovie.embedding
   `;
 
-  const updateResult = neo4j.executeQuery(hostName, updateQuery, vars);
+    const updateResult = neo4j.executeQuery(hostName, updateQuery, vars);
+  }
 
+  // Create vector index in Neo4j to enable vector search on Movie embeddings
   const indexQuery =
     "CREATE VECTOR INDEX `movie-index` IF NOT EXISTS FOR (m:Movie) ON (m.embedding)";
 
   const indexResult = neo4j.executeQuery(hostName, indexQuery);
-  return embeddedMovies;
+  return movies.length;
 }
 
 /**
@@ -102,6 +112,7 @@ export function findSimilarMovies(title: string, num: i16): MovieResult[] {
   WHERE m.embedding IS NOT NULL
   CALL db.index.vector.queryNodes('movie-index', $num, m.embedding)
   YIELD node AS searchResult, score
+  WITH * WHERE searchResult <> m
   RETURN COLLECT({
     movie: {
       title: searchResult.title,
