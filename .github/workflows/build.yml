@@ -32,7 +32,6 @@ jobs:
         id: get-dirs
         run: |
           echo "dirs=$(find . -name 'modus.json' -exec dirname {} \; | sed 's|^\./||' | jq -Rsc 'split("\n")[:-1]')" >> ${GITHUB_OUTPUT}
-
   build:
     needs: get-dirs
     name: build
