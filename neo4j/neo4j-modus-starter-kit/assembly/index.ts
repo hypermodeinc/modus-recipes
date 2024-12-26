@@ -1,22 +1,22 @@
-import { neo4j } from "@hypermode/modus-sdk-as";
+import { neo4j } from "@hypermode/modus-sdk-as"
 
-import { models } from "@hypermode/modus-sdk-as";
-import { EmbeddingsModel } from "@hypermode/modus-sdk-as/models/experimental/embeddings";
+import { models } from "@hypermode/modus-sdk-as"
+import { EmbeddingsModel } from "@hypermode/modus-sdk-as/models/experimental/embeddings"
 
-import { Movie, MovieResult } from "./classes";
-import { JSON } from "json-as";
+import { Movie, MovieResult } from "./classes"
+import { JSON } from "json-as"
 
 // Should match the name of the Neo4j connection declared in modus.json
-const hostName = "neo4j";
+const hostName = "neo4j"
 
 /**
  * Create embeddings using the minilm model for an array of texts
  */
 export function generateEmbeddings(texts: string[]): f32[][] {
-  const model = models.getModel<EmbeddingsModel>("minilm");
-  const input = model.createInput(texts);
-  const output = model.invoke(input);
-  return output.predictions;
+  const model = models.getModel<EmbeddingsModel>("minilm")
+  const input = model.createInput(texts)
+  const output = model.invoke(input)
+  return output.predictions
 }
 
 /**
@@ -25,19 +25,19 @@ export function generateEmbeddings(texts: string[]): f32[][] {
  *
  */
 export function getEmbeddingsForMovies(movies: Movie[]): Movie[] {
-  const texts: string[] = [];
+  const texts: string[] = []
 
   for (let i = 0; i < movies.length; i++) {
-    texts.push(movies[i].plot);
+    texts.push(movies[i].plot)
   }
 
-  const embeddings = generateEmbeddings(texts);
+  const embeddings = generateEmbeddings(texts)
 
   for (let i = 0; i < movies.length; i++) {
-    movies[i].embedding = embeddings[i];
+    movies[i].embedding = embeddings[i]
   }
 
-  return movies;
+  return movies
 }
 
 /**
@@ -50,62 +50,62 @@ export function saveEmbeddingsToNeo4j(): i32 {
   WHERE m.embedding IS NULL AND m.plot IS NOT NULL AND m.imdbRating > 0.0
   RETURN m.imdbRating AS rating, m.title AS title, m.plot AS plot, m.imdbId AS id
   ORDER BY m.imdbRating DESC
-  LIMIT 100`;
+  LIMIT 100`
 
-  const result = neo4j.executeQuery(hostName, query);
+  const result = neo4j.executeQuery(hostName, query)
 
-  const movies: Movie[] = [];
+  const movies: Movie[] = []
 
   for (let i = 0; i < result.Records.length; i++) {
-    const record = result.Records[i];
-    const plot = record.getValue<string>("plot");
-    const rating = record.getValue<f32>("rating");
-    const title = record.getValue<string>("title");
-    const id = record.getValue<string>("id");
-    movies.push(new Movie(id, title, plot, rating));
+    const record = result.Records[i]
+    const plot = record.getValue<string>("plot")
+    const rating = record.getValue<f32>("rating")
+    const title = record.getValue<string>("title")
+    const id = record.getValue<string>("id")
+    movies.push(new Movie(id, title, plot, rating))
   }
 
   // Batch calls to embedding model in chunks of 100
 
-  const movieChunks: Movie[][] = [];
+  const movieChunks: Movie[][] = []
   for (let i = 0; i < movies.length; i += 100) {
-    movieChunks.push(movies.slice(i, i + 100));
+    movieChunks.push(movies.slice(i, i + 100))
   }
 
   for (let i = 0, len = movieChunks.length; i < len; i++) {
-    let movieChunk = movieChunks[i];
+    let movieChunk = movieChunks[i]
 
     // Generate embeddings for a chunk of movies
-    const embeddedMovies = getEmbeddingsForMovies(movieChunk);
+    const embeddedMovies = getEmbeddingsForMovies(movieChunk)
 
     // Update the Movie.embedding property in Neo4j with the new embedding values
-    const vars = new neo4j.Variables();
-    vars.set("movies", embeddedMovies);
+    const vars = new neo4j.Variables()
+    vars.set("movies", embeddedMovies)
 
     const updateQuery = `
   UNWIND $movies AS embeddedMovie
   MATCH (m:Movie {imdbId: embeddedMovie.id})
   SET m.embedding = embeddedMovie.embedding
-  `;
+  `
 
-    const updateResult = neo4j.executeQuery(hostName, updateQuery, vars);
+    const updateResult = neo4j.executeQuery(hostName, updateQuery, vars)
   }
 
   // Create vector index in Neo4j to enable vector search on Movie embeddings
   const indexQuery =
-    "CREATE VECTOR INDEX `movie-index` IF NOT EXISTS FOR (m:Movie) ON (m.embedding)";
+    "CREATE VECTOR INDEX `movie-index` IF NOT EXISTS FOR (m:Movie) ON (m.embedding)"
 
-  const indexResult = neo4j.executeQuery(hostName, indexQuery);
-  return movies.length;
+  const indexResult = neo4j.executeQuery(hostName, indexQuery)
+  return movies.length
 }
 
 /**
  * Given a movie title, find similar movies using vector search based on the movie embeddings
  */
 export function findSimilarMovies(title: string, num: i16): MovieResult[] {
-  const vars = new neo4j.Variables();
-  vars.set("title", title);
-  vars.set("num", num);
+  const vars = new neo4j.Variables()
+  vars.set("title", title)
+  vars.set("num", num)
 
   const searchQuery = `
   MATCH (m:Movie {title: $title})
@@ -122,13 +122,13 @@ export function findSimilarMovies(title: string, num: i16): MovieResult[] {
     },
     score: score
     }) AS movieResults
-  `;
+  `
 
-  const result = neo4j.executeQuery(hostName, searchQuery, vars);
+  const result = neo4j.executeQuery(hostName, searchQuery, vars)
 
   const movieResults: MovieResult[] = JSON.parse<MovieResult[]>(
     result.Records[0].get("movieResults"),
-  );
+  )
 
-  return movieResults;
+  return movieResults
 }

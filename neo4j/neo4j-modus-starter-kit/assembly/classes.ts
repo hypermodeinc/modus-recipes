@@ -4,18 +4,18 @@
  * A Movie
  */
 export class Movie {
-  id!: string;
-  title!: string;
-  plot!: string;
-  rating!: f32;
-  embedding: f32[] = [];
+  id!: string
+  title!: string
+  plot!: string
+  rating!: f32
+  embedding: f32[] = []
 
   constructor(id: string, title: string, plot: string, rating: f32) {
-    this.id = id;
-    this.title = title;
-    this.plot = plot;
-    this.rating = rating;
-    this.embedding = [];
+    this.id = id
+    this.title = title
+    this.plot = plot
+    this.rating = rating
+    this.embedding = []
   }
 }
 
@@ -25,11 +25,11 @@ export class Movie {
  * Results of a movie search, includes movie details and a similarity score
  */
 export class MovieResult {
-  movie!: Movie;
-  score: f32 = 0.0;
+  movie!: Movie
+  score: f32 = 0.0
 
   constructor(movie: Movie, score: f32) {
-    this.movie = movie;
-    this.score = score;
+    this.movie = movie
+    this.score = score
   }
 }
