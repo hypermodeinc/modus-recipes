@@ -1,8 +1,10 @@
 module my-modus-app
 
-go 1.23.0
+go 1.23.1
 
-require github.com/hypermodeinc/modus/sdk/go v0.15.0
+toolchain go1.23.4
+
+require github.com/hypermodeinc/modus/sdk/go v0.16.0
 
 require (
 	github.com/tidwall/gjson v1.18.0 // indirect
