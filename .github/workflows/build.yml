@@ -9,6 +9,8 @@ on:
       - ready_for_review
     paths:
       - "**.go"
+      - "**.mod"
+      - "**.sum"
       - "**.ts"
       - "**.json"
       - .github/workflows/*
