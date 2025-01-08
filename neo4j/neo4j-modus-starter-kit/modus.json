@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.hypermode.com/modus.json",
+  "endpoints": {
+    "default": {
+      "type": "graphql",
+      "path": "/graphql",
+      "auth": "bearer-token"
+    }
+  },
+  "models": {
+    "minilm": {
+      "sourceModel": "sentence-transformers/all-MiniLM-L6-v2",
+      "provider": "hugging-face",
+      "connection": "hypermode"
+    }
+  },
+  "connections": {
+    "neo4j": {
+      "type": "neo4j",
+      "dbUri": "{{NEO4J_URI}}",
+      "username": "{{USERNAME}}",
+      "password": "{{PASSWORD}}"
+    }
+  }
+}
