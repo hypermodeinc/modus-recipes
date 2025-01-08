@@ -1,8 +1,6 @@
-module my-modus-app
+module dgraph-modus-example
 
-go 1.23.1
-
-toolchain go1.23.4
+go 1.23.3
 
 require github.com/hypermodeinc/modus/sdk/go v0.16.0
 
