@@ -18,21 +18,27 @@ runtimes:
 
 lint:
   enabled:
-    - actionlint@1.7.4
-    - checkov@3.2.334
+    - taplo@0.9.3
+    - bandit@1.8.0
+    - black@24.10.0
+    - isort@5.13.2
+    - ruff@0.8.5
+    - svgo@3.3.2
+    - actionlint@1.7.5
+    - checkov@3.2.346
     - git-diff-check
     - gofmt@1.20.4
     - golangci-lint@1.62.2
     - markdownlint@0.43.0
-    - osv-scanner@1.9.1
+    - osv-scanner@1.9.2
     - oxipng@9.1.3
     - prettier@3.4.2:
         packages:
           - assemblyscript-prettier@3.0.1
-    - renovate@39.62.2
+    - renovate@39.90.2
     - shellcheck@0.10.0
     - shfmt@3.6.0
-    - trufflehog@3.86.0
+    - trufflehog@3.88.0
     - yamllint@1.35.1
 
 actions:
