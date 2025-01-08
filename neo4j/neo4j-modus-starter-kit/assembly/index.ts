@@ -1,8 +1,6 @@
 import { neo4j } from "@hypermode/modus-sdk-as"
-
 import { models } from "@hypermode/modus-sdk-as"
 import { EmbeddingsModel } from "@hypermode/modus-sdk-as/models/experimental/embeddings"
-
 import { Movie, MovieResult } from "./classes"
 import { JSON } from "json-as"
 
@@ -43,19 +41,25 @@ export function getEmbeddingsForMovies(movies: Movie[]): Movie[] {
 /**
  *
  * Update movie nodes in Neo4j with generated embeddings and create a vector index
+ *
  */
-export function saveEmbeddingsToNeo4j(): i32 {
+export function saveEmbeddingsToNeo4j(count: i32): i32 {
   const query = `
   MATCH (m:Movie) 
   WHERE m.embedding IS NULL AND m.plot IS NOT NULL AND m.imdbRating > 0.0
   RETURN m.imdbRating AS rating, m.title AS title, m.plot AS plot, m.imdbId AS id
   ORDER BY m.imdbRating DESC
-  LIMIT 100`
+  LIMIT toInteger($count)`
 
-  const result = neo4j.executeQuery(hostName, query)
+  const countVars = new neo4j.Variables()
+  countVars.set("count", count)
+  const result = neo4j.executeQuery(hostName, query, countVars)
 
   const movies: Movie[] = []
 
+  // Here we iterate through each row returned and explicitly access each column value
+  // An alternative would be to return an object from the Cypher query and use JSON.parse to handle type marshalling
+  // see findSimilarMovies function below for an example of this approach
   for (let i = 0; i < result.Records.length; i++) {
     const record = result.Records[i]
     const plot = record.getValue<string>("plot")
@@ -88,14 +92,15 @@ export function saveEmbeddingsToNeo4j(): i32 {
   SET m.embedding = embeddedMovie.embedding
   `
 
-    const updateResult = neo4j.executeQuery(hostName, updateQuery, vars)
+    neo4j.executeQuery(hostName, updateQuery, vars)
   }
 
   // Create vector index in Neo4j to enable vector search on Movie embeddings
   const indexQuery =
     "CREATE VECTOR INDEX `movie-index` IF NOT EXISTS FOR (m:Movie) ON (m.embedding)"
 
-  const indexResult = neo4j.executeQuery(hostName, indexQuery)
+  neo4j.executeQuery(hostName, indexQuery)
+
   return movies.length
 }
 
@@ -124,11 +129,13 @@ export function findSimilarMovies(title: string, num: i16): MovieResult[] {
     }) AS movieResults
   `
 
-  const result = neo4j.executeQuery(hostName, searchQuery, vars)
+  const results = neo4j.executeQuery(hostName, searchQuery, vars)
+  let movieResults: MovieResult[] = []
 
-  const movieResults: MovieResult[] = JSON.parse<MovieResult[]>(
-    result.Records[0].get("movieResults"),
-  )
+  if (results.Records.length > 0) {
+    const recordResults = results.Records[0].get("movieResults")
+    movieResults = JSON.parse<MovieResult[]>(recordResults)
+  }
 
   return movieResults
 }
