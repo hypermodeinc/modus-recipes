@@ -43,7 +43,7 @@ export function getEmbeddingsForMovies(movies: Movie[]): Movie[] {
  * Update movie nodes in Neo4j with generated embeddings and create a vector index
  *
  */
-export function saveEmbeddingsToNeo4j(count: i32): i32 {
+export function saveEmbeddingsToNeo4j(count: i32 = 100): i32 {
   const query = `
   MATCH (m:Movie) 
   WHERE m.embedding IS NULL AND m.plot IS NOT NULL AND m.imdbRating > 0.0
@@ -123,7 +123,10 @@ export function findSimilarMovies(title: string, num: i16): MovieResult[] {
       title: searchResult.title,
       plot: searchResult.plot,
       rating: searchResult.imdbRating,
-      id: searchResult.imdbId
+      id: searchResult.imdbId,
+      poster: searchResult.poster,
+      actors: [(searchResult)<-[:ACTED_IN]-(a:Actor) | a.name],
+      genres: [(searchResult)-[:IN_GENRE]->(g:Genre) | g.name]
     },
     score: score
     }) AS movieResults
