@@ -9,6 +9,9 @@ export class Movie {
   plot!: string
   rating!: f32
   embedding: f32[] = []
+  actors: string[] = []
+  genres: string[] = []
+  poster: string = ""
 
   constructor(id: string, title: string, plot: string, rating: f32) {
     this.id = id
