@@ -56,7 +56,7 @@ jobs:
       - name: Get Go Toolchain version
         id: toolchain
         run: echo "version=$(sed -ne '/^toolchain /s/^toolchain go//p' go.mod)" >> "$GITHUB_OUTPUT"
-        
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
