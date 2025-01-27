@@ -7,6 +7,12 @@ export class RankedDocument {
   score: f64 = 0.0;
 }
 
+export class Ranked<T> {
+  item!: T;
+  score!: f32;
+  rank!: i32;
+}
+
 // Function to compute Reciprocal Rank Fusion (RRF) score for a list of rankings
 export function computeRRF(
   rankings: RankedDocument[][],
