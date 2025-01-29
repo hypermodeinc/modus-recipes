@@ -6,6 +6,7 @@
       "groupName": "minor and patch",
       "matchCategories": ["js", "golang"],
       "matchUpdateTypes": ["digest", "patch", "minor"],
+      "minimumReleaseAge": "0 days",
       "automerge": true
     }
   ]
