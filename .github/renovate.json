@@ -1,4 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>hypermodeinc/renovate-config"]
+  "extends": ["github>hypermodeinc/renovate-config"],
+  "packageRules": [
+    {
+      "groupName": "minor and patch",
+      "matchCategories": ["js", "golang"],
+      "matchUpdateTypes": ["digest", "patch", "minor"],
+      "automerge": true
+    }
 }
