@@ -9,8 +9,8 @@
     "pretty:check": "prettier --check ."
   },
   "dependencies": {
-    "@hypermode/modus-sdk-as": "^0.16.0",
-    "json-as": "0.9.28"
+    "@hypermode/modus-sdk-as": "^0.17.0",
+    "json-as": "0.9.29"
   },
   "devDependencies": {
     "@eslint/js": "^9.12.0",
