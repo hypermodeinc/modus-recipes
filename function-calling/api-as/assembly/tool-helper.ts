@@ -7,6 +7,7 @@ import {
   ToolMessage,
   ResponseFormat,
   CompletionMessage,
+  ToolChoice,
 } from "@hypermode/modus-sdk-as/models/openai/chat"
 
 /**
@@ -28,7 +29,7 @@ export function llmWithTools(
 ): ResponseWithLogs {
   var logs: string[] = []
   var final_response = ""
-  var tool_messages: ToolMessage[] = []
+  var tool_messages: ToolMessage<string>[] = []
   var message: CompletionMessage | null = null
   var loops: u8 = 0
   // we loop until we get a response or we reach the maximum number of loops (3)
@@ -60,7 +61,7 @@ function getLLMResponse(
   system_prompt: string,
   question: string,
   last_message: CompletionMessage | null = null,
-  tools_messages: ToolMessage[] = [],
+  tools_messages: ToolMessage<string>[] = [],
 ): CompletionMessage {
   const input = model.createInput([new SystemMessage(system_prompt), new UserMessage(question)])
   /*
@@ -68,7 +69,7 @@ function getLLMResponse(
    * first we need to add the last completion message so the LLM can match the tool messages with the tool call
    */
   if (last_message != null) {
-    input.messages.push(last_message)
+    input.messages.push(last_message.toAssistantMessage())
   }
   for (var i = 0; i < tools_messages.length; i++) {
     input.messages.push(tools_messages[i])
@@ -77,7 +78,7 @@ function getLLMResponse(
   input.responseFormat = ResponseFormat.Text
   input.tools = tools
 
-  input.toolChoice = "auto" //  "auto "required" or "none" or  a function in json format
+  input.toolChoice = ToolChoice.Auto //  Auto, Required, None, or Function("name")
 
   const message = model.invoke(input).choices[0].message
   return message
@@ -90,8 +91,8 @@ function getLLMResponse(
 function aggregateToolsResponse(
   toolCalls: ToolCall[],
   toolCallBack: (toolCall: ToolCall) => string,
-): ToolMessage[] {
-  var messages: ToolMessage[] = []
+): ToolMessage<string>[] {
+  var messages: ToolMessage<string>[] = []
   for (let i = 0; i < toolCalls.length; i++) {
     const content = toolCallBack(toolCalls[i])
     const toolCallResponse = new ToolMessage(content, toolCalls[i].id)
