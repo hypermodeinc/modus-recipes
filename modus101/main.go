@@ -85,12 +85,12 @@ func FetchQuoteAddToDB() (uint, error) {
 		return 0, err
 	}
 
-	rows, err := pg.Execute("postgres", "INSERT INTO quotes (quote, author, info) VALUES ($1, $2, $3)", quote.Quote, quote.Author, *info)
+	res, err := pg.Execute("postgres", "INSERT INTO quotes (quote, author, info) VALUES ($1, $2, $3)", quote.Quote, quote.Author, *info)
 	if err != nil {
 		return 0, err
 	}
 
-	return rows, nil
+	return uint(res.RowsAffected), nil
 }
 
 // Quote including author information
@@ -102,10 +102,10 @@ type DBQuote struct {
 
 // Fetch all quotes from database
 func FetchQuotesFromDB() ([]DBQuote, error) {
-	rows, _, err := pg.Query[DBQuote]("postgres", "SELECT quote, author, info FROM quotes")
+	res, err := pg.Query[DBQuote]("postgres", "SELECT quote, author, info FROM quotes")
 	if err != nil {
 		return nil, err
 	}
 
-	return rows, nil
+	return res.Rows, nil
 }
