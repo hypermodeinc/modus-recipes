@@ -4,10 +4,10 @@
  * A Movie
  */
 export class Movie {
-  id!: string
-  title!: string
-  plot!: string
-  rating!: f32
+  id: string
+  title: string
+  plot: string
+  rating: f32
   embedding: f32[] = []
   actors: string[] = []
   genres: string[] = []
