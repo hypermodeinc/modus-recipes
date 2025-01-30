@@ -1,0 +1,23 @@
+name: Issue Summarizer
+
+on:
+  issues:
+    types:
+      - closed
+
+jobs:
+  trigger-hypermode:
+    runs-on: ubuntu-latest
+
+    permissions:
+      discussions: write
+
+    steps:
+      - name: Trigger Hypermode Function
+        run: |
+          curl -X POST https://YOUR_HYPERMODE_ENDPOINT.hypermode.app/graphql \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${{ secrets.HYPERMODE_API_KEY }}" \
+          -d '{
+            "query": "query { issueClosedHandler(repo: \"${{ github.repository }}\", issueNumber: ${{ github.event.issue.number }}, token: \"${{ secrets.GITHUB_TOKEN }}\") }"
+          }'
