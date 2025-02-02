@@ -20,7 +20,12 @@ import {
 export function genSEO(postContent: string): string {
   const suggestedTag = generateText(
     "You are an SEO expert",
-    `Create the HTML meta description tag for a blog post with the following content, only return the meta tag value: ${postContent}`,
+    `Create the HTML meta description tag for a blog post with the following content,
+    return only the SEO meta description tag and value in html format. For example:
+
+    <meta name="description" content="SEO content here">
+
+    Post content: ${postContent}`,
   )
 
   return suggestedTag
@@ -36,7 +41,8 @@ export function genTitle(postContent: string, postCategory: string, authorName: 
   const suggestedTitle = generateText(
     "You are a copyeditor",
     `
-  Create a title for the following blog post, in the style of ${author.name}. Only return the title text.
+  Create a title for the following blog post, in the style of ${author.name}, using information from the author's biography below.
+  Only return the title text.
     
   Blog post content: ${postContent}
 
