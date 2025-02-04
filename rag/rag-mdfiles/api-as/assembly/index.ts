@@ -8,8 +8,8 @@ export {
 } from "./rag"
 
 export { embedRagChunk } from "./embeddings"
-export {
-  recursiveCharacterTextSplitter,
-  splitMarkdown,
-  splitMarkdownHeaderText,
-} from "./text-splitters"
+export { splitMarkdown, splitMarkdownHeaderText } from "./markdown-splitters"
+/**
+ * expose some functions for testing purposes
+ */
+export { mergeSplits, recursiveCharacterTextSplitter } from "../../../../utils/as/text-splitters"

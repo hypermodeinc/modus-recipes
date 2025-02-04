@@ -4,7 +4,7 @@
 
 import { models } from "@hypermode/modus-sdk-as"
 import { DocPage, Chunk, getFlatChunks } from "./chunk"
-import { splitMarkdown } from "./text-splitters"
+import { splitMarkdown } from "./markdown-splitters"
 import { RagContext, RagSource } from "./rag_classes"
 import {
   OpenAIChatModel,
