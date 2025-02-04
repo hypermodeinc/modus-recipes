@@ -21,6 +21,10 @@
       "headers": {
         "Authorization": "Bearer {{API_KEY}}"
       }
+    },
+    "dgraph": {
+      "type": "dgraph",
+      "grpcTarget": "localhost:9080"
     }
   }
 }

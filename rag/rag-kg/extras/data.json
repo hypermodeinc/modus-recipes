@@ -1,0 +1,15 @@
+{
+  "dgraph.type": "Ontology",
+  "uid": "_:o",
+  "rdfs:label": "rag/example",
+  "hypermode.entity": [
+    {
+      "dgraph.type": "Class",
+      "rdfs:isDefinedBy": {
+        "uid": "_:o"
+      },
+      "rdfs:label": "Person",
+      "rdfs:comment": "A human being."
+    }
+  ]
+}

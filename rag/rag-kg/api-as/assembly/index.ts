@@ -10,21 +10,32 @@ import {
   UserMessage,
 } from "@hypermode/modus-sdk-as/models/openai/chat";
 
-export function generateText(prompt: string): string {
+import { Ontology, getOntologyByName } from "./ontology";
+
+export function getOntology(): Ontology {
+  return getOntologyByName("rag/example");
+}
+
+export function extractEntities(prompt: string): string {
+  const ontology = getOntology();
   // The imported OpenAIChatModel interface follows the OpenAI chat completion model input format.
   const model = models.getModel<OpenAIChatModel>("llm");
   model.debug = true;
-  const instruction = `list the main entities mentioned in the prompt. 
-  Here are the types of entities to identify:
-  Person: a human being identified by name or pronoun.
-  CelestialBody: a natural object in space, such as a planet, moon, or star.
+  var instruction = `list the main entities mentioned in the prompt.
+  Look only for the entities that are in the following list:
+  LIST OF KNOWN ENTITIES:
+  `;
+  for (let i = 0; i < ontology.entities.length; i++) {
+    instruction += `${ontology.entities[i].label}: ${ontology.entities[i].description}\n`;
+  }
+
+  /*CelestialBody: a natural object in space, such as a planet, moon, or star.
   Location: a place or position.
   Organization: a group of people identified by a name.
-  AgentiveEvent: an event involving an agent that has occurred in the past and is now considered an established fact
   Fact: something we know to be true about an entity.
+  */
 
-  
-  Reply with a JSON document containing the list of entities with an identifier name and a short semantic description using the example:
+  instruction += `Reply with a JSON document containing the list of entities with an identifier name and a short semantic description using the example:
   ["entities": [{"id": "Uranus", "type": "CelestialBody", "description": "a planet from the solar system."}]`;
 
   // We'll start by creating an input object using the instruction and prompt provided.
