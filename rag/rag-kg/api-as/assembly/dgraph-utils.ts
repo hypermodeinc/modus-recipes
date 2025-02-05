@@ -1,32 +1,43 @@
 /**
  * Utility classes and functions used to interact with Dgraph.
  */
-import { dgraph } from "@hypermode/modus-sdk-as"
-import { JSON } from "json-as"
-import { JSON as JSON_TREE } from "assemblyscript-json/assembly/index"
+import { dgraph } from "@hypermode/modus-sdk-as";
+import { JSON } from "json-as";
+import { JSON as JSON_TREE } from "assemblyscript-json/assembly/index";
 
 
 @json
 class Uid {
-  uid: string = ""
+  uid: string = "";
 }
 
 
 @json
 class UidResult {
-  uids: Uid[] = []
-}
-
-
-@json
-export class ListOf<T> {
-  list: T[] = []
+  uids: Uid[] = [];
 }
 
 /**
  * JSON Encoder/Decoder for AssemblyScript
  */
 export namespace LAB_DGRAPH {
+
+  @json
+  export class ListOf<T> {
+    list: T[] = [];
+  }
+
+
+  @json
+  export class a<T> {
+    a: T | null = null;
+  }
+
+
+  @json
+  export class NumUidsResult {
+    numUids: i32 = 0;
+  }
   export function getEntityById<T>(
     connection: string,
     predicate: string,
@@ -37,13 +48,13 @@ export namespace LAB_DGRAPH {
         list(func: eq(${predicate}, "${id}")) {
             ${body}
           }
-        }`)
-    const response = dgraph.execute(connection, new dgraph.Request(query))
-    const data = JSON.parse<ListOf<T>>(response.Json)
+        }`);
+    const response = dgraph.execute(connection, new dgraph.Request(query));
+    const data = JSON.parse<ListOf<T>>(response.Json);
     if (data.list.length > 0) {
-      return data.list[0]
+      return data.list[0];
     }
-    return null
+    return null;
   }
   export function upsertEntity<T>(
     connection: string,
@@ -51,32 +62,57 @@ export namespace LAB_DGRAPH {
     record: T,
     id_predicate: string,
   ): string {
-    const root = <JSON_TREE.Obj>JSON_TREE.parse(JSON.stringify(record))
-    console.log(`Upserting ${namespace} ${root.toString()}`)
-    const id: string = root.getString(id_predicate)
-    const query = new dgraph.Query(`{
+    const root = <JSON_TREE.Obj>JSON_TREE.parse(JSON.stringify(record));
+    console.log(`Upserting ${namespace} ${root.toString()}`);
+    if (root.has(id_predicate)) {
+      const id: string = root.getString(id_predicate)!.toString();
+      const query = new dgraph.Query(`{
         var(func: eq(${id_predicate}, "${id}"))
-        }`)
+        }`);
+      // build Nquads for upsert mutation
+      var nquads = "";
+      const predicates = root.keys;
+      for (var i = 0; i < predicates.length; i++) {
+        const predicate = predicates[i];
+        const value = root.get(predicate);
 
-    return "success"
+        if (!value!.isObj) {
+          if (value!.isString) {
+            nquads += `_:${id} <${predicate}> "${value!.toString()}" .\n`;
+          }
+        }
+      }
+      const mutation = new dgraph.Mutation("", "", nquads);
+      console.log(`Mutation: ${nquads}`);
+      //dgraph.execute(connection, new dgraph.Request(query, [mutation]));
+      return "success";
+    } else {
+      return "error";
+    }
   }
 
   export function getEntityList<T>(connection: string, query: string): T[] {
-    const dql_query = new dgraph.Query(query)
-    const response = dgraph.execute(connection, new dgraph.Request(dql_query))
-    const data = JSON.parse<ListOf<T>>(response.Json)
-    return data.list
+    const dql_query = new dgraph.Query(query);
+    const response = dgraph.execute(connection, new dgraph.Request(dql_query));
+    const data = JSON.parse<ListOf<T>>(response.Json);
+    return data.list;
   }
 
-  function getEntityUid(connection: string, predicate: string, value: string): string | null {
-    const query = new dgraph.Query(`{uids(func: eq(${predicate}, "${value}")) {uid}}`)
-    const response = dgraph.execute(connection, new dgraph.Request(query))
-    const data = JSON.parse<UidResult>(response.Json)
+  function getEntityUid(
+    connection: string,
+    predicate: string,
+    value: string,
+  ): string | null {
+    const query = new dgraph.Query(
+      `{uids(func: eq(${predicate}, "${value}")) {uid}}`,
+    );
+    const response = dgraph.execute(connection, new dgraph.Request(query));
+    const data = JSON.parse<UidResult>(response.Json);
     if (data.uids.length == 0) {
-      return null
+      return null;
     }
-    console.log(`${predicate} Uid: ${data.uids[0].uid}`)
-    return data.uids[0].uid
+    console.log(`${predicate} Uid: ${data.uids[0].uid}`);
+    return data.uids[0].uid;
   }
 
   export function deleteNodePredicates(
@@ -86,14 +122,14 @@ export namespace LAB_DGRAPH {
   ): void {
     const query = new dgraph.Query(`{
           node as var(func: ${criteria})
-      }`)
-    predicates.push("dgraph.type")
+      }`);
+    predicates.push("dgraph.type");
     const del_nquads = predicates
       .map<string>((predicate) => `uid(node) <${predicate}> * .`)
-      .join("\n")
-    const mutation = new dgraph.Mutation("", "", "", del_nquads)
+      .join("\n");
+    const mutation = new dgraph.Mutation("", "", "", del_nquads);
 
-    dgraph.execute(connection, new dgraph.Request(query, [mutation]))
+    dgraph.execute(connection, new dgraph.Request(query, [mutation]));
   }
 
   export function searchBySimilarity<T>(
@@ -106,12 +142,12 @@ export namespace LAB_DGRAPH {
     topK: i32 = 10,
     threshold: f32 = 0.75,
   ): T[] {
-    let query = ""
+    let query = "";
     if (filter != null) {
-      console.log(`Filter: ${filter}`)
+      console.log(`Filter: ${filter}`);
     }
 
-    const filter_str = filter != null ? `@filter(${filter})` : ""
+    const filter_str = filter != null ? `@filter(${filter})` : "";
 
     query = `
         query search($vector: float32vector) {
@@ -129,16 +165,19 @@ export namespace LAB_DGRAPH {
                 ${body}
             }
 
-        }`
+        }`;
 
-    const vars = new dgraph.Variables()
-    vars.set("$vector", JSON.stringify(embedding))
+    const vars = new dgraph.Variables();
+    vars.set("$vector", JSON.stringify(embedding));
 
-    const dgraph_query = new dgraph.Query(query, vars)
+    const dgraph_query = new dgraph.Query(query, vars);
 
-    const response = dgraph.execute(connection, new dgraph.Request(dgraph_query))
-    console.log(response.Json)
-    return JSON.parse<ListOf<T>>(response.Json).list
+    const response = dgraph.execute(
+      connection,
+      new dgraph.Request(dgraph_query),
+    );
+    console.log(response.Json);
+    return JSON.parse<ListOf<T>>(response.Json).list;
   }
   /**
    * This function is used to find similar users based on the Jaccard similarity with a intermediate node relation.
@@ -188,17 +227,20 @@ export namespace LAB_DGRAPH {
             similarity: val(similarity)
             ${body}
           }
-      }`
+      }`;
 
-    const vars = new dgraph.Variables()
-    vars.set("$identifier", identifier_value)
-    const dgraph_query = new dgraph.Query(query, vars)
+    const vars = new dgraph.Variables();
+    vars.set("$identifier", identifier_value);
+    const dgraph_query = new dgraph.Query(query, vars);
 
-    const response = dgraph.execute(connection, new dgraph.Request(dgraph_query))
-    console.log(response.Json)
+    const response = dgraph.execute(
+      connection,
+      new dgraph.Request(dgraph_query),
+    );
+    console.log(response.Json);
     // create list of Similar<T> from response get item with uid
-    const data = JSON.parse<ListOf<T>>(response.Json)
-    return data.list
+    const data = JSON.parse<ListOf<T>>(response.Json);
+    return data.list;
   }
 
   export function queryWithFilter<T>(
@@ -208,9 +250,9 @@ export namespace LAB_DGRAPH {
     filter: string,
     cascade_criteria: string[] = [],
   ): T[] {
-    const filter_part = filter != "" ? `@filter(${filter})` : ""
+    const filter_part = filter != "" ? `@filter(${filter})` : "";
 
-    let query = ""
+    let query = "";
 
     query = `
         query search($type: string!) {
@@ -222,21 +264,27 @@ export namespace LAB_DGRAPH {
                 ${body}
             }
 
-        }`
-    const vars = new dgraph.Variables()
-    vars.set("$type", type)
-    const dgraph_query = new dgraph.Query(query, vars)
+        }`;
+    const vars = new dgraph.Variables();
+    vars.set("$type", type);
+    const dgraph_query = new dgraph.Query(query, vars);
 
-    const response = dgraph.execute(connection, new dgraph.Request(dgraph_query))
-    console.log(response.Json)
-    return JSON.parse<ListOf<T>>(response.Json).list
+    const response = dgraph.execute(
+      connection,
+      new dgraph.Request(dgraph_query),
+    );
+    console.log(response.Json);
+    return JSON.parse<ListOf<T>>(response.Json).list;
   }
 
   export function dqlList<T>(connection: string, dql: string): T[] {
-    const dgraph_query = new dgraph.Query(dql)
+    const dgraph_query = new dgraph.Query(dql);
 
-    const response = dgraph.execute(connection, new dgraph.Request(dgraph_query))
-    console.log(response.Json)
-    return JSON.parse<ListOf<T>>(response.Json).list
+    const response = dgraph.execute(
+      connection,
+      new dgraph.Request(dgraph_query),
+    );
+    console.log(response.Json);
+    return JSON.parse<ListOf<T>>(response.Json).list;
   }
 }

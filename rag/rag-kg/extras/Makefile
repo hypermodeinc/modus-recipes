@@ -12,12 +12,20 @@ start: ## Start dgraph/standalone container (local development) after you stoppe
 down: ## Stop the container (local development)
 	docker stop  dgraph-rag
 
+schema-gql: ## Load/update a GraphQL schema (local development)
+ifneq (,$(wildcard ./schema.graphql))
+	curl --data-binary '@./schema.graphql' --header 'content-type: application/octet-stream' http://localhost:8080/admin/schema
+else
+	@echo "No schema.graphql found"
+endif
+
 schema-dql: ## Load/update a DQL schema (local development)
 ifneq (,$(wildcard ./schema.dql))
 	curl --data-binary '@./schema.dql' --header 'content-type: application/dql' http://localhost:8080/alter
 else
 	@echo "No schema.txt found"
 endif
+
 
 drop-data: ## Drops all data (but not the schema, local development)
 	curl -X POST localhost:8080/alter -d '{"drop_op": "DATA"}'

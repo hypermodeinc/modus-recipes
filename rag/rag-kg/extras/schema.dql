@@ -1,7 +1,2 @@
-<rdfs:label>: string @index(hash) .
-<rdfs:isDefinedBy>: uid .
-<hypermode.entity>: [uid] .
-type <Ontology> {
-	<rdfs:label>
-	<hypermode.entity>
-}
+xid: string @upsert @index(hash) .
+is_a: uid .

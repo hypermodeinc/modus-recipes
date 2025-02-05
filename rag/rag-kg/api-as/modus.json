@@ -25,6 +25,10 @@
     "dgraph": {
       "type": "dgraph",
       "grpcTarget": "localhost:9080"
+    },
+    "dgraph-gql": {
+      "type": "http",
+      "endpoint": "http://localhost:8080/graphql"
     }
   }
 }
