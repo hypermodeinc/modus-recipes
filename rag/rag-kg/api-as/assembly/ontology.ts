@@ -19,6 +19,15 @@ export class Ontology {
 export class Entity {
   label: string = "";
   is_a: string = ""; // reference to a class label
+  description: string | null = null;
+}
+
+
+@json
+export class RelatedEntity {
+  is_a: string = "";
+  label: string = "";
+  source: Entity = new Entity();
   description: string = "";
 }
 
@@ -82,7 +91,12 @@ export function addClass(namespace: string, type: Class): string {
   console.log(`Response numUids: ${response.data!.numUids}`);
   return "success";
 }
-
+export function addEntities(namespace: string, entities: Entity[]): string {
+  for (let i = 0; i < entities.length; i++) {
+    addEntity(namespace, entities[i]);
+  }
+  return "Success";
+}
 export function addEntity(namespace: string, entity: Entity): string {
   // add entity using DQL
   const xid = `${entity.is_a}:${entity.label}`;
@@ -92,18 +106,59 @@ export function addEntity(namespace: string, entity: Entity): string {
         c as var(func: eq(<rdfs:label>,"${entity.is_a}"))
     }
     `);
-  const nquads = `
+  var nquads = `
     uid(v) <xid> "${xid}" .
     uid(v) <rdfs:label> "${entity.label}" .
     uid(v) <is_a> uid(c) .
-    uid(v) <rdfs:comment> "${entity.description}" .
     `;
+  if (entity.description) {
+    nquads += `uid(v) <rdfs:comment> "${entity.description!}" .`;
+  }
   const mutation = new dgraph.Mutation(
     "",
     "",
     nquads,
     "",
     "@if(eq(len(c), 1))",
+  );
+  console.log(`Mutation: ${nquads}`);
+  const response = dgraph.execute(
+    connection,
+    new dgraph.Request(query, [mutation]),
+  );
+  return response.Json;
+}
+export function addRelatedEntities(
+  namespace: string,
+  entities: RelatedEntity[],
+): string {
+  for (let i = 0; i < entities.length; i++) {
+    addRelatedEntity(namespace, entities[i]);
+  }
+  return "Success";
+}
+export function addRelatedEntity(
+  namespace: string,
+  entity: RelatedEntity,
+): string {
+  // add entity using DQL
+  const xid = `${entity.source.is_a}:${entity.source.label}`;
+  const query = new dgraph.Query(`
+      {
+          source as var(func: eq(xid, "${xid}"))
+      }
+      `);
+  var nquads = `
+      <_:e> <entity.type> "${entity.is_a}" .
+      <_:e> <source> uid(source) .
+      <_:e> <rdfs:comment> "${entity.description!}" .
+      `;
+  const mutation = new dgraph.Mutation(
+    "",
+    "",
+    nquads,
+    "",
+    "@if(eq(len(source), 1))",
   );
   console.log(`Mutation: ${nquads}`);
   const response = dgraph.execute(
