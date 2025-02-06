@@ -1,6 +1,6 @@
 module dgraph-modus-example
 
-go 1.23.3
+go 1.23.6
 
 require github.com/hypermodeinc/modus/sdk/go v0.17.0
 
