@@ -7,11 +7,10 @@ const dgraph_host = "dgraph-gql";
 
 
 @json
-export class Ontology {
+export class KGSchema {
   label: string = "";
   description: string | null = null;
-  classes: Class[] = [];
-  relations: Relationship[] = [];
+  classes: KGClass[] = [];
 }
 
 
@@ -27,13 +26,24 @@ export class Entity {
 export class RelatedEntity {
   is_a: string = "";
   label: string = "";
-  source: Entity = new Entity();
+  subject: Entity = new Entity();
   description: string = "";
 }
 
 
 @json
-export class Class {
+export class RelationalEntity {
+  is_a: string = "";
+  label: string = "";
+  subject: Entity = new Entity();
+  object: Entity = new Entity();
+  description: string = "";
+}
+
+
+@json
+export class KGClass {
+  role: string = "";
   label: string = "";
   description: string = "";
 }
@@ -47,26 +57,27 @@ class Relationship {
   description: string = "";
 }
 
-export function getOntologyByName(name: string): Ontology {
+export function getKGSchemaByName(name: string): KGSchema {
   const statement = `query GetKGSchema {
     a:getKGSchema(label: "${name}") {
         label
         description
         classes {
+            role
             description
             label
         }
     }
 }`;
 
-  const response = graphql.execute<LAB_DGRAPH.a<Ontology>>(
+  const response = graphql.execute<LAB_DGRAPH.a<KGSchema>>(
     dgraph_host,
     statement,
   );
   return response.data!.a!;
 }
 
-export function addClass(namespace: string, type: Class): string {
+export function addClass(namespace: string, type: KGClass): string {
   // const ontology = getOntologyByName(namespace);
   const statement = `
   mutation AddKGClass {
@@ -128,6 +139,7 @@ export function addEntity(namespace: string, entity: Entity): string {
   );
   return response.Json;
 }
+
 export function addRelatedEntities(
   namespace: string,
   entities: RelatedEntity[],
@@ -137,12 +149,13 @@ export function addRelatedEntities(
   }
   return "Success";
 }
+
 export function addRelatedEntity(
   namespace: string,
   entity: RelatedEntity,
 ): string {
   // add entity using DQL
-  const xid = `${entity.source.is_a}:${entity.source.label}`;
+  const xid = `${entity.subject.is_a}:${entity.subject.label}`;
   const query = new dgraph.Query(`
       {
           source as var(func: eq(xid, "${xid}"))
@@ -150,7 +163,7 @@ export function addRelatedEntity(
       `);
   var nquads = `
       <_:e> <entity.type> "${entity.is_a}" .
-      <_:e> <source> uid(source) .
+      <_:e> <subject> uid(source) .
       <_:e> <rdfs:comment> "${entity.description!}" .
       `;
   const mutation = new dgraph.Mutation(
@@ -159,6 +172,60 @@ export function addRelatedEntity(
     nquads,
     "",
     "@if(eq(len(source), 1))",
+  );
+  console.log(`Mutation: ${nquads}`);
+  const response = dgraph.execute(
+    connection,
+    new dgraph.Request(query, [mutation]),
+  );
+  return response.Json;
+}
+
+export function addRelationalEntities(
+  namespace: string,
+  entities: RelationalEntity[],
+): string {
+  for (let i = 0; i < entities.length; i++) {
+    addRelationalEntity(namespace, entities[i]);
+  }
+  return "Success";
+}
+
+export function addRelationalEntity(
+  namespace: string,
+  entity: RelationalEntity,
+): string {
+  // add entity using DQL
+  // assuming we can uniquelty identify a relational entity using the subject, object and the relationship:
+  // unique identifier xid is
+  // subject.is_a:subject.label-object.is_a-object.is_a:label
+  // E.g Person:Galileo Galilei-GeospatialBody:Ganymede-AgenticEvent:discover
+
+  const xid = `${entity.subject.is_a}:${entity.subject.label}-${entity.object.is_a}:${entity.object.label}-${entity.is_a}:${entity.label}`;
+  const source_xid = `${entity.subject.is_a}:${entity.subject.label}`;
+  const target_xid = `${entity.object.is_a}:${entity.object.label}`;
+
+  const query = new dgraph.Query(`
+        {
+            xid as var(func: eq(xid, "${xid}"))
+            source as var(func: eq(xid, "${source_xid}"))
+            target as var(func: eq(xid, "${target_xid}"))
+        }
+        `);
+  var nquads = `
+        uid(xid) <entity.type> "${entity.is_a}" .
+        uid(xid) <xid> "${xid}" .
+        uid(xid) <subject> uid(source) .
+        uid(xid) <object> uid(target) .
+        uid(xid) <rdfs:label> "${entity.label}" .
+        uid(xid) <rdfs:comment> "${entity.description!}" .
+        `;
+  const mutation = new dgraph.Mutation(
+    "",
+    "",
+    nquads,
+    "",
+    "@if(eq(len(source), 1) AND eq(len(target), 1))",
   );
   console.log(`Mutation: ${nquads}`);
   const response = dgraph.execute(

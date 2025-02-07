@@ -3,10 +3,14 @@ type KGSchema {
   description: String @dgraph(pred: "<rdfs:comment>")
   classes: [KGClass] @hasInverse(field: isDefinedBy)
 }
-
+enum KGClassRole {
+  MAIN
+  RELATED
+  RELATION
+}
 type KGClass {
+  role: KGClassRole!
   label: String! @id @dgraph(pred: "<rdfs:label>")
   description: String @dgraph(pred: "<rdfs:comment>")
-  # Should be @dgraph(pred: "<rdfs:isDefinedBy>") but we have an issue on reverse link with alias
-  isDefinedBy: KGSchema @hasInverse(field: classes) @dgraph(pred: "<rdfs:isDefinedBy>")
+  isDefinedBy: KGSchema @hasInverse(field: classes)
 }

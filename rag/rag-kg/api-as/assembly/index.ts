@@ -11,17 +11,19 @@ import {
 } from "@hypermode/modus-sdk-as/models/openai/chat";
 
 import {
-  Ontology,
+  KGSchema,
   Entity,
   RelatedEntity,
+  RelationalEntity,
   addEntities,
   addRelatedEntities,
-  getOntologyByName,
+  addRelationalEntities,
+  getKGSchemaByName,
 } from "./ontology";
 import { LAB_DGRAPH } from "./dgraph-utils";
 export { addClass } from "./ontology";
-export function getOntology(): Ontology {
-  return getOntologyByName("rag/example");
+export function getKGSchema(): KGSchema {
+  return getKGSchemaByName("rag/example");
 }
 const MODEL_DEBUG = false;
 
@@ -82,13 +84,13 @@ export function readEntities(entities: Entity[]): string {
 }
 export function extractEntities(
   text: string,
-  ontology: Ontology | null = null,
+  ontology: KGSchema | null = null,
 ): Entity[] {
   // if not provided get the ontology from the connected Knowledge Graph
   // extractEntities can be used in a pipeline where the ontology is already loaded
   // or to test an ontology before saving it to the Knowledge Graph
   if (ontology == null) {
-    ontology = getOntology();
+    ontology = getKGSchema();
   }
   // The imported OpenAIChatModel interface follows the OpenAI chat completion model input format.
   const model = models.getModel<OpenAIChatModel>("llm");
@@ -98,7 +100,9 @@ export function extractEntities(
   LIST OF KNOWN ENTITY TYPES::
   `;
   for (let i = 0; i < ontology.classes.length; i++) {
-    instruction += `${ontology.classes[i].label}: ${ontology.classes[i].description}\n`;
+    if (ontology.classes[i].role == "MAIN") {
+      instruction += `${ontology.classes[i].label}: ${ontology.classes[i].description}\n`;
+    }
   }
 
   instruction += `Reply with a JSON document containing the list of entities with an identifier label and a short semantic description using the example:
@@ -111,7 +115,7 @@ export function extractEntities(
     new SystemMessage(instruction),
     new UserMessage(text),
   ]);
-  input.temperature = 0.7;
+  // input.temperature = 0.7;
   input.responseFormat = ResponseFormat.Json;
   const output = model.invoke(input);
   const llm_response = output.choices[0].message.content.trim();
@@ -154,29 +158,33 @@ function verifyEntity(entity: Entity): bool {
     .includes("true");
 }
 
-export function saveEntities(entity: Entity[]): string {
-  return addEntities("rag/example", entity);
+export function saveEntities(entities: Entity[]): string {
+  return addEntities("rag/example", entities);
 }
 
 export function extractRelatedEntities(
   text: string,
   entities: Entity[],
-  ontology: Ontology | null = null,
+  ontology: KGSchema | null = null,
 ): RelatedEntity[] {
   // if not provided get the ontology from the connected Knowledge Graph
   // extractEntities can be used in a pipeline where the ontology is already loaded
   // or to test an ontology before saving it to the Knowledge Graph
   if (ontology == null) {
-    ontology = getOntology();
+    ontology = getKGSchema();
   }
   const model = models.getModel<OpenAIChatModel>("llm");
   model.debug = MODEL_DEBUG;
   var instruction = `User submits a text. `;
   instruction += `
   Identify the following types of information:
-  - Fact: something we know to be true about an entity.
-  - Characteristic: a feature or quality of an entity.
   `;
+  for (let i = 0; i < ontology.classes.length; i++) {
+    if (ontology.classes[i].role == "RELATED") {
+      instruction += ` - ${ontology.classes[i].label}: ${ontology.classes[i].description}\n`;
+    }
+  }
+
   instruction += `Find only the information related to the following entities:
   LIST OF KNOWN ENTITIES:
   `;
@@ -184,10 +192,10 @@ export function extractRelatedEntities(
     instruction += `- label:${entities[i].label} is_a:${entities[i].is_a}\n`;
   }
 
-  instruction += `Reply with a JSON document containing the list of information with the entity source using the following example.
+  instruction += `Reply with a JSON document containing the list of items containing the retrieved information and the subject entity, following the example.
 
   {
-    "list": [ {"is_a": "Fact","label":"in one word what the info is about", "source": {"label": "Uranus", "is_a":"CelestialBody"}, "description": "The fact or characteristic"}]
+    "list": [ {"is_a": "Fact","label":"in one word what the info is about", "subject": {"label": "Uranus", "is_a":"CelestialBody"}, "description": "The fact or characteristic"}]
   }`;
 
   // We'll start by creating an input object using the instruction and prompt provided.
@@ -195,7 +203,7 @@ export function extractRelatedEntities(
     new SystemMessage(instruction),
     new UserMessage(text),
   ]);
-  input.temperature = 0.7;
+  // input.temperature = 0.7;
   input.responseFormat = ResponseFormat.Json;
   const output = model.invoke(input);
   const llm_response = output.choices[0].message.content.trim();
@@ -208,6 +216,60 @@ export function saveRelatedEntities(entities: RelatedEntity[]): string {
   return addRelatedEntities("rag/example", entities);
 }
 
+export function extractRelationalEntities(
+  text: string,
+  entities: Entity[],
+  ontology: KGSchema | null = null,
+): RelationalEntity[] {
+  // if not provided get the ontology from the connected Knowledge Graph
+  // extractEntities can be used in a pipeline where the ontology is already loaded
+  // or to test an ontology before saving it to the Knowledge Graph
+  if (ontology == null) {
+    ontology = getKGSchema();
+  }
+  const model = models.getModel<OpenAIChatModel>("llm");
+  model.debug = MODEL_DEBUG;
+  var instruction = `User submits a text. `;
+  instruction += `
+  Identify the following types of information:
+  `;
+  for (let i = 0; i < ontology.classes.length; i++) {
+    if (ontology.classes[i].role == "RELATION") {
+      instruction += ` - ${ontology.classes[i].label}: ${ontology.classes[i].description}\n`;
+    }
+  }
+  instruction += `Find only the information involving the following entities as subject or object.
+  LIST OF KNOWN ENTITIES:
+  `;
+  for (let i = 0; i < entities.length; i++) {
+    instruction += `- label:${entities[i].label} is_a:${entities[i].is_a}\n`;
+  }
+
+  instruction += `Use a verb as label and a sentence to descrbe the event.
+  Reply with a JSON document containing the list of information with the entity source using the following example.
+
+  {
+    "list": [ {"is_a": "AgenticEvent","label":"discover", "subject": {"label": "Galileo", "is_a":"Person"}, "object": {"label": "Uranus", "is_a":"CelestialBody"}, "description": "A sentence description what happened"}]
+  }`;
+
+  // We'll start by creating an input object using the instruction and prompt provided.
+  const input = model.createInput([
+    new SystemMessage(instruction),
+    new UserMessage(text),
+  ]);
+  // input.temperature = 0.7;
+  input.responseFormat = ResponseFormat.Json;
+  const output = model.invoke(input);
+  const llm_response = output.choices[0].message.content.trim();
+  const list =
+    JSON.parse<LAB_DGRAPH.ListOf<RelationalEntity>>(llm_response).list;
+
+  return list;
+}
+
+export function saveRelationalEntities(entities: RelationalEntity[]): string {
+  return addRelationalEntities("rag/example", entities);
+}
 export function analyzeRelationships(text: string): string {
   // The imported OpenAIChatModel interface follows the OpenAI chat completion model input format.
   const model = models.getModel<OpenAIChatModel>("llm");
@@ -229,7 +291,7 @@ export function analyzeRelationships(text: string): string {
   ]);
 
   // This is one of many optional parameters available for the OpenAI chat model.
-  input.temperature = 0.7;
+  // input.temperature = 0.7;
   input.responseFormat = ResponseFormat.Json;
 
   // Here we invoke the model with the input we created.
@@ -242,7 +304,7 @@ export function analyzeRelationships(text: string): string {
 
 export function pipeline(text: string): string {
   var status = "";
-  const ontology = getOntology();
+  const ontology = getKGSchema();
   const entities = extractEntities(text, ontology);
   // list entities in the status
   status += "Entities:\n";
@@ -254,7 +316,7 @@ export function pipeline(text: string): string {
   // list related entities in the status
   status += "Related Entities:\n";
   for (let i = 0; i < relatedEntities.length; i++) {
-    status += `${relatedEntities[i].is_a} about ${relatedEntities[i].source.label} : ${relatedEntities[i].label}
+    status += `${relatedEntities[i].is_a} about ${relatedEntities[i].subject.label} : ${relatedEntities[i].label}
      ${relatedEntities[i].description}\n`;
   }
   saveRelatedEntities(relatedEntities);
@@ -291,7 +353,7 @@ export function suggestEntities(text: string): string {
   ]);
 
   // This is one of many optional parameters available for the OpenAI chat model.
-  input.temperature = 0.7;
+  // input.temperature = 0.7;
   input.responseFormat = ResponseFormat.Json;
 
   // Here we invoke the model with the input we created.
