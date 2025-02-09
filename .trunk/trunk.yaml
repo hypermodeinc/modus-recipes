@@ -2,12 +2,12 @@
 version: 0.1
 
 cli:
-  version: 1.22.8
+  version: 1.22.10
 
 plugins:
   sources:
     - id: trunk
-      ref: v1.6.6
+      ref: v1.6.7
       uri: https://github.com/trunk-io/plugins
 
 runtimes:
@@ -18,27 +18,28 @@ runtimes:
 
 lint:
   enabled:
+    - trivy@0.59.1
     - taplo@0.9.3
-    - bandit@1.8.0
-    - black@24.10.0
-    - isort@5.13.2
-    - ruff@0.8.5
+    - bandit@1.8.2
+    - black@25.1.0
+    - isort@6.0.0
+    - ruff@0.9.4
     - svgo@3.3.2
-    - actionlint@1.7.5
-    - checkov@3.2.346
+    - actionlint@1.7.7
+    - checkov@3.2.365
     - git-diff-check
     - gofmt@1.20.4
-    - golangci-lint@1.62.2
-    - markdownlint@0.43.0
+    - golangci-lint@1.63.4
+    - markdownlint@0.44.0
     - osv-scanner@1.9.2
     - oxipng@9.1.3
     - prettier@3.4.2:
         packages:
           - assemblyscript-prettier@3.0.1
-    - renovate@39.90.2
+    - renovate@39.161.0
     - shellcheck@0.10.0
     - shfmt@3.6.0
-    - trufflehog@3.88.0
+    - trufflehog@3.88.4
     - yamllint@1.35.1
 
 actions:
