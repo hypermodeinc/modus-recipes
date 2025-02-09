@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/http"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models/openai"
+	"strings"
 )
 
 type GitHubUser struct {
@@ -34,23 +34,23 @@ type GitHubReactions struct {
 }
 
 type GitHubIssue struct {
-	Title       string         `json:"title"`
-	Body        string         `json:"body"`
-	State       string         `json:"state"`
-	Number      int            `json:"number"`
-	HTMLURL     string         `json:"html_url"`
-	CreatedAt   string         `json:"created_at"`
-	UpdatedAt   string         `json:"updated_at"`
-	ClosedAt    string         `json:"closed_at"`
-	User        GitHubUser     `json:"user"`
-	Labels      []GitHubLabel  `json:"labels"`
-	Comments    int            `json:"comments"`
-	CommentsURL string         `json:"comments_url"`
-	Reactions   GitHubReactions `json:"reactions"` 
+	Title       string          `json:"title"`
+	Body        string          `json:"body"`
+	State       string          `json:"state"`
+	Number      int             `json:"number"`
+	HTMLURL     string          `json:"html_url"`
+	CreatedAt   string          `json:"created_at"`
+	UpdatedAt   string          `json:"updated_at"`
+	ClosedAt    string          `json:"closed_at"`
+	User        GitHubUser      `json:"user"`
+	Labels      []GitHubLabel   `json:"labels"`
+	Comments    int             `json:"comments"`
+	CommentsURL string          `json:"comments_url"`
+	Reactions   GitHubReactions `json:"reactions"`
 }
 
 type GitHubComment struct {
-	User      GitHubUser `json:"user"` 
+	User      GitHubUser `json:"user"`
 	Body      string     `json:"body"`
 	CreatedAt string     `json:"created_at"`
 	UpdatedAt string     `json:"updated_at"`
@@ -235,7 +235,6 @@ func getDiscussionCategoryID(repoID string, token string) (string, error) {
 	return "", fmt.Errorf("no discussion categories found in repository")
 }
 
-
 func generateKBArticle(issue *GitHubIssue, comments []GitHubComment) (string, error) {
 	prompt := fmt.Sprintf(`
 		Generate a detailed markdown article givin a concise summary of the following GitHub issue. Include the problem, the solution (if on exists), and any other relevant details. Please mention the users involved and any significant involvement in the issue.
@@ -380,7 +379,6 @@ func IssueClosedHandler(repo string, issueNumber int, token string) {
 	// Output the KB article
 	fmt.Printf(kbArticle)
 
-
 	// Post the KB article as a GitHub discussion
 	err = postDiscussionToRepo(repo, fmt.Sprintf("Issue Summary: %s", issue.Title), kbArticle, token)
 	if err != nil {
@@ -388,5 +386,5 @@ func IssueClosedHandler(repo string, issueNumber int, token string) {
 		return
 	}
 
-    fmt.Println("KB article successfully posted as a comment.")
+	fmt.Println("KB article successfully posted as a comment.")
 }

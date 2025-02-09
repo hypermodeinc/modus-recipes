@@ -1,6 +1,8 @@
 # GitHub Issue Knowledge Base Generator (Modus + Hypermode) 🚀
 
-This project automatically generates a Knowledge Base (KB) article when a GitHub issue is closed. It utilizes Hypermode and Modus (a serverless Go framework) to process issue data and generate a structured KB article using an LLM. The article is then posted as a GitHub Discussion.
+This project automatically generates a Knowledge Base (KB) article when a GitHub issue is closed. It
+utilizes Hypermode and Modus (a serverless Go framework) to process issue data and generate a
+structured KB article using an LLM. The article is then posted as a GitHub Discussion.
 
 ## 🛠 Features
 
@@ -42,7 +44,9 @@ Go to:
 http://localhost:54321/graphql
 ```
 
-You'll see an exported function `issueClosedHandler`. Test the KB Article Generation. Enter the repository name and issue number and run the query. The API will return a formatted KB article. You can also post the KB Article as a Discussion. To do so, pass a GitHub API token as well.
+You'll see an exported function `issueClosedHandler`. Test the KB Article Generation. Enter the
+repository name and issue number and run the query. The API will return a formatted KB article. You
+can also post the KB Article as a Discussion. To do so, pass a GitHub API token as well.
 
 --
 
@@ -89,7 +93,8 @@ Copy the issue-summarizer.yml file into in your repository:
 
 ### 4️⃣ Done! 🎉
 
-Now, every time a GitHub issue is closed, a KB article will be generated and posted as a GitHub Discussion.
+Now, every time a GitHub issue is closed, a KB article will be generated and posted as a GitHub
+Discussion.
 
 --
 
