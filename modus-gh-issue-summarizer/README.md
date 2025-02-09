@@ -2,12 +2,13 @@
 
 This project automatically generates a Knowledge Base (KB) article when a GitHub issue is closed. It
 utilizes Hypermode and Modus (a serverless Go framework) to process issue data and generate a
-structured KB article using an LLM. The article is then posted as a GitHub Discussion.
+structured KB article using an LLM. The knowledge base article is then posted as a GitHub
+Discussion.
 
 ## 🛠 Features
 
 - Fetches GitHub issue details and comments upon issue closure.
-- Uses LLM (Hugging Face model via Hypermode) to generate a detailed KB article.
+- Uses LLM (Meta's LLaMa model hosted on Hypermode) to generate a detailed KB article.
 - Posts the generated KB article as a GitHub Discussion.
 - Can be triggered manually or via GitHub Actions.
 
@@ -19,30 +20,26 @@ structured KB article using an LLM. The article is then posted as a GitHub Discu
 
 First, install Modus CLI:
 
-```
+```bash
 npm install -g @hypermodeinc/modus
 ```
 
 ### 2️⃣ Clone the Repository
 
-```
+```bash
 git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
 cd YOUR_REPO
 ```
 
 ### 3️⃣ Start the Modus Dev Server
 
-```
+```bash
 modus dev
 ```
 
 ### 4️⃣ Test the API Locally
 
-Go to:
-
-```
-http://localhost:54321/graphql
-```
+Go to: `http://localhost:54321/graphql`
 
 You'll see an exported function `issueClosedHandler`. Test the KB Article Generation. Enter the
 repository name and issue number and run the query. The API will return a formatted KB article. You
@@ -54,7 +51,7 @@ can also post the KB Article as a Discussion. To do so, pass a GitHub API token 
 
 To deploy the function to Hypermode:
 
-```
+```bash
 modus deploy
 ```
 
@@ -70,13 +67,13 @@ This action allows the KB article to be generated automatically when an issue is
 
 If you haven't already:
 
-```
+```bash
 git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
 cd YOUR_REPO
 modus deploy
 ```
 
-Copy your Hypermode endpoint.
+Copy your Hypermode endpoint as specified in the Hypermode console.
 
 ### 2️⃣ Add the GitHub Action
 
