@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/hypermodeinc/modus/sdk/go/pkg/http"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models/openai"
-	"strings"
 )
 
 type GitHubUser struct {
@@ -377,7 +378,7 @@ func IssueClosedHandler(repo string, issueNumber int, token string) {
 	}
 
 	// Output the KB article
-	fmt.Printf(kbArticle)
+	fmt.Printf("%s", kbArticle)
 
 	// Post the KB article as a GitHub discussion
 	err = postDiscussionToRepo(repo, fmt.Sprintf("Issue Summary: %s", issue.Title), kbArticle, token)
