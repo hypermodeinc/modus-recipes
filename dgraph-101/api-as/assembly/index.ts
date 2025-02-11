@@ -17,15 +17,15 @@ const DGRAPH_CONNECTION = "dgraph-grpc"
  * Add or update a new product to the database
  */
 export function upsertProduct(product: Product): Map<string, string> | null {
-  var payload = buildProductMutationJson(DGRAPH_CONNECTION, product)
+  let payload = buildProductMutationJson(DGRAPH_CONNECTION, product)
 
   const embedding = embedText([product.description])[0]
   payload = addEmbeddingToJson(payload, "Product.embedding", embedding)
 
-  const mutations: dgraph.Mutation[] = [new dgraph.Mutation(payload)]
-  const uids = dgraph.execute(DGRAPH_CONNECTION, new dgraph.Request(null, mutations)).Uids
+  const mutation = new dgraph.Mutation(payload)
+  const response = dgraph.executeMutations(DGRAPH_CONNECTION, mutation)
 
-  return uids
+  return response.Uids
 }
 
 /**
@@ -69,7 +69,7 @@ export function getProductsByCategory(category: string): Product[] {
       }
     }
   }`)
-  const response = dgraph.execute(DGRAPH_CONNECTION, new dgraph.Request(query))
+  const response = dgraph.executeQuery(DGRAPH_CONNECTION, query)
   const data = JSON.parse<ListOf<ListOf<Product>>>(response.Json)
   if (data.list.length > 0) {
     return data.list[0].list
