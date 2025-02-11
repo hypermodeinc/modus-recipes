@@ -17,9 +17,6 @@ product_schema.node_types.set("Category", {
 })
 
 export function buildProductMutationJson(connection: string, product: Product): string {
-  var payload = JSON.stringify(product)
-
-  payload = injectNodeUid(connection, payload, "Product", product_schema)
-
-  return payload
+  const payload = JSON.stringify(product)
+  return injectNodeUid(connection, payload, "Product", product_schema)
 }

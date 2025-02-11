@@ -45,12 +45,12 @@ function _recursiveCharacterTextSplitter(
 
   for (let i = 0; i < must_split_on.length; i++) {
     const sep = must_split_on[i]
-    var offset = 0
+    let offset = 0
     if (text.startsWith(sep)) {
       offset = sep.length
     }
 
-    var pos = text.slice(offset, max_char).indexOf(sep)
+    let pos = text.slice(offset, max_char).indexOf(sep)
     if (pos > 0) {
       pos += offset
       // console.log(`found separator [${sep}] at ${pos}`);
@@ -131,7 +131,7 @@ export function splitMarkdown(
   section_zero.children = []
   section_zero.chunks = []
   const doc = <DocPage>{ docid: id, root: section_zero }
-  var current_section = section_zero
+  let current_section = section_zero
   const section_path = [section_zero]
 
   const lines = recursiveCharacterTextSplitter(

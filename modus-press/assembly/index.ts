@@ -69,8 +69,8 @@ function generateText(instruction: string, prompt: string): string {
   return output.choices[0].message.content.trim()
 }
 
-// The connection host for our Postgres database, as defined in modus.json
-const host = "moduspressdb"
+// The connection for our Postgres database, as defined in modus.json
+const connection = "moduspressdb"
 
 /**
  * The author information
@@ -91,6 +91,6 @@ function getAuthorByName(name: string): Author {
   const params = new postgresql.Params()
   params.push(name)
 
-  const response = postgresql.query<Author>(host, query, params)
+  const response = postgresql.query<Author>(connection, query, params)
   return response.rows[0]
 }

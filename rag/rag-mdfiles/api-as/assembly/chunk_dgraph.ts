@@ -29,11 +29,11 @@ export function computeChunkEmbeddings(doc: DocPage): void {
 export function addDocument(connection: string, doc: DocPage): Map<string, string> | null {
   /* take advantage of the fact that Dgraph can handle JSON with nested objects in mutation */
   const chunk_json = JSON.stringify(doc)
-  const mutations: dgraph.Mutation[] = [new dgraph.Mutation(chunk_json)]
-  const uids = dgraph.execute(connection, new dgraph.Request(null, mutations)).Uids
-
-  return uids
+  const mutation = new dgraph.Mutation(chunk_json)
+  const response = dgraph.executeMutations(connection, mutation)
+  return response.Uids
 }
+
 export function getDocument(connection: string, docid: string): DocPage | null {
   const query = new dgraph.Query(`
       query { 
@@ -51,7 +51,7 @@ export function getDocument(connection: string, docid: string): DocPage | null {
           }
       }
       `)
-  const resp = dgraph.execute(connection, new dgraph.Request(query))
+  const resp = dgraph.executeQuery(connection, query)
   const response = JSON.parse<DocPageResult>(resp.Json).result
   if (response.length == 0) {
     return null
@@ -80,7 +80,7 @@ export function deleteDocument(connection: string, docid: string): void {
       `,
   )
 
-  dgraph.execute(connection, new dgraph.Request(query, [mutation]))
+  dgraph.executeQuery(connection, query, mutation)
 }
 
 
@@ -120,7 +120,7 @@ export function rank_by_similarity(
   `
 
   const query = new dgraph.Query(dql_query, vars)
-  const resp = dgraph.execute(connection, new dgraph.Request(query))
+  const resp = dgraph.executeQuery(connection, query)
   const response = JSON.parse<SimilarChunkResult>(resp.Json).result
 
   // create a RankedDocument array
@@ -160,7 +160,7 @@ export function search_by_term(
   `
   console.log(dql_query)
   const query = new dgraph.Query(dql_query, vars)
-  const resp = dgraph.execute(connection, new dgraph.Request(query))
+  const resp = dgraph.executeQuery(connection, query)
   const response = JSON.parse<SimilarChunkResult>(resp.Json).result
   return response
 }
@@ -204,7 +204,7 @@ export function getPageSubTrees(
   }
   `
   const query = new dgraph.Query(dql_query)
-  const resp = dgraph.execute(connection, new dgraph.Request(query))
+  const resp = dgraph.executeQuery(connection, query)
   const response = JSON.parse<DocPageResult>(resp.Json).result
   return response
 }
