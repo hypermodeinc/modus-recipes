@@ -67,7 +67,7 @@ function injectNodeType(
   if (entity != null) {
     entity.set("dgraph.type", type)
     const node_type = schema.node_types.get(type)
-    for (var i = 0; i < node_type.relationships.length; i++) {
+    for (let i = 0; i < node_type.relationships.length; i++) {
       const predicate = node_type.relationships[i].predicate
       const type = node_type.relationships[i].type
       injectNodeType(connection, entity.getObj(predicate), type, schema)
@@ -99,7 +99,7 @@ export function getEntityById<T>(
           ${body}
         }
       }`)
-  const response = dgraph.execute(connection, new dgraph.Request(query))
+  const response = dgraph.executeQuery(connection, query)
   const data = JSON.parse<ListOf<T>>(response.Json)
   if (data.list.length > 0) {
     return data.list[0]
@@ -109,7 +109,7 @@ export function getEntityById<T>(
 
 function getEntityUid(connection: string, predicate: string, value: string): string | null {
   const query = new dgraph.Query(`{uids(func: eq(${predicate}, "${value}")) {uid}}`)
-  const response = dgraph.execute(connection, new dgraph.Request(query))
+  const response = dgraph.executeQuery(connection, query)
   const data = JSON.parse<UidResult>(response.Json)
   if (data.uids.length == 0) {
     return null
@@ -132,7 +132,7 @@ export function deleteNodePredicates(
     .join("\n")
   const mutation = new dgraph.Mutation("", "", "", del_nquads)
 
-  dgraph.execute(connection, new dgraph.Request(query, [mutation]))
+  dgraph.executeQuery(connection, query, mutation)
 }
 
 export function searchBySimilarity<T>(
@@ -142,7 +142,7 @@ export function searchBySimilarity<T>(
   body: string,
   topK: i32,
 ): T[] {
-  const query = `
+  const query = new dgraph.Query(`
     query search($vector: float32vector) {
         var(func: similar_to(${predicate},${topK},$vector))  {    
             vemb as Product.embedding 
@@ -153,13 +153,9 @@ export function searchBySimilarity<T>(
         list(func:uid(score),orderdesc:val(score))  @filter(gt(val(score),0.25)){ 
             ${body}
         }
-    }`
-  const vars = new dgraph.Variables()
-  vars.set("$vector", JSON.stringify(embedding))
+    }`).withVariable("$vector", embedding)
 
-  const dgraph_query = new dgraph.Query(query, vars)
-
-  const response = dgraph.execute(connection, new dgraph.Request(dgraph_query))
+  const response = dgraph.executeQuery(connection, query)
   console.log(response.Json)
   return JSON.parse<ListOf<T>>(response.Json).list
 }
@@ -167,6 +163,5 @@ export function searchBySimilarity<T>(
 export function addEmbeddingToJson(payload: string, predicate: string, embedding: f32[]): string {
   // Add the embedding to the payload at root level
   // TO DO: extend to nested entities and use JSONpath
-  payload = payload.replace("{", `{ \"${predicate}\":\"${JSON.stringify(embedding)}\",`)
-  return payload
+  return payload.replace("{", `{ \"${predicate}\":\"${JSON.stringify(embedding)}\",`)
 }

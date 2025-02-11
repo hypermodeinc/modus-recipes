@@ -27,11 +27,11 @@ export function llmWithTools(
   toolCallBack: (toolCall: ToolCall) => string,
   limit: u8 = 3,
 ): ResponseWithLogs {
-  var logs: string[] = []
-  var final_response = ""
-  var tool_messages: ToolMessage<string>[] = []
-  var message: CompletionMessage | null = null
-  var loops: u8 = 0
+  const logs: string[] = []
+  let final_response = ""
+  let tool_messages: ToolMessage<string>[] = []
+  let message: CompletionMessage | null = null
+  let loops: u8 = 0
   // we loop until we get a response or we reach the maximum number of loops (3)
   do {
     message = getLLMResponse(model, tools, system_prompt, question, message, tool_messages)
@@ -71,7 +71,7 @@ function getLLMResponse(
   if (last_message != null) {
     input.messages.push(last_message.toAssistantMessage())
   }
-  for (var i = 0; i < tools_messages.length; i++) {
+  for (let i = 0; i < tools_messages.length; i++) {
     input.messages.push(tools_messages[i])
   }
 
@@ -92,7 +92,7 @@ function aggregateToolsResponse(
   toolCalls: ToolCall[],
   toolCallBack: (toolCall: ToolCall) => string,
 ): ToolMessage<string>[] {
-  var messages: ToolMessage<string>[] = []
+  const messages: ToolMessage<string>[] = []
   for (let i = 0; i < toolCalls.length; i++) {
     const content = toolCallBack(toolCalls[i])
     const toolCallResponse = new ToolMessage(content, toolCalls[i].id)
