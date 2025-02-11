@@ -12,3 +12,5 @@ build/
 __debug_bin*
 *_generated.go
 *.generated.go
+
+.modusdb/
