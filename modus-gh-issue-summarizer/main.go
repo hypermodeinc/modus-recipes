@@ -316,7 +316,7 @@ func fetchIssueDetails(repo string, issueNumber int) (*GitHubIssue, error) {
 		return nil, fmt.Errorf("error fetching issue details: %w", err)
 	}
 
-	if response.Status != 200 {
+	if !response.Ok() {
 		fmt.Printf("Unexpected response status: %d\n", response.Status)
 		fmt.Printf("Response body: %s\n", string(response.Body))
 		return nil, fmt.Errorf("unexpected status code: %d", response.Status)
