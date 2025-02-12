@@ -306,6 +306,7 @@ func fetchIssueDetails(repo string, issueNumber int) (*GitHubIssue, error) {
 	options := &http.RequestOptions{
 		Method: "GET",
 		Headers: map[string]string{
+			"Authorization": "Bearer " + token,
 			"Content-Type": "application/json",
 		},
 	}
