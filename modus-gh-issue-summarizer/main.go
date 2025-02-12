@@ -293,11 +293,11 @@ func getLabelNames(labels []GitHubLabel) string {
 }
 
 func formatComments(comments []GitHubComment) string {
-	formatted := []string{}
+	buf := strings.Builder{}
 	for _, comment := range comments {
-		formatted = append(formatted, fmt.Sprintf("- **%s** (%s): %s", comment.User.Login, comment.CreatedAt, comment.Body))
+		buf.WriteString(fmt.Sprintf("- **%s** (%s): %s\n", comment.User.Login, comment.CreatedAt, comment.Body))
 	}
-	return strings.Join(formatted, "\n")
+	return buf.String()
 }
 
 func fetchIssueDetails(repo string, issueNumber int) (*GitHubIssue, error) {
