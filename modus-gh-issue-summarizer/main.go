@@ -285,9 +285,9 @@ func generateKBArticle(issue *GitHubIssue, comments []GitHubComment) (string, er
 }
 
 func getLabelNames(labels []GitHubLabel) string {
-	names := []string{}
-	for _, label := range labels {
-		names = append(names, label.Name)
+	names := make([]string, len(labels))
+	for i, label := range labels {
+		names[i] = label.Name
 	}
 	return strings.Join(names, ", ")
 }
