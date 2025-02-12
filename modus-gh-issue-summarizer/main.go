@@ -224,7 +224,7 @@ func getDiscussionCategoryID(repoID string, token string) (string, error) {
 		} `json:"data"`
 	}
 
-	if err := json.Unmarshal(response.Body, &result); err != nil {
+	if err := response.JSON(&result); err != nil {
 		return "", fmt.Errorf("error parsing discussion category ID response: %w", err)
 	}
 
