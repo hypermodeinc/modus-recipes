@@ -116,7 +116,7 @@ func postDiscussionToRepo(repo string, title string, body string, token string) 
 		return fmt.Errorf("error creating discussion: %w", err)
 	}
 
-	if response.Status != 200 {
+	if !response.Ok() {
 		return fmt.Errorf("failed to create discussion, status: %d, body: %s", response.Status, string(response.Body))
 	}
 
