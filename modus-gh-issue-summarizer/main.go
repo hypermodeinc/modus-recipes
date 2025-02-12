@@ -353,7 +353,7 @@ func fetchIssueComments(commentsURL string) ([]GitHubComment, error) {
 	}
 
 	var comments []GitHubComment
-	if err := json.Unmarshal(response.Body, &comments); err != nil {
+	if err := response.JSON(&comments); err != nil {
 		return nil, fmt.Errorf("error parsing comments: %w", err)
 	}
 
