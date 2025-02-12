@@ -324,7 +324,7 @@ func fetchIssueDetails(repo string, issueNumber int) (*GitHubIssue, error) {
 	}
 
 	var issue GitHubIssue
-	if err := json.Unmarshal(response.Body, &issue); err != nil {
+	if err := response.JSON(&issue); err != nil {
 		return nil, fmt.Errorf("error parsing issue details: %w", err)
 	}
 
