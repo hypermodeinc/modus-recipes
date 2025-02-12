@@ -335,6 +335,7 @@ func fetchIssueComments(commentsURL string) ([]GitHubComment, error) {
 	options := &http.RequestOptions{
 		Method: "GET",
 		Headers: map[string]string{
+			"Authorization": "Bearer " + token,
 			"Content-Type": "application/json",
 		},
 	}
