@@ -344,7 +344,7 @@ func fetchIssueComments(commentsURL string) ([]GitHubComment, error) {
 		return nil, fmt.Errorf("error fetching issue comments: %w", err)
 	}
 
-	if response.Status != 200 {
+	if !response.Ok() {
 		fmt.Printf("Unexpected response status: %d\n", response.Status)
 		fmt.Printf("Response body: %s\n", string(response.Body))
 		return nil, fmt.Errorf("unexpected status code: %d", response.Status)
