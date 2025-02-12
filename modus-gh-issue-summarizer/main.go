@@ -228,12 +228,13 @@ func getDiscussionCategoryID(repoID string, token string) (string, error) {
 		return "", fmt.Errorf("error parsing discussion category ID response: %w", err)
 	}
 
-	// Return the first available category
-	if len(result.Data.Node.DiscussionCategories.Nodes) > 0 {
-		return result.Data.Node.DiscussionCategories.Nodes[0].ID, nil
+	categories := result.Data.Node.DiscussionCategories.Nodes
+	if len(categories) == 0 {
+		return "", fmt.Errorf("no discussion categories found in repository")
 	}
 
-	return "", fmt.Errorf("no discussion categories found in repository")
+	// Return the ID of the first available category
+	return categories[0].ID, nil
 }
 
 func generateKBArticle(issue *GitHubIssue, comments []GitHubComment) (string, error) {
