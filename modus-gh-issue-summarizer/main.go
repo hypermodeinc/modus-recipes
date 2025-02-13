@@ -308,7 +308,7 @@ func fetchIssueDetails(repo string, issueNumber int) (*GitHubIssue, error) {
 		Method: "GET",
 		Headers: map[string]string{
 			"Authorization": "Bearer " + token,
-			"Content-Type": "application/json",
+			"Content-Type":  "application/json",
 		},
 	}
 
@@ -337,7 +337,7 @@ func fetchIssueComments(commentsURL string) ([]GitHubComment, error) {
 		Method: "GET",
 		Headers: map[string]string{
 			"Authorization": "Bearer " + token,
-			"Content-Type": "application/json",
+			"Content-Type":  "application/json",
 		},
 	}
 
