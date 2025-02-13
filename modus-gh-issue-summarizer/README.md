@@ -24,6 +24,10 @@ First, install Modus CLI:
 npm install -g @hypermodeinc/modus
 ```
 
+We'll be using Go for this project so you'll also want to make sure you have
+[Go](https://go.dev/doc/install) and [TinyGo](https://tinygo.org/getting-started/install/) installed
+as well.
+
 ### 2️⃣ Clone the Repository
 
 ```bash
@@ -39,7 +43,7 @@ modus dev
 
 ### 4️⃣ Test the API Locally
 
-Go to: `http://localhost:54321/graphql`
+Go to: `http://localhost:8686/explorer`
 
 You'll see an exported function `issueClosedHandler`. Test the KB Article Generation. Enter the
 repository name and issue number and run the query. The API will return a formatted KB article. You
@@ -51,9 +55,7 @@ can also post the KB Article as a Discussion. To do so, pass a GitHub API token 
 
 To deploy the function to Hypermode:
 
-```bash
-modus deploy
-```
+TODO: deploy to Hypermode steps
 
 Once deployed, copy your Hypermode endpoint, which will be used in the GitHub Action.
 
@@ -70,7 +72,6 @@ If you haven't already:
 ```bash
 git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
 cd YOUR_REPO
-modus deploy
 ```
 
 Copy your Hypermode endpoint as specified in the Hypermode console.
@@ -106,5 +107,5 @@ Ensure:
 
 No Response from the API?
 
-- Check if your Modus function is deployed (modus deploy).
+- Check if your Modus function is deployed.
 - Verify that your Hypermode API key is correct in GitHub Secrets.
