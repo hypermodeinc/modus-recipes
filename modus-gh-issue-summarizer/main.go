@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hypermodeinc/modus/sdk/go/pkg/console"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/http"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models"
 	"github.com/hypermodeinc/modus/sdk/go/pkg/models/openai"
@@ -119,7 +120,7 @@ func postDiscussionToRepo(repo string, title string, body string, token string) 
 		return fmt.Errorf("failed to create discussion, status: %d, body: %s", response.Status, response.Text())
 	}
 
-	fmt.Println("✅ Discussion created successfully.")
+	console.Info("✅ Discussion created successfully.")
 	return nil
 }
 
@@ -320,8 +321,9 @@ func fetchIssueDetails(repo string, issueNumber int, token string) (*GitHubIssue
 	}
 
 	if !response.Ok() {
-		fmt.Printf("Unexpected response status: %d\n", response.Status)
-		fmt.Printf("Response body: %s\n", response.Text())
+		msg := fmt.Sprintf("Unexpected response status: %d\n", response.Status)
+		msg += fmt.Sprintf("Response body:\n%s\n", response.Text())
+		console.Debug(msg)
 		return nil, fmt.Errorf("unexpected status code: %d", response.Status)
 	}
 
@@ -349,8 +351,9 @@ func fetchIssueComments(commentsURL, token string) ([]GitHubComment, error) {
 	}
 
 	if !response.Ok() {
-		fmt.Printf("Unexpected response status: %d\n", response.Status)
-		fmt.Printf("Response body: %s\n", response.Text())
+		msg := fmt.Sprintf("Unexpected response status: %d\n", response.Status)
+		msg += fmt.Sprintf("Response body:\n%s\n", response.Text())
+		console.Debug(msg)
 		return nil, fmt.Errorf("unexpected status code: %d", response.Status)
 	}
 
@@ -362,34 +365,31 @@ func fetchIssueComments(commentsURL, token string) ([]GitHubComment, error) {
 	return comments, nil
 }
 
-func IssueClosedHandler(repo string, issueNumber int, token string) {
+func IssueClosedHandler(repo string, issueNumber int, token string) error {
 	issue, err := fetchIssueDetails(repo, issueNumber, token)
 	if err != nil {
-		fmt.Printf("Error fetching issue details: %v\n", err)
-		return
+		return fmt.Errorf("error fetching issue details: %w", err)
 	}
 
 	comments, err := fetchIssueComments(issue.CommentsURL, token)
 	if err != nil {
-		fmt.Printf("Error fetching issue comments: %v\n", err)
-		return
+		return fmt.Errorf("error fetching issue comments: %w", err)
 	}
 
 	kbArticle, err := generateKBArticle(issue, comments)
 	if err != nil {
-		fmt.Printf("Error generating KB article: %v\n", err)
-		return
+		return fmt.Errorf("error generating KB article: %w", err)
 	}
 
 	// Output the KB article
-	fmt.Printf("%s", kbArticle)
+	console.Debug(kbArticle)
 
 	// Post the KB article as a GitHub discussion
 	err = postDiscussionToRepo(repo, fmt.Sprintf("Issue Summary: %s", issue.Title), kbArticle, token)
 	if err != nil {
-		fmt.Printf("❌ Error posting KB article as a discussion: %v\n", err)
-		return
+		return fmt.Errorf("error posting KB article as a discussion: %w", err)
 	}
 
-	fmt.Println("KB article successfully posted as a comment.")
+	console.Debug("KB article successfully posted as a discussion.")
+	return nil
 }
