@@ -301,7 +301,7 @@ func formatComments(comments []GitHubComment) string {
 	return buf.String()
 }
 
-func fetchIssueDetails(repo string, issueNumber int) (*GitHubIssue, error) {
+func fetchIssueDetails(repo string, issueNumber int, token string) (*GitHubIssue, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d", repo, issueNumber)
 
 	options := &http.RequestOptions{
@@ -332,7 +332,7 @@ func fetchIssueDetails(repo string, issueNumber int) (*GitHubIssue, error) {
 	return &issue, nil
 }
 
-func fetchIssueComments(commentsURL string) ([]GitHubComment, error) {
+func fetchIssueComments(commentsURL, token string) ([]GitHubComment, error) {
 	options := &http.RequestOptions{
 		Method: "GET",
 		Headers: map[string]string{
@@ -362,13 +362,13 @@ func fetchIssueComments(commentsURL string) ([]GitHubComment, error) {
 }
 
 func IssueClosedHandler(repo string, issueNumber int, token string) {
-	issue, err := fetchIssueDetails(repo, issueNumber)
+	issue, err := fetchIssueDetails(repo, issueNumber, token)
 	if err != nil {
 		fmt.Printf("Error fetching issue details: %v\n", err)
 		return
 	}
 
-	comments, err := fetchIssueComments(issue.CommentsURL)
+	comments, err := fetchIssueComments(issue.CommentsURL, token)
 	if err != nil {
 		fmt.Printf("Error fetching issue comments: %v\n", err)
 		return
