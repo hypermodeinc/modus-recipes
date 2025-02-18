@@ -110,8 +110,7 @@ func postDiscussionToRepo(repo string, title string, body string, token string) 
 		Body: payload,
 	}
 
-	request := http.NewRequest("https://api.github.com/graphql", options)
-	response, err := http.Fetch(request)
+	response, err := http.Fetch("https://api.github.com/graphql", options)
 	if err != nil {
 		return fmt.Errorf("error creating discussion: %w", err)
 	}
@@ -152,8 +151,7 @@ func getRepositoryID(owner string, repoName string, token string) (string, error
 		Body: payload,
 	}
 
-	request := http.NewRequest("https://api.github.com/graphql", options)
-	response, err := http.Fetch(request)
+	response, err := http.Fetch("https://api.github.com/graphql", options)
 	if err != nil {
 		return "", fmt.Errorf("error fetching repository ID: %w", err)
 	}
@@ -206,8 +204,7 @@ func getDiscussionCategoryID(repoID string, token string) (string, error) {
 		Body: payload,
 	}
 
-	request := http.NewRequest("https://api.github.com/graphql", options)
-	response, err := http.Fetch(request)
+	response, err := http.Fetch("https://api.github.com/graphql", options)
 	if err != nil {
 		return "", fmt.Errorf("error fetching discussion category ID: %w", err)
 	}
@@ -312,8 +309,7 @@ func fetchIssueDetails(repo string, issueNumber int, token string) (*GitHubIssue
 		},
 	}
 
-	request := http.NewRequest(url, options)
-	response, err := http.Fetch(request)
+	response, err := http.Fetch(url, options)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching issue details: %w", err)
 	}
@@ -342,8 +338,7 @@ func fetchIssueComments(commentsURL, token string) ([]GitHubComment, error) {
 		},
 	}
 
-	request := http.NewRequest(commentsURL, options)
-	response, err := http.Fetch(request)
+	response, err := http.Fetch(commentsURL, options)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching issue comments: %w", err)
 	}
