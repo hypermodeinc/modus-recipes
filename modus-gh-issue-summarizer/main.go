@@ -238,22 +238,24 @@ func getDiscussionCategoryID(repoID string, token string) (string, error) {
 
 func generateKBArticle(issue *GitHubIssue, comments []GitHubComment) (string, error) {
 	prompt := fmt.Sprintf(`
-		Generate a detailed markdown article givin a concise summary of the following GitHub issue. Include the problem, the solution (if on exists), and any other relevant details. Please mention the users involved and any significant involvement in the issue.
-		
-		### Issue Details:
-		- **Title**: %s
-		- **Description**: %s
-		- **State**: %s
-		- **Created by**: %s
-		- **Created at**: %s
-		- **Labels**: %v
-		- **Reactions**: 👍 (%d), 👎 (%d), ❤️ (%d), 🎉 (%d), 🚀 (%d), 👀 (%d)
+Generate a detailed markdown article given a concise summary of the following GitHub issue.
+Include the problem, the solution (if one exists), and any other relevant details.
+Please mention the users involved and any significant involvement in the issue.
 
-		### Comments:
-		%s
+### Issue Details:
+- **Title**: %s
+- **Description**: %s
+- **State**: %s
+- **Created by**: %s
+- **Created at**: %s
+- **Labels**: %v
+- **Reactions**: 👍 (%d), 👎 (%d), ❤️ (%d), 🎉 (%d), 🚀 (%d), 👀 (%d)
 
-		Generate the output in markdown format.
-	`,
+### Comments:
+%s
+
+Generate the output in markdown format.
+`,
 		issue.Title, issue.Body, issue.State, issue.User.Login, issue.CreatedAt,
 		getLabelNames(issue.Labels),
 		issue.Reactions.PlusOne, issue.Reactions.MinusOne, issue.Reactions.Heart,
