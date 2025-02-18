@@ -36,7 +36,7 @@ Additionally
 We are using
 
 - `sentence-transformers/all-MiniLM-L6-v2` for the embedding
-- `meta-llama/Meta-Llama-3.1-8B-Instruct` for text generation All models are shared models hosted by
+- `meta-llama/Llama-3.2-3B-Instruct` for text generation All models are shared models hosted by
   Hypermode.
 
 Login to Hypermode to get access to those model before running this project locally.
@@ -117,7 +117,7 @@ text-generator
 
 ```json
  "text-generator": {
-      "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "sourceModel": "meta-llama/Llama-3.2-3B-Instruct",
       "connection": "hypermode",
       "provider": "hugging-face"
     },

@@ -14,7 +14,7 @@
       "provider": "hugging-face"
     },
     "text-generator": {
-      "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "sourceModel": "meta-llama/Llama-3.2-3B-Instruct",
       "connection": "hypermode",
       "provider": "hugging-face"
     }
