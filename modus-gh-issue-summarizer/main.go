@@ -277,8 +277,6 @@ Generate the output in markdown format.
 		return "", fmt.Errorf("error creating model input: %w", err)
 	}
 
-	input.Temperature = 0.7
-
 	output, err := model.Invoke(input)
 	if err != nil {
 		return "", fmt.Errorf("error invoking model: %w", err)
