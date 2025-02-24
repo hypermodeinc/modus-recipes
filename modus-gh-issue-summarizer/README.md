@@ -21,27 +21,23 @@ Discussion.
 First, install Modus CLI:
 
 ```bash
-npm install -g @hypermodeinc/modus
+npm install -g @hypermodeinc/modus-cli
 ```
 
 We'll be using Go for this project so you'll also want to make sure you have
 [Go](https://go.dev/doc/install) and [TinyGo](https://tinygo.org/getting-started/install/) installed
 as well.
 
-### 2️⃣ Clone the Repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
-```
-
-### 3️⃣ Start the Modus Dev Server
+### 2️⃣ Start the Modus Dev Server
 
 ```bash
 modus dev
 ```
 
-### 4️⃣ Test the API Locally
+### 3️⃣ Test the API Locally With Your GitHub Repository
+
+To test the API locally you'll need a public GitHub repository and a GitHub issue number to use for
+the knowledge base article.
 
 Go to: `http://localhost:8686/explorer`
 
@@ -53,9 +49,8 @@ can also post the KB Article as a Discussion. To do so, pass a GitHub API token 
 
 ## 🚀 Deploying to Hypermode
 
-To deploy the function to Hypermode:
-
-TODO: deploy to Hypermode steps
+See [the Hypermode docs for instructions](https://docs.hypermode.com/deploy) to deploy this project
+to Hypermode.
 
 Once deployed, copy your Hypermode endpoint, which will be used in the GitHub Action.
 
@@ -63,24 +58,14 @@ Once deployed, copy your Hypermode endpoint, which will be used in the GitHub Ac
 
 ## 🔧 Setting Up the GitHub Action
 
-This action allows the KB article to be generated automatically when an issue is closed.
+This action allows the KB article to be generated automatically when an issue is closed. Be sure to
+follow the step above to deploy your Modus project to Hypermode.
 
-### 1️⃣ Clone the Project & Deploy to Hypermode
+### 1️⃣ Add the GitHub Action
 
-If you haven't already:
+Copy the `workflows/issue-summarizer.yml` file into in your repository:
 
-```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
-```
-
-Copy your Hypermode endpoint as specified in the Hypermode console.
-
-### 2️⃣ Add the GitHub Action
-
-Copy the issue-summarizer.yml file into in your repository:
-
-### 3️⃣ Add Your Hypermode API Key to GitHub Secrets
+### 2️⃣ Add Your Hypermode API Key to GitHub Secrets
 
 1. Go to your GitHub repository.
 2. Navigate to Settings → Secrets and variables → Actions.
@@ -89,7 +74,7 @@ Copy the issue-summarizer.yml file into in your repository:
 5. Paste your Hypermode API key.
 6. Save.
 
-### 4️⃣ Done! 🎉
+### 3️⃣ Done! 🎉
 
 Now, every time a GitHub issue is closed, a KB article will be generated and posted as a GitHub
 Discussion.
