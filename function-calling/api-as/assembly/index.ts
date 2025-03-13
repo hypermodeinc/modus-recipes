@@ -79,7 +79,7 @@ function tool_get_product_info(): Tool {
     // all object in the schema must have "additionalProperties": false
     // 'required' is required to be supplied and to be an array including every key in properties
     // meaning openai expects all fields to be required
-    parameters: param.toString(),
+    parameters: JSON.Raw.from(param.toString()),
     strict: true,
   }
 
