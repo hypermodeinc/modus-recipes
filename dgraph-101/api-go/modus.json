@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.hypermode.com/modus.json",
+  "endpoints": {
+    "default": {
+      "type": "graphql",
+      "path": "/graphql",
+      "auth": "bearer-token"
+    }
+  },
+  "connections": {
+    "dgraph": {
+      "type": "dgraph",
+      "grpcTarget": "sandbox-raphael.hypermode.host:443",
+      "key": "{{API_KEY}}"
+    }
+  }
+}

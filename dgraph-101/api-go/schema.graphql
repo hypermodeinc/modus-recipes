@@ -1,0 +1,13 @@
+# GraphQL type from Go struct:
+# Deploy using
+# curl --data-binary '@./schema.graphql' --header 'content-type: application/octet-stream' -H "Authorization: Bearer $DGRAPH_API_TOKEN" $DGRAPH_ENDPOINT/admin/schema
+
+type Product {
+  id: String! @id
+  title: String!
+  description: String
+  parts: [ProductPart]
+}
+type ProductPart {
+  name: String!
+}
