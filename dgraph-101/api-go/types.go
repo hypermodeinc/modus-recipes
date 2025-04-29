@@ -1,7 +1,7 @@
 package main
 
 type Product struct {
-	ID          string        `json:"id" dgraph:"@id"`
+	Id          string        `json:"id" dgraph:"@id"`
 	Title       string        `json:"title"`
 	Description *string       `json:"description",omitempty`
 	Parts       []ProductPart `json:"parts,omitempty"`

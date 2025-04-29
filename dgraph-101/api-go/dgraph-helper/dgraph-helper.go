@@ -334,7 +334,7 @@ func GetByID[T any](connection string, id string) (*T, error) {
 
 	typeName := objType.Name()
 	idField := idField(objType)
-	query := fmt.Sprintf("query { node(func: eq(%s.%s, \"%s\")) %s }", typeName, idField, id, payload)
+	query := fmt.Sprintf("query { node(func: eq(%s.%s, \"%s\"),first:1) %s }", typeName, idField, id, payload)
 
 	dgraph_query := dgraph.NewQuery(query)
 
@@ -386,4 +386,96 @@ func getJSONFieldName(field reflect.StructField) string {
 		return jsonTag[:idx] // Extract the field name before the first comma
 	}
 	return jsonTag
+}
+
+// generateSample generates a JSON document as a sample of the given type using the "desc" tag.
+func generateSample(objType reflect.Type) (string, error) {
+	if objType.Kind() != reflect.Struct {
+		return "", fmt.Errorf("expected a struct type, got %s", objType.Name())
+	}
+
+	sample := generateSampleRecurse(objType)
+	jsonData, err := json.MarshalIndent(sample, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
+}
+
+func generateSampleRecurse(objType reflect.Type) map[string]interface{} {
+	sample := make(map[string]interface{})
+
+	for i := 0; i < objType.NumField(); i++ {
+		field := objType.Field(i)
+		fieldName := getJSONFieldName(field)
+		descTag := field.Tag.Get("desc")
+		fieldType := getDereferencedType(field.Type)
+
+		switch fieldType.Kind() {
+		case reflect.String:
+			if descTag != "" {
+				sample[fieldName] = fmt.Sprintf("string field: %s", descTag)
+			} else {
+				sample[fieldName] = "sample_string"
+			}
+		case reflect.Int:
+			if descTag != "" {
+				sample[fieldName] = fmt.Sprintf("int field: %s", descTag)
+			} else {
+				sample[fieldName] = "sample_int"
+			}
+		case reflect.Float64:
+			if descTag != "" {
+				sample[fieldName] = fmt.Sprintf("float64 field: %s", descTag)
+			} else {
+				sample[fieldName] = "sample_float64"
+			}
+		case reflect.Bool:
+			if descTag != "" {
+				sample[fieldName] = fmt.Sprintf("boolean field: %s", descTag)
+			} else {
+				sample[fieldName] = "sample_bool"
+			}
+		case reflect.Struct:
+			sample[fieldName] = generateSampleRecurse(fieldType)
+		case reflect.Slice:
+			elemType := getDereferencedType(fieldType.Elem())
+			if elemType.Kind() == reflect.Struct {
+				sample[fieldName] = []interface{}{generateSampleRecurse(elemType)}
+			} else {
+				sample[fieldName] = []interface{}{generateSampleValue(elemType, descTag)}
+			}
+		default:
+			sample[fieldName] = generateSampleValue(fieldType, descTag)
+		}
+	}
+
+	return sample
+}
+
+func generateSampleValue(fieldType reflect.Type, descTag string) interface{} {
+	switch fieldType.Kind() {
+	case reflect.String:
+		if descTag != "" {
+			return fmt.Sprintf("string field: %s", descTag)
+		}
+		return "sample_string"
+	case reflect.Int:
+		if descTag != "" {
+			return fmt.Sprintf("int field: %s", descTag)
+		}
+		return "sample_int"
+	case reflect.Float64:
+		if descTag != "" {
+			return fmt.Sprintf("float64 field: %s", descTag)
+		}
+		return "sample_float64"
+	case reflect.Bool:
+		if descTag != "" {
+			return fmt.Sprintf("boolean field: %s", descTag)
+		}
+		return "sample_bool"
+	default:
+		return nil
+	}
 }
