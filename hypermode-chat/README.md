@@ -12,7 +12,7 @@ pnpm i && pnpm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Modify`app/page.tsx` to change the UI.
+Modify `app/page.tsx` to change the UI.
 
 The chat action is implemented in action.ts. Update the GraphQL query to match your backend API.
 
