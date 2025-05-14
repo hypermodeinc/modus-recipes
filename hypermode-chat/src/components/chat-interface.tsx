@@ -58,7 +58,11 @@ export default function ChatInterface() {
   const fetchResponse = async (input: string) => {
     const response = await chat(input, messages.slice(1, -1), userpref)
     {
-      console.log(response)
+      console.info("Chat response received:", {
+        error: response.error,
+        message: response.data?.chat?.message,
+        userPreferences: response.data?.user_preferences,
+      });
       if (response.error) {
         setMessages((prev) => [
           ...prev,
