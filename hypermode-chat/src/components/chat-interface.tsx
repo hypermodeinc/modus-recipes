@@ -100,7 +100,7 @@ export default function ChatInterface() {
         error: response.error,
         message: response.data?.chat?.message,
         userPreferences: response.data?.user_preferences,
-      });
+      })
       if (response.error) {
         setConversations((prev) =>
           prev.map((conv) =>
