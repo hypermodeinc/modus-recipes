@@ -83,7 +83,7 @@ export default function ChatInterface() {
           },
         ])
       }
-      setLoading((prev) => false)
+      setLoading(false)
     }
   }
   const handleSubmit = async (e: FormEvent) => {
