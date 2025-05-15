@@ -11,19 +11,26 @@
     // This defines the models that will be used for text generation.
     "text-generator": {
       "sourceModel": "gpt-4o",
-      "connection": "openai",
+      "connection": "hypermode-router",
       "path": "v1/chat/completions"
     }
   },
   "connections": {
     // This defines the OpenAI connection, which is used by the model above.
     // The {{API_KEY}} will be replaced by the secret's value at run time.
-    "openai": {
+    "hypermode-router": {
       "type": "http",
-      "baseUrl": "https://api.openai.com/",
+      "baseUrl": "https://models.hypermode.host/",
       "headers": {
-        "Authorization": "Bearer {{API_KEY}}"
+        "Authorization": "Bearer {{TOKEN}}"
       }
+    },
+    // This defines a dgraph connection
+    // Get the connection string from the Hypermode dashboard.
+    // use a variable for bearer token
+    "dgraph": {
+      "type": "dgraph",
+      "connString": "dgraph://modus-recipes-backend-hypermode.hypermode.host:443?sslmode=verify-ca&bearertoken={{API_KEY}}"
     }
   }
 }

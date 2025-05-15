@@ -10,11 +10,14 @@ import (
 )
 
 type SearchResponse struct {
-	Message string `json:"message"`
-	History string `json:"history"`
+	Message          string `json:"message"`
+	History          string `json:"history"`
+	User_preferences string `json:"user_preferences"`
 }
 
 const MODEL_NAME = "text-generator"
+
+var session_ID = ""
 
 func defaultPrompt() string {
 	/*
@@ -28,22 +31,10 @@ func defaultPrompt() string {
 	isoTime := time.Now().UTC().Format(time.RFC3339)
 
 	prompt := fmt.Sprintf(`Today is %s. 
-    You are a helpful travel agent. Ask questions to the user until you obtain a booking intent and hotel criteria with enough information.
-    A clear booking intent must contain the following information:
-    - "city"
-    - "number of people"
-    - "date"
-    - "duration in days"
-    The hotel criteria may contain the following information:
-    - "rating": OneStar, TwoStar, ThreeStar, FourStar, FiveStar
-	- "facilities": wifi, parking, pool, gym, spa, ...
-
-    If the intent is not clear, reply with your understanding of the user's intent and a the question to clarify the intent.
-
-    An example of a clear intent is: "I would like to book a hotel with wifi in Valencia for 2 people next Monday for 3 days."
-     or with a list of hotels.
-    Ask one question at a time.
-    Use the provided tools to help you with the conversation and list hotels matching the user criteria.
+    You are a helpful assitant who can save fact in memory and reply to questions by searching for saved facts.
+	If the user input is a statement, use the save_fact tool and confirm that you'll rember.
+	If the user input is a question, use the search_fact tool with selected list of terms and reply using the data retrieved.
+	Reply that you don't have that in memory if the nothing is found.
 	`, isoTime)
 	return prompt
 }
@@ -56,39 +47,29 @@ func executeToolCall(tool_call openai.ToolCall) string {
 		return true
 	})
 	fmt.Println("Tool call:", tool_call.Function.Name, params_map)
-	if tool_call.Function.Name == "search_hotels" {
-		return searchHotels(tool_call.Function.Arguments)
-	} else if tool_call.Function.Name == "weather_forecast" {
-		return weatherForecast(tool_call.Function.Arguments)
+	if tool_call.Function.Name == "save_fact" {
+		return save_fact(session_ID, tool_call.Function.Arguments)
+	} else if tool_call.Function.Name == "search_fact" {
+		return search_fact(session_ID, tool_call.Function.Arguments)
 	}
 	return ""
 }
-func searchHotels(arguments string) string {
-	return "I found 3 hotels in Valencia matching your criteria: Hotel 1, Hotel 2, Hotel 3"
-}
-func weatherForecast(arguments string) string {
-	return "The weather in Valencia on Monday will be sunny with a temperature of 25°C"
-}
+
 func chatTools() []openai.Tool {
 	tools := []openai.Tool{
-		openai.NewToolForFunction("search_hotels", "list of hotels matching the user criteria").
-			WithParameter("city", "string", `city name where user wants to book a hotel`).
-			WithParameter("number_of_people", "integer", `number of people for the booking`).
-			WithParameter("checking_date", "string", `date for the booking`).
-			WithParameter("duration_in_days", "integer", `duration of the booking in days`).
-			WithParameter("rating", "string", `rating of the hotel`).
-			WithParameter("facilities", "string", `comma separated list of facilities expected`),
-		openai.NewToolForFunction("weather_forecast", "Provide weather forecast for a city and date").
-			WithParameter("city", "string", `city`).
-			WithParameter("date", "string", `date`),
+		openai.NewToolForFunction("save_fact", "list of hotels matching the user criteria").
+			WithParameter("fact", "string", `fact to be remembered`),
+		openai.NewToolForFunction("search_fact", "Retrieve a fact from key words").
+			WithParameter("words", "string", `words separated by space`),
 	}
 	return tools
 }
 
-func Chat(query string, chatHistory string) (SearchResponse, error) {
+//export function chat(query: string , chat: ChatMessage[], user_preferences: string): SearchResponse {
+func Chat(query string, chat_history string, user_preferences *string) (SearchResponse, error) {
 
 	model, _ := models.GetModel[openai.ChatModel](MODEL_NAME)
-
+	session_ID = "test"
 	loopLimit := 3 // Maximum number of loops
 
 	llmResponse := llmWithTools(
@@ -96,18 +77,37 @@ func Chat(query string, chatHistory string) (SearchResponse, error) {
 		chatTools(),
 		defaultPrompt(),
 		query,
-		chatHistory,
+		chat_history,
 		openai.ResponseFormatText,
 		executeToolCall,
 		loopLimit,
 	)
 
 	response := SearchResponse{
-		Message: llmResponse.Response,
-		History: llmResponse.ChatHistory,
+		Message:          llmResponse.Response,
+		History:          llmResponse.ChatHistory,
+		User_preferences: "",
 	}
 
 	fmt.Println(llmResponse.Response)
 
 	return response, nil
+}
+
+func save_fact(sessionId string, arguments string) string {
+	// Save the chat history to a database or file
+	// This is a placeholder function. You can implement your own logic to save the memory.
+	fmt.Println("Saving memory for session:", sessionId)
+	fmt.Println("Fact:", arguments)
+
+	// Save a fact as a node in Dgraph with attributes sessionId, fact and timestamp
+	// timestamp := time.Now().UTC().Format(time.RFC3339)
+	// dgraphClient.Mutate(sessionId, fact, timestamp)
+	// Example: dgraphClient.Mutate("sessionId", "fact", "timestamp")
+	return "Fact saved"
+
+}
+
+func search_fact(sessionID string, arguments string) string {
+	return "Brian is in the kitchen"
 }
