@@ -1,4 +1,4 @@
-Lightweight chat UI
+# Lightweight chat UI
 
 ![chat UI](image.png)
 
@@ -26,7 +26,7 @@ const graphqlQuery = `
 
         }
     }
-  `
+  `;
 ```
 
 The current implementation is using a simple fetch at `process.env.HYPERMODE_API_ENDPOINT`, with the
