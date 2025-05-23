@@ -1,0 +1,552 @@
+/*
+We should be using @import tailwindcss, however
+the preflight styles were overriding custom styles
+https://github.com/tailwindlabs/tailwindcss/issues/15850
+*/
+
+/* @layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css"; */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@theme {
+  /* Breakpoints */
+  --breakpoint-3xl: 1920px;
+
+  /* Fonts */
+  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
+  --font-alliance: "Alliance No. 2", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-serif: "Serif", ui-serif, Georgia;
+
+  /* Font Sizes */
+  --text-xs: 13px;
+  --text-xs--line-height: 18px;
+  --text-xxs: 12px;
+  --text-xxs--line-height: 16px;
+
+  /* Colors */
+  --color-primary-25: #f1eef9;
+  --color-primary-50: #e4def6;
+  --color-primary-100: #d8cff3;
+  --color-primary-200: #ae9ee2;
+  --color-primary-300: #9c85e3;
+  --color-primary-400: #785bd4;
+  --color-primary-500: #6342cb;
+  --color-primary-600: #4e32a6;
+  --color-primary-700: #341d7e;
+  --color-primary-800: #2c1c61;
+  --color-primary-850: #2e2254;
+  --color-primary-900: #251f36;
+
+  --color-secondary-25: #e3eef7;
+  --color-secondary-50: #d2e2f1;
+  --color-secondary-100: #b7d5ef;
+  --color-secondary-200: #92c0ea;
+  --color-secondary-300: #73b1ea;
+  --color-secondary-400: #3f90d9;
+  --color-secondary-500: #1672c6;
+  --color-secondary-600: #0b5ba3;
+  --color-secondary-700: #054781;
+  --color-secondary-800: #022f58;
+  --color-secondary-850: #01203d;
+  --color-secondary-900: #011425;
+
+  --color-neutral-0: #ffffff;
+  --color-neutral-25: #f2f4fa;
+  --color-neutral-50: #edeef4;
+  --color-neutral-100: #dfe1e7;
+  --color-neutral-200: #cacdd6;
+  --color-neutral-300: #aeb2bb;
+  --color-neutral-400: #82868f;
+  --color-neutral-500: #62646b;
+  --color-neutral-600: #3c3d43;
+  --color-neutral-700: #303037;
+  --color-neutral-750: #292a30;
+  --color-neutral-800: #23242b;
+  --color-neutral-850: #171820;
+  --color-neutral-900: #14161f;
+  --color-neutral-950: #0b0c14;
+  --color-neutral-1000: #000000;
+
+  --color-error-100: #fbe0e8;
+  --color-error-300: #e89cb3;
+  --color-error-400: #f34c7e;
+  --color-error-500: #d41951;
+  --color-error-600: #ba0a3f;
+  --color-error-700: #7d0227;
+  --color-error-900: #240d14;
+
+  --color-error-alt-100: #f9d2f3;
+  --color-error-alt-300: #f58de5;
+  --color-error-alt-500: #db30bf;
+  --color-error-alt-700: #80056d;
+  --color-error-alt-900: #37002e;
+
+  --color-warning-100: #f5e6d0;
+  --color-warning-300: #f0c584;
+  --color-warning-500: #eb9516;
+  --color-warning-700: #b76e02;
+  --color-warning-900: #342e13;
+
+  --color-success-100: #d5f3db;
+  --color-success-300: #65d67e;
+  --color-success-500: #11d43c;
+  --color-success-700: #035b16;
+  --color-success-900: #102816;
+
+  --color-info-100: #d7e3f5;
+  --color-info-300: #7ea4de;
+  --color-info-500: #3e88f5;
+  --color-info-700: #03347e;
+  --color-info-900: #131d28;
+
+  /* Chart Colors */
+  --chart-1: #1e89aa;
+  --chart-2: #8238af;
+  --chart-3: #de5fab;
+  --chart-4: #f9a03f;
+  --chart-5: #1fa79f;
+  --chart-6: #d3751e;
+
+  /* Spacing */
+  --spacing-dialog-height: 376px;
+  --spacing-dialog-width: 480px;
+  --spacing-dialog-inner-content-height: 248px;
+  --spacing-navigation-height: 72px;
+
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+  --color-border-fair: var(--border-fair);
+  --color-border-inverse: var(--border-inverse);
+  --color-border-disabled: var(--border-disabled);
+  --color-border-action: var(--border-action);
+  --color-border-error: var(--border-error);
+  --color-border-warning: var(--border-warning);
+  --color-border-success: var(--border-success);
+  --color-border-info: var(--border-info);
+
+  --color-state-hover: var(--state-hover);
+  --color-state-select: var(--state-select);
+  --color-state-subnav-select: var(--state-subnav-select);
+
+  --color-surface-bg: var(--surface-bg);
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-surface-disabled: var(--surface-disabled);
+  --color-surface-action: var(--surface-action);
+  --color-surface-bg-modal: var(--surface-bg-modal);
+  --color-surface-error: var(--surface-error);
+  --color-surface-warning: var(--surface-warning);
+  --color-surface-success: var(--surface-success);
+  --color-surface-info: var(--surface-info);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-inverse: var(--text-inverse);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-action: var(--text-action);
+  --color-text-button-primary: var(--text-button-primary);
+  --color-text-button-secondary: var(--text-button-secondary);
+  --color-text-link: var(--text-link);
+  --color-text-error: var(--text-error);
+  --color-text-warning: var(--text-warning);
+  --color-text-success: var(--text-success);
+  --color-text-info: var(--text-info);
+
+  --color-icon-primary: var(--icon-primary);
+  --color-icon-secondary: var(--icon-secondary);
+  --color-icon-tertiary: var(--icon-tertiary);
+  --color-icon-inverse: var(--icon-inverse);
+  --color-icon-button-primary: var(--icon-button-primary);
+  --color-icon-disabled: var(--icon-disabled);
+  --color-icon-action: var(--icon-action);
+  --color-icon-error: var(--icon-error);
+  --color-icon-warning: var(--icon-warning);
+  --color-icon-success: var(--icon-success);
+  --color-icon-info: var(--icon-info);
+
+  --color-button-surface-primary: var(--button-surface-primary);
+  --color-button-surface-secondary: var(--button-surface-secondary);
+  --color-button-border-primary: var(--button-border-primary);
+  --color-button-border-secondary: var(--button-border-secondary);
+  --color-button-divider-primary: var(--button-divider-primary);
+  --color-button-divider-secondary: var(--button-divider-secondary);
+  --color-button-surface-disabled: var(--button-surface-disabled);
+  --color-button-divider-disabled: var(--button-divider-disabled);
+  --color-button-border-error: var(--button-border-error);
+  --color-button-text-error: var(--button-text-error);
+  --color-button-icon-error: var(--button-icon-error);
+
+  --color-modal-surface-header-primary: var(--modal-surface-header-primary);
+  --color-modal-surface-footer-primary: var(--modal-surface-footer-primary);
+  --color-modal-surface-body-primary: var(--modal-surface-body-primary);
+  --color-modal-surface-border-primary: var(--modal-surface-border-primary);
+
+  --color-nav-surface-primary: var(--nav-surface-primary);
+  --color-nav-surface-secondary: var(--nav-surface-secondary);
+  --color-nav-logo: var(--nav-logo);
+  --color-nav-border: var(--nav-border);
+  --color-nav-text: var(--nav-text);
+  --color-nav-icon: var(--nav-icon);
+  --color-nav-icon-secondary: var(--nav-icon-secondary);
+  --color-nav-icon-on: var(--nav-icon-on);
+  --color-nav-icon-off: var(--nav-icon-off);
+  --color-nav-bg-on: var(--nav-bg-on);
+
+  --color-control-surface-primary: var(--control-surface-primary);
+  --color-control-surface-secondary: var(--control-surface-secondary);
+  --color-control-surface-active: var(--control-surface-active);
+  --color-control-surface-disabled: var(--control-surface-disabled);
+  --color-control-border-primary: var(--control-border-primary);
+  --color-control-border-disabled: var(--control-border-disabled);
+
+  --color-form-surface-primary: var(--form-surface-primary);
+  --color-form-surface-secondary: var(--form-surface-secondary);
+  --color-form-border-primary: var(--form-border-primary);
+  --color-form-surface-disabled: var(--form-surface-disabled);
+  --color-form-border-disabled: var(--form-border-disabled);
+  --color-navigation-height: 72px;
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+@layer base {
+  :root {
+    --border-primary: var(--color-neutral-100);
+    --border-secondary: var(--color-neutral-200);
+    --border-fair: var(--color-neutral-50);
+    --border-inverse: var(--color-neutral-800);
+    --border-disabled: var(--color-neutral-300);
+    --border-action: var(--color-primary-500);
+    --border-error: var(--color-error-500);
+    --border-warning: var(--color-warning-500);
+    --border-success: var(--color-success-500);
+    --border-info: var(--color-info-500);
+
+    --state-hover: var(--color-secondary-25);
+    --state-select: var(--color-secondary-50);
+    --state-subnav-select: var(--color-primary-500);
+
+    --surface-bg: var(--color-neutral-800);
+    --surface-primary: var(--color-red-100);
+    --surface-secondary: var(--color-neutral-50);
+    --surface-inverse: var(--color-neutral-900);
+    --surface-disabled: var(--color-neutral-200);
+    --surface-action: var(--color-primary-500);
+    --surface-bg-modal: var(--color-neutral-0);
+    --surface-error: var(--color-error-100);
+    --surface-warning: var(--color-warning-100);
+    --surface-success: var(--color-success-100);
+    --surface-info: var(--color-info-100);
+
+    --text-primary: var(--color-neutral-900);
+    --text-secondary: var(--color-neutral-500);
+    --text-inverse: var(--color-neutral-0);
+    --text-disabled: var(--color-neutral-400);
+    --text-action: var(--color-primary-600);
+    --text-button-primary: var(--color-neutral-0);
+    --text-button-secondary: var(--color-primary-600);
+    --text-link: var(--color-secondary-600);
+    --text-error: var(--color-error-500);
+    --text-warning: var(--color-warning-500);
+    --text-success: var(--color-success-500);
+    --text-info: var(--color-info-500);
+
+    --icon-primary: var(--color-neutral-800);
+    --icon-secondary: var(--color-neutral-600);
+    --icon-tertiary: var(--color-neutral-400);
+    --icon-inverse: var(--color-neutral-0);
+    --icon-button-primary: var(--color-neutral-0);
+    --icon-disabled: var(--color-neutral-400);
+    --icon-action: var(--color-primary-500);
+    --icon-error: var(--color-error-500);
+    --icon-warning: var(--color-warning-500);
+    --icon-success: var(--color-success-500);
+    --icon-info: var(--color-info-500);
+
+    --button-surface-primary: var(--color-primary-500);
+    --button-surface-secondary: var(--color-neutral-0);
+    --button-border-primary: var(--color-primary-500);
+    --button-border-secondary: var(--color-neutral-0);
+    --button-divider-primary: var(--color-primary-400);
+    --button-divider-secondary: var(--color-primary-200);
+    --button-surface-disabled: var(--color-neutral-200);
+    --button-divider-disabled: var(--color-neutral-300);
+    --button-border-error: var(--color-error-500);
+    --button-text-error: var(--color-error-500);
+    --button-icon-error: var(--color-error-500);
+
+    --modal-surface-header-primary: var(--color-neutral-0);
+    --modal-surface-footer-primary: var(--color-neutral-50);
+    --modal-surface-body-primary: var(--color-neutral-0);
+    --modal-surface-border-primary: var(--color-neutral-200);
+
+    --nav-surface-primary: var(--color-neutral-900);
+    --nav-surface-secondary: var(--color-neutral-700);
+    --nav-logo: var(--color-neutral-0);
+    --nav-border: var(--color-neutral-600);
+    --nav-text: var(--color-neutral-0);
+    --nav-icon: var(--color-neutral-0);
+    --nav-icon-secondary: var(--color-neutral-300);
+    --nav-icon-on: var(--color-neutral-0);
+    --nav-icon-off: var(--color-secondary-50);
+    --nav-bg-on: var(--color-primary-500);
+
+    --control-surface-primary: var(--color-neutral-0);
+    --control-surface-secondary: var(--color-neutral-200);
+    --control-surface-active: var(--color-primary-500);
+    --control-surface-disabled: var(--color-neutral-200);
+    --control-border-primary: var(--color-neutral-100);
+    --control-border-disabled: var(--color-neutral-300);
+
+    --form-surface-primary: var(--color-neutral-0);
+    --form-surface-secondary: var(--color-neutral-50);
+    --form-border-primary: var(--color-neutral-100);
+    --form-surface-disabled: var(--color-neutral-200);
+    --form-border-disabled: var(--color-neutral-300);
+    --navigation-height: 72px;
+
+    --chart-1: var(--color-chart-1);
+    --chart-2: var(--color-chart-2);
+    --chart-3: var(--color-chart-3);
+    --chart-4: var(--color-chart-4);
+    --chart-5: var(--color-chart-5);
+  }
+
+  [data-theme="dark"] {
+    --border-primary: var(--color-neutral-800);
+    --border-secondary: var(--color-neutral-700);
+    --border-fair: var(--color-neutral-750);
+    --border-inverse: var(--color-neutral-25);
+    --border-disabled: var(--color-neutral-600);
+    --border-action: var(--color-primary-500);
+    --border-error: var(--color-error-500);
+    --border-warning: var(--color-warning-500);
+    --border-success: var(--color-success-500);
+    --border-info: var(--color-info-500);
+
+    --state-hover: var(--color-neutral-800);
+    --state-select: var(--color-neutral-750);
+    --state-subnav-select: var(--color-primary-500);
+
+    --surface-bg: var(--color-neutral-950);
+    --surface-primary: var(--color-neutral-900);
+    --surface-secondary: var(--color-neutral-800);
+    --surface-inverse: var(--color-neutral-0);
+    --surface-disabled: var(--color-neutral-500);
+    --surface-action: var(--color-primary-500);
+    --surface-bg-modal: var(--color-secondary-900);
+    --surface-error: var(--color-error-900);
+    --surface-warning: var(--color-warning-900);
+    --surface-success: var(--color-success-900);
+    --surface-info: var(--color-info-900);
+
+    --text-primary: var(--color-neutral-0);
+    --text-secondary: var(--color-neutral-300);
+    --text-inverse: var(--color-neutral-900);
+    --text-disabled: var(--color-neutral-500);
+    --text-action: var(--color-primary-200);
+    --text-button-primary: var(--color-neutral-0);
+    --text-button-secondary: var(--color-neutral-0);
+    --text-link: var(--color-secondary-300);
+    --text-error: var(--color-error-500);
+    --text-warning: var(--color-warning-500);
+    --text-success: var(--color-success-500);
+    --text-info: var(--color-info-500);
+
+    --icon-primary: var(--color-neutral-0);
+    --icon-secondary: var(--color-neutral-300);
+    --icon-tertiary: var(--color-neutral-500);
+    --icon-inverse: var(--color-neutral-900);
+    --icon-button-primary: var(--color-neutral-0);
+    --icon-disabled: var(--color-neutral-500);
+    --icon-action: var(--color-primary-100);
+    --icon-error: var(--color-error-500);
+    --icon-warning: var(--color-warning-500);
+    --icon-success: var(--color-success-500);
+    --icon-info: var(--color-info-500);
+
+    --button-surface-primary: var(--color-primary-500);
+    --button-surface-secondary: var(--color-primary-850);
+    --button-border-primary: var(--color-primary-500);
+    --button-border-secondary: var(--color-neutral-100);
+    --button-divider-primary: var(--color-primary-400);
+    --button-divider-secondary: var(--color-primary-200);
+    --button-surface-disabled: var(--color-neutral-750);
+    --button-divider-disabled: var(--color-neutral-700);
+    --button-border-error: var(--color-error-500);
+    --button-text-error: var(--color-neutral-0);
+    --button-icon-error: var(--color-neutral-0);
+
+    --modal-surface-header-primary: var(--color-neutral-900);
+    --modal-surface-footer-primary: var(--color-neutral-850);
+    --modal-surface-body-primary: var(--color-neutral-900);
+    --modal-surface-border-primary: var(--color-neutral-700);
+
+    --nav-surface-primary: var(--color-neutral-900);
+    --nav-surface-secondary: var(--color-neutral-850);
+    --nav-logo: var(--color-neutral-0);
+    --nav-border: var(--color-neutral-750);
+    --nav-text: var(--color-neutral-0);
+    --nav-icon: var(--color-neutral-0);
+    --nav-icon-secondary: var(--color-neutral-400);
+    --nav-icon-on: var(--color-neutral-0);
+    --nav-icon-off: var(--color-secondary-200);
+    --nav-bg-on: var(--color-primary-500);
+
+    --control-surface-primary: var(--color-neutral-0);
+    --control-surface-secondary: var(--color-neutral-200);
+    --control-surface-active: var(--color-primary-500);
+    --control-surface-disabled: var(--color-neutral-300);
+    --control-border-primary: var(--color-neutral-100);
+    --control-border-disabled: var(--color-neutral-300);
+
+    --form-surface-primary: var(--color-neutral-850);
+    --form-surface-secondary: var(--color-neutral-800);
+    --form-border-primary: var(--color-neutral-700);
+    --form-surface-disabled: var(--color-neutral-700);
+    --form-border-disabled: var(--color-neutral-600);
+
+    --chart-1: var(--color-chart-1);
+    --chart-2: var(--color-chart-2);
+    --chart-3: var(--color-chart-3);
+    --chart-4: var(--color-chart-4);
+    --chart-5: var(--color-chart-5);
+  }
+
+  [data-theme="light"] {
+    --border-primary: var(--color-neutral-100);
+    --border-secondary: var(--color-neutral-200);
+    --border-fair: var(--color-neutral-50);
+    --border-inverse: var(--color-neutral-800);
+    --border-disabled: var(--color-neutral-300);
+    --border-action: var(--color-primary-500);
+    --border-error: var(--color-error-500);
+    --border-warning: var(--color-warning-500);
+    --border-success: var(--color-success-500);
+    --border-info: var(--color-info-500);
+
+    --state-hover: var(--color-secondary-25);
+    --state-select: var(--color-secondary-50);
+    --state-subnav-select: var(--color-primary-500);
+
+    --surface-bg: var(--color-neutral-800);
+    --surface-primary: var(--color-red-100);
+    --surface-secondary: var(--color-neutral-50);
+    --surface-inverse: var(--color-neutral-900);
+    --surface-disabled: var(--color-neutral-200);
+    --surface-action: var(--color-primary-500);
+    --surface-bg-modal: var(--color-neutral-0);
+    --surface-error: var(--color-error-100);
+    --surface-warning: var(--color-warning-100);
+    --surface-success: var(--color-success-100);
+    --surface-info: var(--color-info-100);
+
+    --text-primary: var(--color-neutral-900);
+    --text-secondary: var(--color-neutral-500);
+    --text-inverse: var(--color-neutral-0);
+    --text-disabled: var(--color-neutral-400);
+    --text-action: var(--color-primary-600);
+    --text-button-primary: var(--color-neutral-0);
+    --text-button-secondary: var(--color-primary-600);
+    --text-link: var(--color-secondary-600);
+    --text-error: var(--color-error-500);
+    --text-warning: var(--color-warning-500);
+    --text-success: var(--color-success-500);
+    --text-info: var(--color-info-500);
+
+    --icon-primary: var(--color-neutral-800);
+    --icon-secondary: var(--color-neutral-600);
+    --icon-tertiary: var(--color-neutral-400);
+    --icon-inverse: var(--color-neutral-0);
+    --icon-button-primary: var(--color-neutral-0);
+    --icon-disabled: var(--color-neutral-400);
+    --icon-action: var(--color-primary-500);
+    --icon-error: var(--color-error-500);
+    --icon-warning: var(--color-warning-500);
+    --icon-success: var(--color-success-500);
+    --icon-info: var(--color-info-500);
+
+    --button-surface-primary: var(--color-primary-500);
+    --button-surface-secondary: var(--color-neutral-0);
+    --button-border-primary: var(--color-primary-500);
+    --button-border-secondary: var(--color-neutral-0);
+    --button-divider-primary: var(--color-primary-400);
+    --button-divider-secondary: var(--color-primary-200);
+    --button-surface-disabled: var(--color-neutral-200);
+    --button-divider-disabled: var(--color-neutral-300);
+    --button-border-error: var(--color-error-500);
+    --button-text-error: var(--color-error-500);
+    --button-icon-error: var(--color-error-500);
+
+    --modal-surface-header-primary: var(--color-neutral-0);
+    --modal-surface-footer-primary: var(--color-neutral-50);
+    --modal-surface-body-primary: var(--color-neutral-0);
+    --modal-surface-border-primary: var(--color-neutral-200);
+
+    --nav-surface-primary: var(--color-neutral-900);
+    --nav-surface-secondary: var(--color-neutral-700);
+    --nav-logo: var(--color-neutral-0);
+    --nav-border: var(--color-neutral-600);
+    --nav-text: var(--color-neutral-0);
+    --nav-icon: var(--color-neutral-0);
+    --nav-icon-secondary: var(--color-neutral-300);
+    --nav-icon-on: var(--color-neutral-0);
+    --nav-icon-off: var(--color-secondary-50);
+    --nav-bg-on: var(--color-primary-500);
+
+    --control-surface-primary: var(--color-neutral-0);
+    --control-surface-secondary: var(--color-neutral-200);
+    --control-surface-active: var(--color-primary-500);
+    --control-surface-disabled: var(--color-neutral-200);
+    --control-border-primary: var(--color-neutral-100);
+    --control-border-disabled: var(--color-neutral-300);
+
+    --form-surface-primary: var(--color-neutral-0);
+    --form-surface-secondary: var(--color-neutral-50);
+    --form-border-primary: var(--color-neutral-100);
+    --form-surface-disabled: var(--color-neutral-200);
+    --form-border-disabled: var(--color-neutral-300);
+
+    --chart-1: var(--color-chart-1);
+    --chart-2: var(--color-chart-2);
+    --chart-3: var(--color-chart-3);
+    --chart-4: var(--color-chart-4);
+    --chart-5: var(--color-chart-5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border-primary font-inter text-text-primary;
+  }
+}
