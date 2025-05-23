@@ -28,14 +28,18 @@ func llmWithTools(
 	responseFormat openai.ResponseFormat,
 	toolCallback func(toolCall openai.ToolCall) string,
 	limit int,
+	historyLength int,
 ) ResponseWithLogs {
-
 	var chatMessages []openai.RequestMessage
 	if chatHistory != "" {
-		err := json.Unmarshal([]byte(chatHistory), &chatMessages)
+		var err error
+		chatMessages, err = openai.ParseMessages([]byte(chatHistory))
 		if err != nil {
 			fmt.Println("Error parsing chat history:", err)
+			chatMessages = []openai.RequestMessage{}
 		}
+	} else {
+		chatMessages = []openai.RequestMessage{}
 	}
 
 	logs := []string{}
@@ -61,6 +65,10 @@ func llmWithTools(
 			break
 		}
 		loops++
+	}
+	// limit the chat history
+	if len(chatMessages) > historyLength {
+		chatMessages = chatMessages[len(chatMessages)-historyLength:]
 	}
 
 	chatHistoryJSON, _ := json.Marshal(chatMessages)
