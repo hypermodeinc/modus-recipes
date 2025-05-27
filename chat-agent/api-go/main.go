@@ -54,3 +54,8 @@ func ChatHistory(id string) (*string, error) {
 	// The user preferences are optional and can be used to customize the response.
 	return agents.SendMessage(id, "get_chat_history")
 }
+
+func SaveFact(id string, fact string) (*string, error) {
+	// Send a message to the agent to save a fact.
+	return (save_fact(id, fact))
+}

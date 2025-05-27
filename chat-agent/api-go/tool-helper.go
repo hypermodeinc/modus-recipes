@@ -26,7 +26,7 @@ func llmWithTools(
 	question string,
 	chatHistory string,
 	responseFormat openai.ResponseFormat,
-	toolCallback func(toolCall openai.ToolCall) string,
+	toolCallback func(toolCall openai.ToolCall) (*string, error),
 	limit int,
 	historyLength int,
 ) ResponseWithLogs {
@@ -55,7 +55,7 @@ func llmWithTools(
 			chatMessages = append(chatMessages, message.ToAssistantMessage())
 			for _, toolCall := range message.ToolCalls {
 				logs = append(logs, fmt.Sprintf("Calling function: %s with %s", toolCall.Function.Name, toolCall.Function.Arguments))
-				content := toolCallback(toolCall)
+				content, _ := toolCallback(toolCall)
 				fmt.Println("Tool response:", content)
 				chatMessages = append(chatMessages, openai.NewToolMessage(content, toolCall.Id))
 			}

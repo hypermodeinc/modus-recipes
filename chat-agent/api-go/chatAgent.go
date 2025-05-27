@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hypermodeinc/modus/sdk/go/pkg/agents"
@@ -25,7 +26,9 @@ type ChatAgent struct {
 
 	// Additional fields can be added to the agent to hold state.
 	// This is state is only visible to the active instance of the agent.
-	// In this case, we are just using a simple integer field to hold the count.
+	state ChatAgentState
+}
+type ChatAgentState struct {
 	chatHistory string
 }
 
@@ -42,17 +45,20 @@ func (c *ChatAgent) Name() string {
 // This method should return the current state of the agent as a string.
 // Any format is fine, but it should be consistent and easy to parse.
 func (c *ChatAgent) GetState() *string {
-	return &c.chatHistory
+	serializedState, _ := json.Marshal(c.state)
+	serializedStateStr := string(serializedState)
+	return &serializedStateStr
 }
 
 // This method should set the state of the agent from a string.
 // The string should be in the same format as the one returned by GetState.
 // Be sure to consider data compatibility when changing the format of the state.
 func (c *ChatAgent) SetState(data *string) {
-	if data == nil {
-		return
+	err := json.Unmarshal([]byte(*data), &c.state)
+	if err != nil {
+		fmt.Println("Error unmarshalling state:", err)
 	}
-	c.chatHistory = *data
+	// If the state is empty, return.
 }
 
 // When the agent is first started, this method is automatically called. Implementing it is optional.
@@ -60,7 +66,8 @@ func (c *ChatAgent) SetState(data *string) {
 // It can be used to initialize state, retrieve data, etc.
 // This is a good place to set up any listeners or subscriptions.
 func (c *ChatAgent) OnStart() error {
-	fmt.Println("Counter agent started")
+	c.state.chatHistory = ""
+	fmt.Println("Agent started")
 	return nil
 }
 
@@ -79,7 +86,7 @@ func (c *ChatAgent) OnReceiveMessage(msgName string, data *string) (*string, err
 
 	case "get_chat_history":
 		// Return the chat history as a string.
-		return &c.chatHistory, nil
+		return &c.state.chatHistory, nil
 	}
 	return nil, nil
 
@@ -100,13 +107,13 @@ func (c *ChatAgent) chat(data *string) (*string, error) {
 		chatTools(),
 		systemPrompt(),
 		*data,
-		c.chatHistory,
+		c.state.chatHistory,
 		openai.ResponseFormatText,
 		executeToolCall,
 		loopLimit,
 		MAX_HISTORY,
 	)
-	c.chatHistory = llmResponse.ChatHistory
+	c.state.chatHistory = llmResponse.ChatHistory
 
 	fmt.Println(llmResponse.Response)
 
