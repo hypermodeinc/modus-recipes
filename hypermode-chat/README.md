@@ -19,11 +19,7 @@ Modify `app/page.tsx` to change the UI.
 The chat action is implemented in action.ts. Update the GraphQL query to match your backend API.
 
 ```graphql
-query chat(
-  $query: String!
-  $chat: [ChatMessageInput!]!
-  $user_preferences: String!
-) {
+query chat($query: String!, $chat: [ChatMessageInput!]!, $user_preferences: String!) {
   chat(query: $query, chat: $chat, user_preferences: $user_preferences) {
     message
     isQuestion
