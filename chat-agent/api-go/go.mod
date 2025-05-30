@@ -1,8 +1,6 @@
 module api-go
 
-go 1.23.2
-
-toolchain go1.24.1
+go 1.24.2
 
 require (
 	github.com/hypermodeinc/modus/sdk/go v0.18.0-alpha.4
