@@ -43,7 +43,7 @@ library designed for building AI-powered chat interfaces. The library provides:
 The application uses the **Apollo Adapter** from aichatkit to handle all backend communication:
 
 ```typescript
-const apolloAdapter = new ApolloAdapter({ apolloClient });
+const apolloAdapter = new ApolloAdapter({ apolloClient })
 ```
 
 The adapter automatically handles:
@@ -72,31 +72,21 @@ query Chat($query: String!, $chatHistory: String!) {
 You can override the default chat query to match your backend's schema:
 
 ```typescript
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 const customChatQuery = gql`
-  mutation SendMessage(
-    $query: String!
-    $conversationId: ID!
-    $history: String!
-  ) {
-    sendMessage(
-      input: {
-        message: $query
-        conversationId: $conversationId
-        history: $history
-      }
-    ) {
+  mutation SendMessage($query: String!, $conversationId: ID!, $history: String!) {
+    sendMessage(input: { message: $query, conversationId: $conversationId, history: $history }) {
       response
       updatedHistory
     }
   }
-`;
+`
 
 const apolloAdapter = new ApolloAdapter({
   apolloClient,
   chatQuery: customChatQuery,
-});
+})
 ```
 
 This allows you to:
