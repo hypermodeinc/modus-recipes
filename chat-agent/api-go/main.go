@@ -59,3 +59,11 @@ func SaveFact(id string, fact string) (*string, error) {
 	// Send a message to the agent to save a fact.
 	return (save_fact(id, fact))
 }
+
+func DeleteAgent(id string) (*string, error) {
+	_, err := agents.Stop(id)
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
+}
