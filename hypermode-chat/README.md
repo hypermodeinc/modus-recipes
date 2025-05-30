@@ -150,14 +150,6 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-### Production Build
-
-```bash
-# Build for production
-npm run build
-npm start
-```
-
 ## Configuration
 
 ### GraphQL Endpoint
