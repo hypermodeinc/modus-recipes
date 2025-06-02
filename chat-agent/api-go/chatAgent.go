@@ -120,3 +120,8 @@ func (c *ChatAgent) chat(data *string) (*string, error) {
 	return &llmResponse.Response, nil
 
 }
+
+func (c *ChatAgent) DeleteAgent(id string) error {
+	_, err := agents.Stop(id)
+	return err
+}

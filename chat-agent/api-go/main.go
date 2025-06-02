@@ -23,8 +23,8 @@ func init() {
 // This is because the agent instance will actually be running in a different WASM instance,
 // perhaps on a different process or even on a different machine.
 
-// Starts a counter agent and returns info including its ID and status.
-func StartConversation() (id *string, err error) {
+// Creates a counter agent and returns info including its ID and status.
+func CreateConversation() (id *string, err error) {
 	info, err := agents.Start("Chat-v1")
 	if err != nil {
 		return nil, err
@@ -58,4 +58,12 @@ func ChatHistory(id string) (*string, error) {
 func SaveFact(id string, fact string) (*string, error) {
 	// Send a message to the agent to save a fact.
 	return (save_fact(id, fact))
+}
+
+func DeleteAgent(id string) (*string, error) {
+	_, err := agents.Stop(id)
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
 }

@@ -1,41 +1,126 @@
-Lightweight chat UI
+# Hypermode Agent Chat Demo
 
-![chat UI](image.png)
+A modern AI chat interface built with React, Next.js, and the **aichatkit** component library,
+powered by Hypermode agents with persistent memory.
+
+## Overview
+
+- **Frontend**: Next.js 15 + React 19 + TypeScript
+- **UI Components**: aichatkit modular chat components
+- **Backend**: Custom Hypermode agent adapter via GraphQL
+- **Features**: Persistent agent memory, fact storage, conversation management
+
+## Architecture
+
+### Custom Agent Integration
+
+Each conversation gets its own dedicated Hypermode agent with independent memory:
+
+```typescript
+const agentAdapter = new CustomAgentAdapter({
+  apolloClient,
+  debug: process.env.NODE_ENV === "development",
+})
+```
+
+**Agent Flow:**
+
+1. **Create**: `startChatAgent()` → New agent instance per conversation
+2. **Chat**: `sendMessage()` → Agent processes with full memory context
+3. **Remember**: Agents can save/retrieve facts using built-in tools
+4. **Cleanup**: `stopChatAgent()` → Proper session termination
+
+### Required GraphQL Schema
+
+```graphql
+mutation CreateConversation {
+  createConversation
+}
+
+query ContinueChat($id: String!, $query: String!) {
+  continueChat(id: $id, query: $query)
+}
+
+query ChatHistory($id: String!) {
+  chatHistory(id: $id)
+}
+
+mutation DeleteAgent($id: String!) {
+  deleteAgent(id: $id)
+}
+```
 
 ## Getting Started
 
-First, run the development server:
+### Installation
 
 ```bash
-pnpm i && pnpm run dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-Modify`app/page.tsx` to change the UI.
-
-The chat action is implemented in action.ts. Update the GraphQL query to match your backend API.
-
-```tsx
-const graphqlQuery = `
-    query chat($query: String!, $chat: [ChatMessageInput!]!, $user_preferences: String!) {
-        chat(query: $query, chat: $chat, user_preferences: $user_preferences) {
-            message
-            isQuestion
-            user_preferences
-
-        }
-    }
-  `
-```
-
-The current implementation is using a simple fetch at `process.env.HYPERMODE_API_ENDPOINT`, with the
-Bearer token authorization using `process.env.HYPERMODE_API_TOKEN`
-
-set the environment variables to match the GraphQL API endpoint.
-
-For local dev:
+### Environment Setup
 
 ```bash
-export HYPERMODE_API_ENDPOINT=http://localhost:8686/graphql
+# .env.local
+NEXT_PUBLIC_GRAPHQL_API_URL=http://localhost:8686/graphql
+NEXT_PUBLIC_GRAPHQL_API_TOKEN=your-token
 ```
+
+### Run
+
+```bash
+npm run dev
+```
+
+**Note**: Ensure your Hypermode agent backend is running first.
+
+## Key Features
+
+### Agent Memory
+
+- Each conversation has independent agent memory
+- Agents remember conversation history and can save facts
+- Memory persists across browser sessions
+
+### Conversation Management
+
+- Create new conversations (new agent instances)
+- Reset conversations (fresh agent memory)
+- Delete conversations (cleanup agent sessions)
+
+### Synchronization
+
+- localStorage + agent backend sync
+- Conversation history maintained on both ends
+- Automatic recovery on app restart
+
+## Configuration
+
+### Debug Mode
+
+```typescript
+const agentAdapter = new CustomAgentAdapter({
+  apolloClient,
+  debug: true, // Enable detailed logging
+})
+```
+
+### Customization
+
+- **Styling**: Modify `tailwind.config.ts` for theme changes
+- **Icons**: Replace Lucide React icons as needed
+- **Backend**: Update GraphQL queries in `CustomAgentAdapter`
+
+## Troubleshooting
+
+**Agent Backend Not Running**: Check GraphQL endpoint and ensure backend is started **Schema
+Mismatch**: Verify GraphQL operations match expected schema **Session Issues**: Check browser
+localStorage and agent cleanup logs **Debug**: Enable `debug: true` in adapter for detailed agent
+communication logs
+
+## aichatkit Packages
+
+- `@aichatkit/ui` - Chat interface components
+- `@aichatkit/network-adapter` - Base adapter interface
+- `@aichatkit/localstorage-adapter` - Local storage persistence
+- `@aichatkit/types` - TypeScript definitions
