@@ -46,18 +46,25 @@ func llmWithTools(
 	var finalResponse *openai.CompletionMessage
 	loops := 0
 
-	chatMessages = append(chatMessages, openai.NewUserMessage(question))
-
 	for loops < limit {
 		message, _ := getLLMResponse(model, tools, systemPrompt, question, chatMessages, responseFormat)
-
+		if loops == 0 {
+			chatMessages = append(chatMessages, openai.NewUserMessage(question))
+		}
 		if len(message.ToolCalls) > 0 {
 			chatMessages = append(chatMessages, message.ToAssistantMessage())
 			for _, toolCall := range message.ToolCalls {
 				logs = append(logs, fmt.Sprintf("Calling function: %s with %s", toolCall.Function.Name, toolCall.Function.Arguments))
-				content, _ := toolCallback(toolCall)
-				fmt.Println("Tool response:", content)
-				chatMessages = append(chatMessages, openai.NewToolMessage(content, toolCall.Id))
+				content, err := toolCallback(toolCall)
+				if err != nil {
+					fmt.Printf("Error executing tool: %+v\n", err)
+					msg := fmt.Sprintf("Error executing tool: %+v , explain to the user.", err)
+					chatMessages = append(chatMessages, openai.NewToolMessage(&msg, toolCall.Id))
+					break
+				} else {
+					fmt.Println("Tool response:", content)
+					chatMessages = append(chatMessages, openai.NewToolMessage(content, toolCall.Id))
+				}
 			}
 		} else {
 			chatMessages = append(chatMessages, message.ToAssistantMessage())

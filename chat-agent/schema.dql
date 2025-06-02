@@ -1,2 +1,4 @@
 <created_at>: datetime @index(day) .
 <fact>: string @index(term) .
+<entity.id>: string @index(term) .
+<fact.entity>: [uid] @reverse .
