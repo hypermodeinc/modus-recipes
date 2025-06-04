@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
-    "assemblyscript": "^0.27.35",
+    "assemblyscript": "^0.27.35 || ^0.28.0",
     "assemblyscript-prettier": "^3.0.1",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
