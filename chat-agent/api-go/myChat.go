@@ -28,10 +28,11 @@ func systemPrompt() string {
 	 */
 	isoTime := time.Now().UTC().Format(time.RFC3339)
 	prompt := fmt.Sprintf(`Today is %s. 
+	When user input is a question, use search_fact_by_term or search_by_entity tool with a list of terms and reply using the data retrieved.
 	If the user input is a statement, use the save_fact tool and confirm that you'll remember that fact.
 	Try to extract the following entities linked to the fact.
 	If the user input is about several facts, use the save_fact tool for each fact and confirm that you'll remember them.
-	If the user input is a question, check the chat history first, if needed, use the search_fact tool with selected list of terms and reply using the data retrieved.
+    
 	Reply that you don't have that in memory if nothing is found.
 	`, isoTime)
 	return prompt

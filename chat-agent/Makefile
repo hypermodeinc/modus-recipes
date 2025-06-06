@@ -29,6 +29,15 @@ DGRAPH_API_TOKEN := $(shell echo '$(DGRAPH_CONNECTION_STRING)' | sed -E 's/.*[?&
 
 current_dir = $(shell pwd)
 
+DGRAPH_VERSION = latest
+
+
+up: ## Init and Start dgraph/standalone container (local development)
+	docker run -d --name dgraph-rag -p "8080:8080" -p "9080:9080"  -v ~/dgraph-rag:/dgraph  dgraph/standalone:$(DGRAPH_VERSION)
+start: ## Start dgraph/standalone container (local development) after you stopped it
+	docker start dgraph-rag
+down: ## Stop the container (local development)
+	docker stop  dgraph-rag
 help: ## Print target help
 	@echo "Usage: make <target> or make <target> ENV=<environment>"
 	@echo "Targets:"
