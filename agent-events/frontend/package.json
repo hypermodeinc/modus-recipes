@@ -1,0 +1,41 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier . --write --ignore-path .prettierignore",
+    "format:check": "prettier . --check --ignore-path .prettierignore"
+  },
+  "dependencies": {
+    "@apollo/client": "latest",
+    "@apollo/experimental-nextjs-app-support": "latest",
+    "autoprefixer": "^10.4.20",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "d3": "^7.9.0",
+    "graphql": "^16.10.0",
+    "graphql-sse": "^2.5.4",
+    "lucide-react": "^0.488.0",
+    "next": "^15.3.1",
+    "papaparse": "^5.5.2",
+    "react": "^19",
+    "react-dom": "^19",
+    "tailwind-merge": "^2.5.5",
+    "urql": "^4.2.2",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "postcss": "^8",
+    "postcss-nesting": "^13.0.1",
+    "tailwindcss": "3.4.17",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5"
+  }
+}
