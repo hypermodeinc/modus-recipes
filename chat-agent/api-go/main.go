@@ -14,7 +14,6 @@ var session_ID = ""
 
 func init() {
 	agents.Register(&ChatAgent{})
-
 }
 
 // The following are regular Modus functions.
@@ -39,17 +38,8 @@ func ContinueChat(id string, query string) (*string, error) {
 	return response, nil
 }
 
-type ChatResponse struct {
-	Message string `json:"message"`
-	History string `json:"history"`
-}
-
 func ChatHistory(id string) (*string, error) {
 	// Send a message to the agent and get a response.
-	// The agent will use the chat history to generate a response.
-	// The response will be in the form of a JSON string.
-	// The response will include the message, the chat history, and any user preferences.
-	// The user preferences are optional and can be used to customize the response.
 	return agents.SendMessage(id, "get_chat_history")
 }
 

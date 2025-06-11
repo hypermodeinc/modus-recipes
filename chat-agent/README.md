@@ -1,4 +1,8 @@
-### Run the API, the frontend and Dgraph locally
+# Chat Agent with KG
+
+## Launch the API, the frontend and Dgraph
+
+### Run locally
 
 ```shell
 make local
@@ -32,7 +36,7 @@ Open http://localhost:3000/ in your Browser and start a conversation.
 
 Enter some fact like
 
-```
+```txt
 I put my passport in the red box under my bed.
 
 I met with Will at the AI Conference yesterday.
@@ -44,7 +48,7 @@ Will is working at Hypermode.
 
 You can see the KG in Dgraph
 
-```
+```txt
 {
   fact(func:has(fact)) {
     name:fact
@@ -57,7 +61,7 @@ You can see the KG in Dgraph
 
 and ask questions in the conversation.
 
-```
+```txt
 Where did I put my passport?
 
 What do you know about Will ?

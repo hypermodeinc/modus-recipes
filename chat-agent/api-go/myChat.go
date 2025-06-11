@@ -29,11 +29,11 @@ func systemPrompt() string {
 	isoTime := time.Now().UTC().Format(time.RFC3339)
 	prompt := fmt.Sprintf(`Today is %s. 
 	When user input is a question, use search_fact_by_term or search_by_entity tool with a list of terms and reply using the data retrieved.
-	If the user input is a statement, use the save_fact tool and confirm that you'll remember that fact.
-	Try to extract the following entities linked to the fact.
+	Reply that you don't have that in memory if nothing is found.
+	If the user input is a statement, use the save_fact tool and confirm that you have saved the fact in your memory.
+	Try to extract the entities linked to the fact such as place, city, country, person, organization, event, item, etc.
 	If the user input is about several facts, use the save_fact tool for each fact and confirm that you'll remember them.
     
-	Reply that you don't have that in memory if nothing is found.
 	`, isoTime)
 	return prompt
 }
@@ -55,8 +55,6 @@ func chatTools() []openai.Tool {
 }
 
 func executeToolCall(tool_call openai.ToolCall) (*string, error) {
-	session_ID := "fake_session_id"
-	// not supported yet, all facts saved with same context.
 
 	// Parse JSON into a map of strings
 	params_map := make(map[string]string)
@@ -66,20 +64,20 @@ func executeToolCall(tool_call openai.ToolCall) (*string, error) {
 	})
 	fmt.Println("Tool call:", tool_call.Function.Name, params_map)
 	if tool_call.Function.Name == "save_fact" {
-		return save_fact(session_ID, params_map["fact"], params_map["entities"], params_map["happened_on"])
+		return save_fact(params_map["fact"], params_map["entities"], params_map["happened_on"])
 	} else if tool_call.Function.Name == "search_fact_by_term" {
 		if params_map["terms"] == "" {
 			return nil, fmt.Errorf("terms parameter is required for search_fact_by_term")
 		}
-		return search_fact(session_ID, params_map["terms"])
+		return search_fact(params_map["terms"])
 	} else if tool_call.Function.Name == "search_by_entity" {
 		entity := params_map["entity"]
 		if entity == "" {
 			return nil, fmt.Errorf("entity parameter is required for search_by_entity")
 		}
-		return facts_by_entity(session_ID, entity)
+		return facts_by_entity(entity)
 	} else if tool_call.Function.Name == "all_facts" {
-		return all_facts(session_ID)
+		return all_facts()
 	}
 	return nil, fmt.Errorf("unknown tool call: %s", tool_call.Function.Name)
 }
@@ -107,14 +105,12 @@ func parseEntities(entities string) []Entity {
 	return entitiesArray
 }
 
-func save_fact(sessionId string, fact string, entities string, happened_on string) (*string, error) {
-	// save to Dgraph
-	fmt.Println("Saving memory for session:", sessionId)
+func save_fact(fact string, entities string, happened_on string) (*string, error) {
+
 	fmt.Println("Fact:", fact)
 	fmt.Println("Entities:", entities)
 	fmt.Println("Happened on:", happened_on)
 	// Parse entities string into an array of key-value pairs
-
 	entitiesArray := parseEntities(entities)
 
 	// Save a fact as a node in Dgraph with attributes sessionId, fact and timestamp
@@ -137,21 +133,11 @@ func save_fact(sessionId string, fact string, entities string, happened_on strin
 	queryBlock += `}`
 	query := dgraph.NewQuery(queryBlock)
 
-	/*
-		factObject := Fact{
-			CreatedAt: timestamp,
-			Fact:      fact,
-		}
-		factJson, err := json.Marshal(factObject)
-		if err != nil {
-			return nil, err
-		}
-		mutation := dgraph.NewMutation().WithSetJson(string(factJson))
-	*/
 	rdf += fmt.Sprintf(`
 		<_:fact> <created_at> "%s" .
 		<_:fact> <fact> "%s" .
 		`, timestamp, fact)
+	// If the fact is associated with a date, add it to the RDF
 	if happened_on != "" {
 		// convert the YYYY-MM-DD format to a full ISO 8601 date
 		// Parse the date string into a time.Time object
@@ -162,6 +148,7 @@ func save_fact(sessionId string, fact string, entities string, happened_on strin
 			`, happened_on)
 		}
 	}
+
 	mutation := dgraph.NewMutation().WithSetNquads(rdf)
 
 	_, err := dgraph.ExecuteQuery(connection, query, mutation)
@@ -173,7 +160,7 @@ func save_fact(sessionId string, fact string, entities string, happened_on strin
 
 }
 
-func search_fact(sessionID string, terms string) (*string, error) {
+func search_fact(terms string) (*string, error) {
 	dql := fmt.Sprintf(`query {
 		facts(func: anyofterms(fact, "%s")) {
 			fact
@@ -188,7 +175,8 @@ func search_fact(sessionID string, terms string) (*string, error) {
 	}
 	return &res.Json, nil
 }
-func facts_by_entity(sessionID string, entity string) (*string, error) {
+
+func facts_by_entity(entity string) (*string, error) {
 	dql := fmt.Sprintf(`query {
 		facts(func: anyofterms(entity.name, "%s")) {
 			name:location.name
@@ -208,7 +196,7 @@ func facts_by_entity(sessionID string, entity string) (*string, error) {
 	return &res.Json, nil
 }
 
-func all_facts(sessionID string) (*string, error) {
+func all_facts() (*string, error) {
 	dql := `query {
 		facts(func: has(fact)) {
 			fact
