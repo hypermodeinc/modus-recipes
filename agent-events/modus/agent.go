@@ -150,16 +150,6 @@ func (a *ThemedAgent) startEventGeneration() (*string, error) {
 		return &result, nil
 	}
 
-	event, err := a.generateThemeEvent()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate event: %w", err)
-	}
-
-	err = a.PublishEvent(event)
-	if err != nil {
-		return nil, fmt.Errorf("failed to publish event: %w", err)
-	}
-
 	a.EventCount++
 	a.LastEventTime = time.Now()
 
@@ -172,9 +162,19 @@ func (a *ThemedAgent) startEventGeneration() (*string, error) {
 		TimeElapsed: elapsed.Round(time.Second).String(),
 	}
 
-	err = a.PublishEvent(statusEvent)
+	err := a.PublishEvent(statusEvent)
 	if err != nil {
 		return nil, fmt.Errorf("failed to publish status: %w", err)
+	}
+
+	event, err := a.generateThemeEvent()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate event: %w", err)
+	}
+
+	err = a.PublishEvent(event)
+	if err != nil {
+		return nil, fmt.Errorf("failed to publish event: %w", err)
 	}
 
 	result := fmt.Sprintf("Generated event %d/%d for theme: %s", a.EventCount, a.MaxEvents, a.Theme)
