@@ -43,7 +43,8 @@ func chatTools() []openai.Tool {
 	tools := []openai.Tool{
 		openai.NewToolForFunction("save_fact", "use to save facts when user states something").
 			WithParameter("fact", "string", `fact to be remembered`).
-			WithParameter("entities", "string", "a list of entities like place, person. The string is formatted as 'Type:Name' pairs separated by commas, like 'place:Paris, person:Will, person:John'."),
+			WithParameter("entities", "string", "a list of entities like place, person. The string is formatted as 'Type:Name' pairs separated by commas, like 'place:Paris, person:Will, person:John'.").
+			WithParameter("happened_on", "string", `empty or date in format YYYY-MM-DD if the fact is an event associated with a date`),
 		openai.NewToolForFunction("search_fact_by_term", "Retrieve a fact from key words").
 			WithParameter("terms", "string", `terms to search for separated by space`),
 		openai.NewToolForFunction("search_by_entity", "Search for an entity like place, person or item and the related facts").
@@ -65,7 +66,7 @@ func executeToolCall(tool_call openai.ToolCall) (*string, error) {
 	})
 	fmt.Println("Tool call:", tool_call.Function.Name, params_map)
 	if tool_call.Function.Name == "save_fact" {
-		return save_fact(session_ID, params_map["fact"], params_map["entities"])
+		return save_fact(session_ID, params_map["fact"], params_map["entities"], params_map["happened_on"])
 	} else if tool_call.Function.Name == "search_fact_by_term" {
 		if params_map["terms"] == "" {
 			return nil, fmt.Errorf("terms parameter is required for search_fact_by_term")
@@ -106,11 +107,12 @@ func parseEntities(entities string) []Entity {
 	return entitiesArray
 }
 
-func save_fact(sessionId string, fact string, entities string) (*string, error) {
+func save_fact(sessionId string, fact string, entities string, happened_on string) (*string, error) {
 	// save to Dgraph
 	fmt.Println("Saving memory for session:", sessionId)
 	fmt.Println("Fact:", fact)
 	fmt.Println("Entities:", entities)
+	fmt.Println("Happened on:", happened_on)
 	// Parse entities string into an array of key-value pairs
 
 	entitiesArray := parseEntities(entities)
@@ -147,9 +149,19 @@ func save_fact(sessionId string, fact string, entities string) (*string, error) 
 		mutation := dgraph.NewMutation().WithSetJson(string(factJson))
 	*/
 	rdf += fmt.Sprintf(`
-		<_:fact> <createdat> "%s" .
+		<_:fact> <created_at> "%s" .
 		<_:fact> <fact> "%s" .
 		`, timestamp, fact)
+	if happened_on != "" {
+		// convert the YYYY-MM-DD format to a full ISO 8601 date
+		// Parse the date string into a time.Time object
+		_, err := time.Parse("2006-01-02", happened_on)
+		if err == nil {
+			rdf += fmt.Sprintf(`
+			<_:fact> <happened_on> "%s" .
+			`, happened_on)
+		}
+	}
 	mutation := dgraph.NewMutation().WithSetNquads(rdf)
 
 	_, err := dgraph.ExecuteQuery(connection, query, mutation)

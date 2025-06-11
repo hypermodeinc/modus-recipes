@@ -24,7 +24,7 @@
     },
     "dgraph": {
       "type": "dgraph",
-      "connString": "dgraph://modus-recipes-backend-hypermode.hypermode.host:443?sslmode=verify-ca&bearertoken={{API_KEY}}"
+      "connString": "dgraph://localhost:9080"
     }
   }
 }
