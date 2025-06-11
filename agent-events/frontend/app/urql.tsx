@@ -59,7 +59,6 @@ const modusSSEExchange = subscriptionExchange({
                   if (currentEvent === "next" && currentData) {
                     try {
                       const parsedData = JSON.parse(currentData)
-                      console.log("Received subscription data:", parsedData)
                       sink.next(parsedData)
                     } catch (error) {
                       console.error("Failed to parse SSE data:", error, "Raw data:", currentData)
@@ -67,8 +66,6 @@ const modusSSEExchange = subscriptionExchange({
                   } else if (currentEvent === "complete") {
                     sink.complete()
                     return
-                  } else if (currentEvent === "ack") {
-                    console.log("Subscription acknowledged")
                   }
 
                   // Reset for next event

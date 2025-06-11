@@ -58,27 +58,21 @@ const CREATE_AGENT = `
   }
 `
 
-const AUTO_RUN_AGENT_MUTATION = `
-  mutation AutoRunAgent($theme: String!) {
-    autoRunAgent(theme: $theme)
-  }
-`
-
 const SET_AGENT_THEME_MUTATION = `
   mutation SetAgentTheme($agentId: String!, $theme: String!) {
     updateAgentTheme(agentId: $agentId, theme: $theme)
   }
 `
 
-const START_EVENT_GENERATION_QUERY = `
-  query StartEventGeneration($agentId: String!) {
-    startEventGeneration(agentId: $agentId)
+const START_EVENT_GENERATION_MUTATION = `
+  mutation StartEventGeneration($agentId: String!) {
+    mutateStartEventGeneration(agentId: $agentId)
   }
 `
 
-const START_RAPID_GENERATION_QUERY = `
-  query StartRapidGeneration($agentId: String!) {
-    startRapidGeneration(agentId: $agentId)
+const START_RAPID_GENERATION_MUTATION = `
+  mutation StartRapidGeneration($agentId: String!) {
+    mutateStartRapidGeneration(agentId: $agentId)
   }
 `
 
@@ -89,12 +83,10 @@ function AgentEventSubscription({
   agentId: string
   onEvent: (event: any, agentId: string) => void
 }) {
-  const [{ data, error, fetching }] = useSubscription({
+  const [{ data, error }] = useSubscription({
     query: AGENT_EVENT_SUBSCRIPTION,
     variables: { agentId },
   })
-
-  console.log("Subscription state:", { data, error, fetching, agentId })
 
   if (error) {
     console.error("Subscription error details:", {
@@ -106,7 +98,6 @@ function AgentEventSubscription({
 
   useEffect(() => {
     if (data?.agentEvent) {
-      console.log("Received event:", data.agentEvent)
       onEvent(data.agentEvent, agentId)
     }
   }, [data?.agentEvent, agentId, onEvent])
@@ -116,7 +107,8 @@ function AgentEventSubscription({
 
 export default function Page() {
   const [events, setEvents] = useState<AgentEvent[]>([])
-  const [agents, setAgents] = useState<Agent[]>([])
+  const [agentEventCounts, setAgentEventCounts] = useState<Record<string, number>>({})
+  const [agentLastEvents, setAgentLastEvents] = useState<Record<string, string>>({})
   const [isConnected, setIsConnected] = useState(false)
   const [newTheme, setNewTheme] = useState("")
   const [isCreating, setIsCreating] = useState(false)
@@ -125,9 +117,8 @@ export default function Page() {
 
   const [, createAgent] = useMutation(CREATE_AGENT)
   const [, setTheme] = useMutation(SET_AGENT_THEME_MUTATION)
-  const [, autoRunAgent] = useMutation(AUTO_RUN_AGENT_MUTATION)
-  const [, startEventGeneration] = useQuery({ query: START_EVENT_GENERATION_QUERY, pause: true })
-  const [, startRapidGeneration] = useQuery({ query: START_RAPID_GENERATION_QUERY, pause: true })
+  const [, startEventGeneration] = useMutation(START_EVENT_GENERATION_MUTATION)
+  const [, startRapidGeneration] = useMutation(START_RAPID_GENERATION_MUTATION)
 
   const getEventType = useCallback(
     (eventName: string): "info" | "warning" | "success" | "error" => {
@@ -142,8 +133,6 @@ export default function Page() {
   // Handle real agent events from subscriptions - memoized to prevent re-renders
   const handleAgentEvent = useCallback(
     (eventData: any, agentId: string) => {
-      console.log("Processing agent event:", eventData, "for agent:", agentId)
-
       const eventType = getEventType(eventData.name)
 
       const newEvent: AgentEvent = {
@@ -157,19 +146,16 @@ export default function Page() {
 
       setEvents((prev) => [newEvent, ...prev.slice(0, 49)]) // Keep last 50 events
 
-      // Update agent status
-      setAgents((prev) =>
-        prev.map((agent) =>
-          agent.id === agentId
-            ? {
-                ...agent,
-                status: "active" as const,
-                lastEvent: eventData.name.replace(/_/g, " "),
-                eventCount: agent.eventCount + 1,
-              }
-            : agent,
-        ),
-      )
+      // Update agent event counts and last events
+      setAgentEventCounts((prev) => ({
+        ...prev,
+        [agentId]: (prev[agentId] || 0) + 1,
+      }))
+
+      setAgentLastEvents((prev) => ({
+        ...prev,
+        [agentId]: eventData.name.replace(/_/g, " "),
+      }))
     },
     [getEventType],
   )
@@ -180,15 +166,10 @@ export default function Page() {
 
     setIsCreating(true)
     try {
-      // Step 1: Create the agent
       const createResult = await createAgent()
-      console.log("Create agent result:", createResult)
-
       if (createResult.data?.createAgent) {
         const agentId = createResult.data.createAgent
-        console.log("Created agent with ID:", agentId)
 
-        // Step 2: Set the theme after a brief delay
         setTimeout(async () => {
           try {
             await setTheme({ agentId, theme: newTheme.trim() })
@@ -197,7 +178,7 @@ export default function Page() {
           } catch (error) {
             console.error("Failed to set agent theme:", error)
           }
-        }, 1000) // 1 second delay to ensure agent is ready
+        }, 1000)
       }
     } catch (error) {
       console.error("Failed to create agent:", error)
@@ -206,43 +187,23 @@ export default function Page() {
     }
   }
 
-  // Handle auto-running an agent
-  const handleAutoRunAgent = async () => {
-    if (!newTheme.trim()) return
-
-    setIsCreating(true)
-    try {
-      const result = await autoRunAgent({ theme: newTheme.trim() })
-      console.log("Auto-run agent result:", result)
-
-      if (result.data?.autoRunAgent) {
-        setNewTheme("")
-        refetchAgents()
-      }
-    } catch (error) {
-      console.error("Failed to auto-run agent:", error)
-    } finally {
-      setIsCreating(false)
-    }
-  }
-
-  // Initialize agents from GraphQL query
+  // Track connection status based on agents query
   useEffect(() => {
     if (agentsResult.data?.agents) {
-      console.log("Agents loaded:", agentsResult.data.agents)
-      setAgents(
-        agentsResult.data.agents.map((agent: any) => ({
-          ...agent,
-          lastEvent: "Ready for operations",
-          eventCount: 0,
-        })),
-      )
       setIsConnected(true)
     } else if (agentsResult.error) {
       console.error("Agents query error:", agentsResult.error)
       setIsConnected(false)
     }
   }, [agentsResult.data, agentsResult.error])
+
+  // Get enriched agents data combining query data with local state
+  const enrichedAgents = (agentsResult.data?.agents || []).map((agent: any) => ({
+    ...agent,
+    lastEvent: agentLastEvents[agent.id] || "Ready for operations",
+    eventCount: agentEventCounts[agent.id] || 0,
+    status: agentEventCounts[agent.id] > 0 ? "active" : agent.status,
+  }))
 
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -271,7 +232,7 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Real-time subscriptions for each agent - only subscribe to agents with valid IDs */}
-      {agents
+      {enrichedAgents
         .filter((agent) => agent.id && agent.id.trim() !== "")
         .map((agent) => (
           <AgentEventSubscription key={agent.id} agentId={agent.id} onEvent={handleAgentEvent} />
@@ -353,21 +314,6 @@ export default function Page() {
                       </>
                     )}
                   </button>
-
-                  <button
-                    onClick={handleAutoRunAgent}
-                    disabled={!newTheme.trim() || isCreating || !isConnected}
-                    className="flex-1 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
-                  >
-                    {isCreating ? (
-                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4 mr-1" />
-                        Auto-Run
-                      </>
-                    )}
-                  </button>
                 </div>
 
                 <div className="text-xs text-gray-500">
@@ -396,7 +342,7 @@ export default function Page() {
                 </div>
               )}
 
-              {!agentsResult.fetching && agents.length === 0 && isConnected && (
+              {!agentsResult.fetching && enrichedAgents.length === 0 && isConnected && (
                 <div className="text-center py-8 text-gray-500">
                   <Bot className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p>No agents created yet</p>
@@ -405,7 +351,7 @@ export default function Page() {
               )}
 
               <div className="space-y-4">
-                {agents.map((agent) => (
+                {enrichedAgents.map((agent) => (
                   <div key={agent.id} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-medium text-gray-900">{agent.name}</h3>
@@ -452,13 +398,15 @@ export default function Page() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Active Agents</span>
                   <span className="font-medium">
-                    {agents.filter((a) => a.status === "active").length}
+                    {enrichedAgents.filter((a) => a.status === "active").length}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Avg Events/Agent</span>
                   <span className="font-medium">
-                    {agents.length > 0 ? Math.round(events.length / agents.length) : 0}
+                    {enrichedAgents.length > 0
+                      ? Math.round(events.length / enrichedAgents.length)
+                      : 0}
                   </span>
                 </div>
               </div>

@@ -24,16 +24,9 @@ type ThemedAgent struct {
 }
 
 // Agent event types that will be published
-type ThemeEvent struct {
-	EventType   string                 `json:"eventType"`
-	Title       string                 `json:"title"`
-	Description string                 `json:"description"`
-	Severity    string                 `json:"severity"`
-	Location    string                 `json:"location,omitempty"`
-	Data        map[string]interface{} `json:"data,omitempty"`
-}
+type FlexibleThemeEvent map[string]interface{}
 
-func (e ThemeEvent) EventName() string {
+func (e FlexibleThemeEvent) EventName() string {
 	return "theme_event"
 }
 
@@ -66,7 +59,7 @@ func (a *ThemedAgent) Name() string {
 }
 
 func (a *ThemedAgent) OnInitialize() error {
-	a.MaxEvents = 10
+	a.MaxEvents = 100
 	a.EventCount = 0
 	a.StartTime = time.Now()
 	a.IsActive = true
@@ -86,13 +79,6 @@ func (a *ThemedAgent) OnInitialize() error {
 
 func (a *ThemedAgent) OnReceiveMessage(messageName string, data *string) (*string, error) {
 	switch messageName {
-	case "set_agent_id":
-		if data != nil && *data != "" {
-			a.AgentId = *data
-			result := fmt.Sprintf("Agent ID set: %s", a.AgentId)
-			return &result, nil
-		}
-		return nil, fmt.Errorf("agent ID data is required")
 	case "initialize_theme":
 		if data != nil && *data != "" {
 			a.Theme = *data
@@ -104,8 +90,6 @@ func (a *ThemedAgent) OnReceiveMessage(messageName string, data *string) (*strin
 		return a.startEventGeneration()
 	case "start_rapid_generation":
 		return a.startRapidGeneration()
-	case "start_auto_generation":
-		return a.startAutoGeneration()
 	case "get_status":
 		return a.getStatus()
 	case "stop":
@@ -182,7 +166,7 @@ func (a *ThemedAgent) startEventGeneration() (*string, error) {
 	}
 
 	// Publish the themed event
-	err = a.PublishEvent(*event)
+	err = a.PublishEvent(event)
 	if err != nil {
 		return nil, fmt.Errorf("failed to publish event: %w", err)
 	}
@@ -192,13 +176,15 @@ func (a *ThemedAgent) startEventGeneration() (*string, error) {
 
 	// Publish status update
 	elapsed := time.Since(a.StartTime)
-	err = a.PublishEvent(AgentStatusEvent{
+	statusEvent := AgentStatusEvent{
 		Status:      "generating",
 		EventCount:  a.EventCount,
 		MaxEvents:   a.MaxEvents,
 		Theme:       a.Theme,
 		TimeElapsed: elapsed.Round(time.Second).String(),
-	})
+	}
+
+	err = a.PublishEvent(statusEvent)
 	if err != nil {
 		return nil, fmt.Errorf("failed to publish status: %w", err)
 	}
@@ -239,33 +225,6 @@ func (a *ThemedAgent) startRapidGeneration() (*string, error) {
 	return result, nil
 }
 
-// New method for auto generation (continues until complete)
-func (a *ThemedAgent) startAutoGeneration() (*string, error) {
-	if !a.IsActive {
-		result := "Agent is not active"
-		return &result, nil
-	}
-
-	if a.EventCount >= a.MaxEvents {
-		result := "Agent has completed all events"
-		return &result, nil
-	}
-
-	// Generate one event
-	result, err := a.startEventGeneration()
-	if err != nil {
-		return nil, err
-	}
-
-	// If we haven't completed yet, trigger the next auto event
-	if a.IsActive && a.EventCount < a.MaxEvents && a.AgentId != "" {
-		// Send async message to continue auto generation
-		agents.SendMessageAsync(a.AgentId, "start_auto_generation")
-	}
-
-	return result, nil
-}
-
 func (a *ThemedAgent) completeGeneration() (*string, error) {
 	a.IsActive = false
 	duration := time.Since(a.StartTime)
@@ -285,7 +244,7 @@ func (a *ThemedAgent) completeGeneration() (*string, error) {
 	return &result, nil
 }
 
-func (a *ThemedAgent) generateThemeEvent() (*ThemeEvent, error) {
+func (a *ThemedAgent) generateThemeEvent() (FlexibleThemeEvent, error) {
 	model, err := models.GetModel[openai.ChatModel]("text-generator")
 	if err != nil {
 		return nil, err
@@ -295,25 +254,26 @@ func (a *ThemedAgent) generateThemeEvent() (*ThemeEvent, error) {
 Generate a realistic pseudo-event that fits this theme. 
 
 The event should be interesting and dramatic but fictional.
-Respond with ONLY a JSON object in this exact format:
+Respond with ONLY a JSON object with these required fields plus any additional relevant fields:
 {
   "eventType": "type of event (e.g. security_breach, mission_update, system_alert)",
   "title": "Brief event title",
   "description": "Detailed description of what happened",
   "severity": "LOW, MEDIUM, HIGH, or CRITICAL",
   "location": "where this event occurred (optional)",
-  "data": {
-    "additional": "relevant data fields as key-value pairs"
-  }
+  "additionalField1": "any other relevant data",
+  "additionalField2": "more relevant data"
 }
 
-Make it creative and thematic to "%s" but keep it as valid JSON.`, a.Theme, a.Theme)
+Make it creative and thematic to "%s". Add 2-4 additional fields that make sense for the event type and theme. Use flat structure - no nested objects.`, a.Theme, a.Theme)
 
 	input, err := model.CreateInput(
-		openai.NewSystemMessage("You are a creative event generator. Always respond with valid JSON only."),
+		openai.NewSystemMessage("You are a creative event generator. Always respond with valid JSON only. Use flat structure - no nested objects."),
 		openai.NewUserMessage(prompt),
 	)
 	if err != nil {
+		// log the error and return a fallback event
+		fmt.Printf("Error creating model input: %v\n", err)
 		return nil, err
 	}
 
@@ -326,27 +286,14 @@ Make it creative and thematic to "%s" but keep it as valid JSON.`, a.Theme, a.Th
 
 	content := strings.TrimSpace(output.Choices[0].Message.Content)
 
-	// Parse the JSON response
-	var event ThemeEvent
-	err = json.Unmarshal([]byte(content), &event)
+	var eventData map[string]interface{}
+	err = json.Unmarshal([]byte(content), &eventData)
 	if err != nil {
-		// Fallback event if JSON parsing fails
-		event = ThemeEvent{
-			EventType:   "generation_event",
-			Title:       fmt.Sprintf("%s Event #%d", strings.Title(a.Theme), a.EventCount+1),
-			Description: fmt.Sprintf("A %s-themed event occurred during the simulation.", a.Theme),
-			Severity:    "MEDIUM",
-			Location:    "Unknown",
-			Data: map[string]interface{}{
-				"theme":         a.Theme,
-				"event_number":  a.EventCount + 1,
-				"generated_at":  time.Now().Format(time.RFC3339),
-				"parsing_error": err.Error(),
-			},
-		}
+		return nil, fmt.Errorf("failed to parse event JSON: %w", err)
 	}
 
-	return &event, nil
+	event := FlexibleThemeEvent(eventData)
+	return event, nil
 }
 
 func (a *ThemedAgent) getStatus() (*string, error) {
@@ -401,12 +348,6 @@ func CreateAgent() (string, error) {
 		return "", err
 	}
 
-	// Set the agent ID in the agent itself
-	_, err = agents.SendMessage(agentInfo.Id, "set_agent_id", agents.WithData(agentInfo.Id))
-	if err != nil {
-		return "", fmt.Errorf("failed to set agent ID: %w", err)
-	}
-
 	return agentInfo.Id, nil
 }
 
@@ -429,7 +370,7 @@ func UpdateAgentTheme(agentId string, theme string) (string, error) {
 }
 
 // StartEventGeneration triggers a single event
-func StartEventGeneration(agentId string) (string, error) {
+func MutateStartEventGeneration(agentId string) (string, error) {
 	err := agents.SendMessageAsync(agentId, "start_generation")
 	if err != nil {
 		return "", err
@@ -438,7 +379,7 @@ func StartEventGeneration(agentId string) (string, error) {
 }
 
 // StartRapidGeneration triggers rapid event generation (self-managing)
-func StartRapidGeneration(agentId string) (string, error) {
+func MutateStartRapidGeneration(agentId string) (string, error) {
 	err := agents.SendMessageAsync(agentId, "start_rapid_generation")
 	if err != nil {
 		return "", err
@@ -472,29 +413,4 @@ func StopAgent(agentId string) (string, error) {
 // Agents returns all active agents (renamed from ListAgents to match GraphQL field name)
 func Agents() ([]agents.AgentInfo, error) {
 	return agents.ListAll()
-}
-
-// AutoRunAgent creates an agent, sets theme, and starts auto-generation
-func AutoRunAgent(theme string) (string, error) {
-	// Create the agent
-	agentId, err := CreateAgent()
-	if err != nil {
-		return "", err
-	}
-
-	// Set the theme
-	_, err = UpdateAgentTheme(agentId, theme)
-	if err != nil {
-		// If theme setting fails, stop the agent
-		agents.Stop(agentId)
-		return "", fmt.Errorf("failed to setup agent theme: %w", err)
-	}
-
-	// Start auto-generation (agent will self-manage the rest)
-	err = agents.SendMessageAsync(agentId, "start_auto_generation")
-	if err != nil {
-		return "", fmt.Errorf("failed to start auto generation: %w", err)
-	}
-
-	return fmt.Sprintf("Auto-running agent created with ID: %s and theme '%s'. Auto-generation started.", agentId, theme), nil
 }
