@@ -27,6 +27,9 @@ type ThemedAgent struct {
 type FlexibleThemeEvent map[string]interface{}
 
 func (e FlexibleThemeEvent) EventName() string {
+	if eventType, ok := e["eventType"].(string); ok && eventType != "" {
+		return eventType
+	}
 	return "theme_event"
 }
 
