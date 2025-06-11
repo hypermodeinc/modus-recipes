@@ -70,12 +70,6 @@ const START_EVENT_GENERATION_MUTATION = `
   }
 `
 
-const START_RAPID_GENERATION_MUTATION = `
-  mutation StartRapidGeneration($agentId: String!) {
-    mutateStartRapidGeneration(agentId: $agentId)
-  }
-`
-
 function AgentEventSubscription({
   agentId,
   onEvent,
@@ -118,7 +112,6 @@ export default function Page() {
   const [, createAgent] = useMutation(CREATE_AGENT)
   const [, setTheme] = useMutation(SET_AGENT_THEME_MUTATION)
   const [, startEventGeneration] = useMutation(START_EVENT_GENERATION_MUTATION)
-  const [, startRapidGeneration] = useMutation(START_RAPID_GENERATION_MUTATION)
 
   const getEventType = useCallback(
     (eventName: string): "info" | "warning" | "success" | "error" => {
@@ -315,16 +308,6 @@ export default function Page() {
                     )}
                   </button>
                 </div>
-
-                <div className="text-xs text-gray-500">
-                  <p>
-                    <strong>Create:</strong> Manual control with +1 Event and +5 Rapid buttons
-                  </p>
-                  <p>
-                    <strong>Auto-Run:</strong> Creates agent, sets theme, and generates 10 events
-                    automatically
-                  </p>
-                </div>
               </div>
             </div>
 
@@ -373,13 +356,6 @@ export default function Page() {
                         className="flex-1 bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 disabled:bg-gray-300"
                       >
                         +1 Event
-                      </button>
-                      <button
-                        onClick={() => startRapidGeneration({ agentId: agent.id })}
-                        disabled={!isConnected}
-                        className="flex-1 bg-purple-500 text-white px-2 py-1 rounded text-xs hover:bg-purple-600 disabled:bg-gray-300"
-                      >
-                        +5 Rapid
                       </button>
                     </div>
                   </div>
