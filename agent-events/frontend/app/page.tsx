@@ -240,8 +240,8 @@ export default function Page() {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Real-time subscriptions for each agent - dynamically subscribe to all current agents */}
       {enrichedAgents
-        .filter((agent) => agent.id && agent.id.trim() !== "")
-        .map((agent) => (
+        .filter((agent: Agent) => agent.id && agent.id.trim() !== "")
+        .map((agent: Agent) => (
           <AgentEventSubscription
             key={`sub-${agent.id}`}
             agentId={agent.id}
@@ -353,7 +353,7 @@ export default function Page() {
               )}
 
               <div className="space-y-4">
-                {enrichedAgents.map((agent) => (
+                {enrichedAgents.map((agent: Agent) => (
                   <div key={agent.id} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-medium text-gray-900">{agent.name}</h3>
@@ -402,7 +402,7 @@ export default function Page() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Active Agents</span>
                   <span className="font-medium">
-                    {enrichedAgents.filter((a) => a.status === "active").length}
+                    {enrichedAgents.filter((a: Agent) => a.status === "active").length}
                   </span>
                 </div>
                 <div className="flex justify-between">

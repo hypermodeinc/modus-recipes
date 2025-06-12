@@ -16,6 +16,7 @@ export const client = createClient({
       forwardSubscription(operation) {
         return {
           subscribe: (sink) => {
+            // @ts-ignore
             const dispose = sseClient.subscribe(operation, sink)
             return {
               unsubscribe: dispose,
