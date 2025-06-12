@@ -1,5 +1,5 @@
 import { GraphQLProvider } from "./urql"
-import "./globals.css" // Assuming you have global styles
+import "./globals.css"
 
 export const metadata = {
   title: "Agent Events Dashboard",
