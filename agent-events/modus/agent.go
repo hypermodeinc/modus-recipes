@@ -49,6 +49,9 @@ func (e AgentStatusEvent) EventName() string {
 }
 
 func (a *ThemedAgent) Name() string {
+	if a.Theme != "" {
+		return fmt.Sprintf("ThemedAgent_%s", strings.ReplaceAll(a.Theme, " ", "_"))
+	}
 	return "ThemedAgent"
 }
 
@@ -59,15 +62,7 @@ func (a *ThemedAgent) OnInitialize() error {
 	a.IsActive = true
 	a.LastEventTime = time.Now()
 
-	err := a.PublishEvent(AgentStatusEvent{
-		Status:      "initialized",
-		EventCount:  0,
-		MaxEvents:   a.MaxEvents,
-		Theme:       a.Theme,
-		TimeElapsed: "0s",
-	})
-
-	return err
+	return nil
 }
 
 func (a *ThemedAgent) OnReceiveMessage(messageName string, data *string) (*string, error) {
@@ -83,8 +78,6 @@ func (a *ThemedAgent) OnReceiveMessage(messageName string, data *string) (*strin
 		return a.startEventGeneration()
 	case "get_status":
 		return a.getStatus()
-	case "stop":
-		return a.stopGeneration()
 	default:
 		return nil, fmt.Errorf("unknown message: %s", messageName)
 	}
@@ -140,6 +133,10 @@ func (a *ThemedAgent) SetState(data *string) {
 }
 
 func (a *ThemedAgent) startEventGeneration() (*string, error) {
+	if a.Theme == "" {
+		return nil, fmt.Errorf("agent theme not set")
+	}
+
 	if !a.IsActive {
 		result := "Agent is not active"
 		return &result, nil
@@ -262,24 +259,6 @@ func (a *ThemedAgent) getStatus() (*string, error) {
 	}
 
 	result := string(statusBytes)
-	return &result, nil
-}
-
-func (a *ThemedAgent) stopGeneration() (*string, error) {
-	a.IsActive = false
-
-	err := a.PublishEvent(AgentStatusEvent{
-		Status:      "stopped",
-		EventCount:  a.EventCount,
-		MaxEvents:   a.MaxEvents,
-		Theme:       a.Theme,
-		TimeElapsed: time.Since(a.StartTime).Round(time.Second).String(),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	result := fmt.Sprintf("Agent stopped. Generated %d/%d events for theme: %s", a.EventCount, a.MaxEvents, a.Theme)
 	return &result, nil
 }
 

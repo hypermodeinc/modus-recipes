@@ -6,30 +6,22 @@ import (
 	"github.com/hypermodeinc/modus/sdk/go/pkg/agents"
 )
 
-func CreateAgent() (string, error) {
-	agentInfo, err := agents.Start("ThemedAgent")
-	if err != nil {
-		return "", err
-	}
-
-	return agentInfo.Id, nil
-}
-
-func UpdateAgentTheme(agentId string, theme string) (string, error) {
+func CreateThemedAgent(theme string) (string, error) {
 	if theme == "" {
 		return "", fmt.Errorf("theme cannot be empty")
 	}
 
-	result, err := agents.SendMessage(agentId, "initialize_theme", agents.WithData(theme))
+	agentInfo, err := agents.Start("ThemedAgent")
+	if err != nil {
+		return "", fmt.Errorf("failed to start agent: %w", err)
+	}
+
+	_, err = agents.SendMessage(agentInfo.Id, "initialize_theme", agents.WithData(theme))
 	if err != nil {
 		return "", fmt.Errorf("failed to set theme for agent: %w", err)
 	}
 
-	if result == nil {
-		return "", fmt.Errorf("no response from agent")
-	}
-
-	return *result, nil
+	return agentInfo.Id, nil
 }
 
 func MutateStartEventGeneration(agentId string) (string, error) {
@@ -52,7 +44,7 @@ func GetAgentStatus(agentId string) (string, error) {
 }
 
 func StopAgent(agentId string) (string, error) {
-	err := agents.SendMessageAsync(agentId, "stop")
+	_, err := agents.Stop(agentId)
 	if err != nil {
 		return "", err
 	}

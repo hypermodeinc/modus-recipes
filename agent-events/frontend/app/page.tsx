@@ -13,6 +13,7 @@ import {
   WifiOff,
   Plus,
   Play,
+  Square,
 } from "lucide-react"
 
 interface AgentEvent {
@@ -52,21 +53,21 @@ const GET_ALL_AGENTS_QUERY = `
   }
 `
 
-const CREATE_AGENT = `
-  mutation CreateAgent {
-    createAgent
-  }
-`
-
-const SET_AGENT_THEME_MUTATION = `
-  mutation SetAgentTheme($agentId: String!, $theme: String!) {
-    updateAgentTheme(agentId: $agentId, theme: $theme)
+const CREATE_THEMED_AGENT_MUTATION = `
+  mutation CreateThemedAgent($theme: String!) {
+    createThemedAgent(theme: $theme)
   }
 `
 
 const START_EVENT_GENERATION_MUTATION = `
   mutation StartEventGeneration($agentId: String!) {
     mutateStartEventGeneration(agentId: $agentId)
+  }
+`
+
+const STOP_AGENT_MUTATION = `
+  mutation StopAgent($agentId: String!) {
+    stopAgent(agentId: $agentId)
   }
 `
 
@@ -107,11 +108,14 @@ export default function Page() {
   const [newTheme, setNewTheme] = useState("")
   const [isCreating, setIsCreating] = useState(false)
 
-  const [agentsResult, refetchAgents] = useQuery({ query: GET_ALL_AGENTS_QUERY })
+  const [agentsResult, refetchAgents] = useQuery({
+    query: GET_ALL_AGENTS_QUERY,
+    requestPolicy: "cache-and-network", // Always fetch fresh data
+  })
 
-  const [, createAgent] = useMutation(CREATE_AGENT)
-  const [, setTheme] = useMutation(SET_AGENT_THEME_MUTATION)
+  const [, createThemedAgent] = useMutation(CREATE_THEMED_AGENT_MUTATION)
   const [, startEventGeneration] = useMutation(START_EVENT_GENERATION_MUTATION)
+  const [, stopAgent] = useMutation(STOP_AGENT_MUTATION)
 
   const getEventType = useCallback(
     (eventName: string): "info" | "warning" | "success" | "error" => {
@@ -153,34 +157,35 @@ export default function Page() {
     [getEventType],
   )
 
-  // Handle creating a new themed agent (two-step process hidden from user)
+  // Handle stopping an agent
+  const handleStopAgent = async (agentId: string) => {
+    try {
+      await stopAgent({ agentId })
+      // Refetch to update agent status
+      refetchAgents({ requestPolicy: "network-only" })
+    } catch (error) {
+      console.error("Failed to stop agent:", error)
+    }
+  }
   const handleCreateAgent = async () => {
     if (!newTheme.trim()) return
 
     setIsCreating(true)
     try {
-      const createResult = await createAgent()
-      if (createResult.data?.createAgent) {
-        const agentId = createResult.data.createAgent
-
-        setTimeout(async () => {
-          try {
-            await setTheme({ agentId, theme: newTheme.trim() })
-            setNewTheme("")
-            refetchAgents()
-          } catch (error) {
-            console.error("Failed to set agent theme:", error)
-          }
-        }, 1000)
+      const result = await createThemedAgent({ theme: newTheme.trim() })
+      if (result.data?.createThemedAgent) {
+        setNewTheme("")
+        // Force refetch and wait for it to complete to get new agents
+        await refetchAgents({ requestPolicy: "network-only" })
       }
     } catch (error) {
-      console.error("Failed to create agent:", error)
+      console.error("Failed to create themed agent:", error)
     } finally {
       setIsCreating(false)
     }
   }
 
-  // Track connection status based on agents query
+  // Track connection status and refetch agents periodically
   useEffect(() => {
     if (agentsResult.data?.agents) {
       setIsConnected(true)
@@ -188,7 +193,16 @@ export default function Page() {
       console.error("Agents query error:", agentsResult.error)
       setIsConnected(false)
     }
-  }, [agentsResult.data, agentsResult.error])
+
+    // Set up periodic refetch to catch any missed agents
+    const interval = setInterval(() => {
+      if (isConnected) {
+        refetchAgents({ requestPolicy: "network-only" })
+      }
+    }, 5000) // Refetch every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [agentsResult.data, agentsResult.error, isConnected, refetchAgents])
 
   // Get enriched agents data combining query data with local state
   const enrichedAgents = (agentsResult.data?.agents || []).map((agent: any) => ({
@@ -224,11 +238,15 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Real-time subscriptions for each agent - only subscribe to agents with valid IDs */}
+      {/* Real-time subscriptions for each agent - dynamically subscribe to all current agents */}
       {enrichedAgents
         .filter((agent) => agent.id && agent.id.trim() !== "")
         .map((agent) => (
-          <AgentEventSubscription key={agent.id} agentId={agent.id} onEvent={handleAgentEvent} />
+          <AgentEventSubscription
+            key={`sub-${agent.id}`}
+            agentId={agent.id}
+            onEvent={handleAgentEvent}
+          />
         ))}
 
       <div className="max-w-7xl mx-auto">
@@ -289,6 +307,7 @@ export default function Page() {
                     placeholder="e.g., matrix, cyberpunk, space, medieval..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     disabled={isCreating || !isConnected}
+                    onKeyPress={(e) => e.key === "Enter" && handleCreateAgent()}
                   />
                 </div>
 
@@ -352,10 +371,19 @@ export default function Page() {
                     <div className="flex space-x-1">
                       <button
                         onClick={() => startEventGeneration({ agentId: agent.id })}
-                        disabled={!isConnected}
-                        className="flex-1 bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 disabled:bg-gray-300"
+                        disabled={!isConnected || agent.status === "suspended"}
+                        className="flex-1 bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 disabled:bg-gray-300 flex items-center justify-center"
                       >
-                        +1 Event
+                        <Play className="w-3 h-3 mr-1" />
+                        Generate Event
+                      </button>
+                      <button
+                        onClick={() => handleStopAgent(agent.id)}
+                        disabled={!isConnected || agent.status === "suspended"}
+                        className="flex-1 bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 disabled:bg-gray-300 flex items-center justify-center"
+                      >
+                        <Square className="w-3 h-3 mr-1" />
+                        Stop
                       </button>
                     </div>
                   </div>
@@ -477,8 +505,8 @@ subscription AgentEvents($agentId: String!) {
 cd modus && modus dev
 
 # Backend should expose:
-query { listAgents { id name status } }
-mutation { createThemedAgent(theme: $theme) { id name status } }`}
+query { agents { id name status } }
+mutation { createThemedAgent(theme: $theme) }`}
               </pre>
             </div>
           </div>
