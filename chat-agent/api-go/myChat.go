@@ -27,11 +27,12 @@ func systemPrompt() string {
 	* As an example of context data we also provide the current date in the prompt.
 	 */
 	isoTime := time.Now().UTC().Format(time.RFC3339)
-	prompt := fmt.Sprintf(`Today is %s. 
+	prompt := fmt.Sprintf(`Today is %s. The user name is "Me".
 	When user input is a question, use search_fact_by_term or search_by_entity tool with a list of terms and reply using the data retrieved.
 	Reply that you don't have that in memory if nothing is found.
 	If the user input is a statement, use the save_fact tool and confirm that you have saved the fact in your memory.
 	Try to extract the entities linked to the fact such as place, city, country, person, organization, event, item, etc.
+	For first-person sentence always link a person entity with the user name.
 	If the user input is about several facts, use the save_fact tool for each fact and confirm that you'll remember them.
     
 	`, isoTime)

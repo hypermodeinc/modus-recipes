@@ -39,13 +39,17 @@ help: ## Print target help
 backend: 
 	cd ./api-go && modus dev &
 local: env up schema-dql ## start dgraph, modus API and hypermode-chat frontend (local development)
-	cd ./api-go && modus dev & 
-	cd ../hypermode-chat && npm install && npm run dev
+	cd ./api-go && modus dev & echo $$! > $(current_dir)/.modus_pid
+	cd ../hypermode-chat && npm install && npm run dev & echo $$! > $(current_dir)/.npm_pid
 stop: ## Stop the backend and frontend (local development)
-	# Kill the backend process
-	kill $(cat .backend.pid) && rm .backend.pid
-	# Kill the frontend process
-	kill $(cat .frontend.pid) && rm .frontend.pid
+	@if [ -f $(current_dir)/.modus_pid ]; then \
+		kill -TERM -- `cat $(current_dir)/.modus_pid`; \
+		rm $(current_dir)/.modus_pid; \
+	fi
+	@if [ -f $(current_dir)/.npm_pid ]; then \
+		kill -TERM -- `cat $(current_dir)/.npm_pid`; \
+		rm $(current_dir)/.npm_pid; \
+	fi
 ui: ## Start the UI (local development)
 	@echo "Starting UI at http://localhost:3000"
 	cd ../hypermode-chat && npm install && npm run dev &

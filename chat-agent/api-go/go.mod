@@ -3,7 +3,7 @@ module api-go
 go 1.24.2
 
 require (
-	github.com/hypermodeinc/modus/sdk/go v0.18.0-alpha.5
+	github.com/hypermodeinc/modus/sdk/go v0.18.0-alpha.7
 	github.com/tidwall/gjson v1.18.0
 )
 
