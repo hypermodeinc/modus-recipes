@@ -23,7 +23,7 @@
     "@aichatkit/ui": "0.0.0-alpha.4",
     "@aichatkit/apollo-adapter": "0.0.0-alpha.4",
     "@aichatkit/localstorage-adapter": "0.0.0-alpha.4",
-    "lucide-react": "^0.488.0 || ^0.512.0 || ^0.513.0 || ^0.514.0"
+    "lucide-react": "^0.488.0 || ^0.512.0 || ^0.513.0 || ^0.514.0 || ^0.517.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.18",
