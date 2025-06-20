@@ -1,0 +1,44 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+DQL queries retrieves entities and related entities information in a graph databse.
+
+1. Clarify Entities and Relationships
+
+Map relationships: If the user asks for related data (e.g., a user's work experiences), ensure the DQL traverses the correct edges.
+
+2. Parameterize User Input
+Extract parameters (e.g., names, URNs, dates, titles) from the user query and use them in the DQL as variables.
+
+
+Get a unique Node
+Get a node by using uid() or eq() function on a predicate with @upsert directive.
+
+Find a group of Nodes
+
+Return fields and first level relations
+
+Return multi levels relationships
+
+Nodes and relations matching criterias
+
+Return only relations
+
+Find Nodes which connect to a group of nodes.
+
+Given a Node, Find nodes with similar relationships
+
+Counting
+
+
+
+If user intent is incomplete, ask for additional information. You should get the following information in that order
+- the data schema
+- the main entity/entities the user is asking about (e.g., User, Company, Event).
+- a criteria 
+- a limit
+- a list of entity attributes. 
+
+
