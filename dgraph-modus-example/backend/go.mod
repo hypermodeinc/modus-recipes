@@ -2,7 +2,7 @@ module dgraph-modus-example
 
 go 1.23.6
 
-require github.com/hypermodeinc/modus/sdk/go v0.17.4
+require github.com/hypermodeinc/modus/sdk/go v0.18.0
 
 require (
 	github.com/tidwall/gjson v1.18.0 // indirect

@@ -19,11 +19,11 @@
     "react-dom": "^19.1.0",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "@aichatkit/types": "0.0.0-alpha.4",
-    "@aichatkit/ui": "0.0.0-alpha.4",
-    "@aichatkit/apollo-adapter": "0.0.0-alpha.4",
-    "@aichatkit/localstorage-adapter": "0.0.0-alpha.4",
-    "lucide-react": "^0.488.0 || ^0.512.0 || ^0.513.0 || ^0.514.0 || ^0.517.0"
+    "@aichatkit/types": "0.0.0-alpha.5",
+    "@aichatkit/ui": "0.0.0-alpha.5",
+    "@aichatkit/apollo-adapter": "0.0.0-alpha.5",
+    "@aichatkit/localstorage-adapter": "0.0.0-alpha.5",
+    "lucide-react": "^0.488.0 || ^0.512.0 || ^0.513.0 || ^0.514.0 || ^0.517.0 || ^0.523.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.18",
