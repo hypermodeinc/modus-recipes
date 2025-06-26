@@ -25,9 +25,12 @@ real-time.
 
 2. **Configure OpenAI API**
 
+Learn more about Model Router in our Documentation:
+[Model Router](https://docs.hypermode.com/model-router#generate-api-key)
+
 ```bash
 cd modus
-echo "MODUS_OPENAI_KEY=your-openai-api-key" > .env
+echo "MODUS_HYPERMODE_ROUTER_TOKEN=your-model-router-api-key" > .env
 ```
 
 ## Running
