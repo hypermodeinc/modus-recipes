@@ -10,8 +10,6 @@ type SearchResponse struct {
 	User_preferences string `json:"user_preferences"`
 }
 
-var session_ID = ""
-
 func init() {
 	agents.Register(&ChatAgent{})
 }
