@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+ Dgraph schema is a definition file written in DQL (Dgraph Query Language). It describes the structure of your graph database—defining the types of entities (nodes), their properties (predicates), and the relationships (edges) between them.
+
+
+When asked to analyze a schema list entities, provides key fields, dates, statuses. Indicates unique identifiers. List the relationships for this entity and guess the relationship range which is the entity type of the relation target.
+For relationships with @reverse predicate, list the reverse relationship in the target entity type section.
+predicates with @upsert directive are unique identifier.

@@ -1,0 +1,310 @@
+---
+description: Use to generate DQL queries to get entities based on criteria
+globs: 
+alwaysApply: false
+---
+# DQL Query Patterns and Examples
+
+DQL queries retrieve entities and related entities information in a graph database.
+
+Follow [dql-language.mdc](mdc:.cursor/rules/dql-language.mdc) to generate valid DQL.
+# Query patterns
+## Basic Node Retrieval
+Find a single node by a unique identifier and fetch atrributes and relationships.
+
+Use eq function on a unique identifier predicate.
+List the node attribute to return.
+List the relationships  (first degree) and the attrites of the related nodes to return.
+You can continue on degree 2 next depending of the query.
+
+```dql
+query getCity($name: string) {
+  getCity(func: eq(City.name, $name)) {
+    uid
+    City.name
+    City.state {
+      State.name
+    }
+  }
+}
+```
+## Find a Group of nodes and fetch atrributes and relationships.
+Use a more complex root level to start the query on a group of nodes.
+Use functions potentially returning multiple nodes. eq on non unique attribute, lt gt, etc...
+Use @filter to narrow down the criteria
+
+```
+
+
+
+## 3. Filtering with Conditions
+- Description: Apply conditions to filter results at different levels of the query, such as filtering nodes or the relationships themselves.
+- Your Patterns Covered: `Nodes and relations matching criterias`.
+- DQL Keywords: `@filter`, `uid_in`, comparison functions (`gt`, `lt`, `ge`, `le`), full-text search (`anyoftext`).
+- Example: Find users who are not `blocked` AND have exchanged a `message` with a specific user.
+
+## 4. Aggregation (Counting & Calculations)
+- Description: Perform calculations on data, such as counting the number of nodes or the number of relationships a node has.
+- Your Patterns Covered: `Counting nodes`, `Counting related nodes`.
+- DQL Keywords: `count()`, `sum()`, `min()`, `max()`, `avg()`, `val()`.
+- Example: Count the total number of `User`s. Count how many other users a specific `User` follows.
+
+## 5. Reverse Lookups (Who connects to me?)
+- Description: Find nodes that have an edge pointing *to* a specific node or group of nodes. This is essential for answering questions like "Who follows this user?".
+- Your Patterns Covered: `Find Nodes which connect to a group of nodes`.
+- DQL Keywords: `~` (reverse edge), `@filter(uid_in(predicate, ...))`.
+- Example: Find all `PhoneNumber`s that `belongsTo` a specific `User`.
+
+## Count Relations at degree of separation 1
+
+Use count() function applied to the relationbship predicate. Use @filter to add criteria if needed.
+```dql
+{
+  user(func: eq(username,"Isidro.Schmeler")) {
+    username
+    number_of_follows:count(follows @filter(not eq(firstName,"Burley")))
+  }
+}
+```
+
+##  multi-hop (n-th degree) relationship counting
+Count the number of related nodes (e.g., friends, follows, contacts) at any degree of separation 2nd, n-th.
+
+**How:**  
+- Use a variable declared in the starting node with value 1
+- continue the query to reach the target nodes
+- use variable propagation to count the number of path in the graph reaching the target nodes.
+
+- Use value variables (e.g., `mutual_follows as math(c)`) to aggregate counts for each target node.
+- Retrieve and sort results using the value variable, optionally filtering by count.
+
+**Example: Count mutual follows (1st degree):**
+```dql
+{
+  userA as var(func: eq(username, "A")) {
+    c as math(1)
+    follows_of_userA as follows {
+      ~follows @filter(NOT uid(userA)) {
+        mutual_follows as math(c)
+      }
+    }
+  }
+  target_user(func: uid(mutual_follows), orderdesc: val(mutual_follows), first: 1) {
+    username
+    mutual_follows_count: val(mutual_follows)
+  }
+}
+```
+
+**To count 2nd or n-th degree relations:**  
+- Continue nesting the relationship blocks, propagating the variable at each level.
+- For each additional degree, add another relationship traversal and propagate the variable.
+
+**Benefits:**  
+- Avoids redundant graph traversals, making queries much faster and more efficient.
+- Enables complex recommendations and similarity calculations (e.g., Jaccard distance, scoring functions).
+- Keeps queries readable and maintainable.
+
+**References:**  
+- [Hypermode: Cracking DQL—Variable Propagation](mdc:https:/hypermode.com/blog/variable-propgation)
+
+---
+
+This rule ensures you use DQL’s variable propagation to efficiently count and analyze relationships at any degree in your graph queries.
+
+```dql
+{
+  userA as var(func: eq(username, "A")) {
+    c as math(1)
+    follows_of_userA as follows {
+      ~follows @filter(NOT uid(userA)) {
+        mutual_follows as math(c)
+      }
+    }
+  }
+  target_user(func: uid(mutual_follows), orderdesc: val(mutual_follows), first: 1) {
+    username
+    mutual_follows_count: val(mutual_follows)
+  }
+}
+```
+
+## 7. Conditional Upsert (Create or Update Mutation)
+- Description: A vital pattern for writing data. Create a node if it doesn't exist, or update it if it does, based on a unique key (a predicate with `@upsert`). This prevents duplicate data.
+- Why it's important: The LLM needs to know how to safely write data, not just read it.
+- DQL Keywords: `upsert`, `query`, `mutation`, `cond`.
+- Example: Create a `User` with a unique `username`, or update their `lastName` if a user with that username already exists.
+
+---
+
+## DQL Query Examples (using your schema)
+
+
+
+---
+
+## 2. Group Node Retrieval
+Essential. Use `func: type(...)`, `has(...)`, or indexed fields.
+
+Get all Donors with "Smith" in their name:
+
+```dql
+{
+  smithDonors(func: anyofterms(Donor.name, "Smith")) {
+    uid
+    Donor.name
+    Donor.amount
+  }
+}
+```
+
+---
+
+## 3. Graph Traversal (First and Multi-level)
+Get a Project, its School, and the School's City and State:
+
+```dql
+{
+  projectWithLocation(func: eq(Project.title, "Science Fair")) {
+    Project.title
+    Project.school {
+      School.name
+      School.city {
+        City.name
+        City.state {
+          State.name
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## 4. Filtering with Conditions
+Find all Projects in grade "8th" with "Math" in the title:
+
+```dql
+{
+  mathProjects(func: allofterms(Project.title, "Math")) @filter(eq(Project.grade, "8th")) {
+    Project.title
+    Project.grade
+    Project.school {
+      School.name
+    }
+  }
+}
+```
+
+---
+
+## 5. Aggregation (Counting)
+Count the number of Projects for each School:
+
+```dql
+{
+  schoolProjectCounts(func: has(School.projects)) {
+    School.name
+    numProjects: count(School.projects)
+  }
+}
+```
+
+---
+
+## 6. Reverse Lookups
+Find all Projects in the "Technology" Category (using reverse edge):
+
+```dql
+{
+  var(func: eq(Category.name, "Technology")) {
+    techCat as uid
+  }
+  techProjects(func: uid(techCat)) {
+    Category.name
+    ~Project.category {
+      Project.title
+    }
+  }
+}
+```
+
+---
+
+## 7. Edge-only Queries
+Get all Donor-Donation relationships (edges only):
+
+```dql
+{
+  donorDonations(func: has(Donor.donations)) {
+    Donor.name
+    Donor.donations {
+      Donation.amount
+      Donation.project {
+        Project.title
+      }
+    }
+  }
+}
+```
+
+---
+
+## 8. Variable Propagation
+Find all Donors who donated to the same projects as "John Smith":
+
+```dql
+{
+  var(func: eq(Donor.name, "John Smith")) {
+    JohnProjects as Donor.donations {
+      project as Donation.project
+    }
+  }
+  donorsWithSameProjects(func: has(Donor.donations)) @filter(uid_in(Donor.donations, project)) {
+    Donor.name
+  }
+}
+```
+
+---
+
+## 9. Conditional Upsert (Mutation)
+Add a City and link it to a State, creating or updating as needed:
+
+```dql
+upsert {
+  query {
+    city as var(func: eq(City.name, "San Francisco"))
+    state as var(func: eq(State.name, "California"))
+  }
+  mutation {
+    set {
+      uid(city) <City.name> "San Francisco" .
+      uid(city) <dgraph.type> "City" .
+      uid(city) <City.state> uid(state) .
+    }
+  }
+}
+```
+
+---
+
+## 10. Similarity/Recommendation (Advanced)
+Find Schools with similar types as a given School:
+
+```dql
+{
+  var(func: eq(School.name, "Lincoln High")) {
+    schoolType as School.type
+  }
+  similarSchools(func: eq(School.type, val(schoolType))) @filter(not eq(School.name, "Lincoln High")) {
+    School.name
+    School.type
+  }
+}
+```
+
+
+
+

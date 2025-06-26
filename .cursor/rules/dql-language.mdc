@@ -1,0 +1,51 @@
+---
+description: validating DQL and genarating DQL queries
+globs: 
+alwaysApply: false
+---
+### DQL structure
+DQL is declarative, which means that queries return a response back in a similar shape to the query.
+
+A DQL query finds nodes based on search criteria, matches patterns in the graph and returns the node attributes, relationships specified in the query.
+Every node is uniquely idenfied by the predicate `uid`.
+A predicate is a node attribute or a relationship.
+
+A DQL query has
+- an optional parameterization, ie a name and a list of parameters
+- an opening curly bracket
+- at least one named query block, but can contain many blocks
+- optional var blocks
+- a closing curly bracket
+
+```dql
+query myQuery ($year : int, $terms : string = "Indiana Jones") 
+{ 
+  myList(func: allofterms(name@en, $terms), first:2) @filter(lt(initial_release_date,$year)) {
+    name@en
+    initial_release_date
+    executive_produced_by { 
+      name@en 
+    }
+  }
+}
+```
+​
+Query parameters 
+- must have a name starting with a $ symbol.
+- must have a type int, float, bool or string.
+- arrays of uids are passed a string.
+- may have a default value
+- may be mandatory by suffixing the type with character `!`.
+- Mandatory parameters can’t have a default value.
+Variables must be used in the query.
+
+
+A named query block has 
+- a name
+- a opening parenthesis
+- a root criteria introduced by `func:`
+- optional pagination specification using `first:N` to limit the number of data to fetch,`offset:N` to skip the first N element ,`after:0x01` to fetch after a given node `uid`.
+
+
+Rules
+all defined variables are either used directly in a func: uid(...) or referenced in the output.

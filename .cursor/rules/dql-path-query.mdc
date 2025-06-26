@@ -1,0 +1,93 @@
+---
+description: Generate DQL queries involving count of relationships
+globs: 
+alwaysApply: false
+---
+# DQL Query Patterns and Examples
+
+DQL queries retrieve entities and related entities information in a graph database.
+
+Follow [dql-language.mdc](mdc:.cursor/rules/dql-language.mdc) to generate valid DQL.
+
+
+
+## Count Relations at degree of separation 1
+
+Use count() function applied to the relationbship predicate. Use @filter to add criteria if needed.
+```dql
+{
+  user(func: eq(username,"Isidro.Schmeler")) {
+    username
+    number_of_follows:count(follows @filter(not eq(firstName,"Burley")))
+  }
+}
+```
+
+## unique-nth-degree-count
+For queries like:
+"How many unique 2nd degree connections does user A have?"
+"Count distinct 3rd degree followers of user B"
+"Find unique nth-degree relationships in social networks"
+
+```dql
+query UserAndCount($name: string){
+  # start with the entity found by unique identifier
+  source(func: eq(username,$name)) {
+    username
+    # use a relationship to reach degree 1
+    follows {
+        # create a DQL variable with degree 2
+        degree_2 as follows
+    }
+    
+  }
+  # define a block counting the nodes in the dql variable
+  count_degree_2(func:uid(degree_2)) {
+    count:count(uid)
+  }
+}
+```
+
+
+##  multi-hop (n-th degree) relationship counting
+Count the number of paths 
+
+**How:**  
+- Use a variable declared in the starting node with value 1
+- continue the query to reach the target nodes
+- use variable propagation to count the number of path in the graph reaching the target nodes.
+
+- Use value variables (e.g., `mutual_follows as math(c)`) to aggregate counts for each target node.
+- Retrieve and sort results using the value variable, optionally filtering by count.
+
+**Example: Count mutual follows (1st degree):**
+```dql
+{
+  userA as var(func: eq(username, "A")) {
+    # init path_count
+    path_count as math(1)
+    follows_of_userA as follows {
+      # we are in degree 1
+      # use a relationship with a filter condition
+      follows @filter(NOT uid(userA)) {
+        # we are in degree 2
+        # variable path_count provides the number of path reaching for each node
+        target_path_count as math(path_count)
+      }
+    }
+  }
+  # use the uid(<variable_name>) to get all the nodes
+  # use val(<variable_name>) to order the result and fecth the value
+  target(func: uid(target_path_count), orderdesc: val(target_path_count), first: 3) {
+    username
+    # use an alias to name the result
+    target_path_count:val(target_path_count)
+  }
+}
+```
+
+
+
+
+
+
