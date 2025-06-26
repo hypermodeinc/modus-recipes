@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.hypermode.com/modus.json",
+  "endpoints": {
+    "default": {
+      "type": "graphql",
+      "path": "/graphql",
+      "auth": "bearer-token"
+    }
+  },
+  "models": {
+    "text-generator": {
+      "sourceModel": "gpt-4o",
+      "connection": "hypermode-router",
+      "path": "v1/chat/completions"
+    }
+  },
+  "connections": {
+    "hypermode-router": {
+      "type": "http",
+      "baseUrl": "https://models.hypermode.host/",
+      "headers": {
+        "Authorization": "Bearer {{TOKEN}}"
+      }
+    },
+    "dgraph": {
+      "type": "dgraph",
+      "connString": "dgraph://localhost:9080"
+    }
+  }
+}

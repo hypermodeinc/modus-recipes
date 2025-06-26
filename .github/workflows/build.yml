@@ -65,7 +65,7 @@ jobs:
       - name: Set up TinyGo
         uses: acifani/setup-tinygo@v2
         with:
-          tinygo-version: 0.34.0
+          tinygo-version: 0.38.0
 
       - name: Build project
         run: npx -p @hypermode/modus-cli -y modus build
