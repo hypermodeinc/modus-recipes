@@ -3,13 +3,15 @@ description: Generate DQL queries involving count of relationships
 globs: 
 alwaysApply: false
 ---
-# DQL Query Patterns and Examples
+# DQL Query Patterns
 
 DQL queries retrieve entities and related entities information in a graph database.
 
-Follow [dql-language.mdc](mdc:.cursor/rules/dql-language.mdc) to generate valid DQL.
+Respond with the parameterized query, include meaningful parameter like topK and identifier values. Include comments in the query to explain the steps.
 
+Don't prompt the user for anything else. Just produce the query.
 
+Follow @dql-language.mdc to generate valid DQL.
 
 ## Count Relations at degree of separation 1
 
