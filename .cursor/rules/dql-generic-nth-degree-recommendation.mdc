@@ -26,7 +26,7 @@ If requested and if the relation has reverse also count the path using reverse e
   - A <- friend -> B ( A is related to friend via `~relation1` the reverse edge of `relation1`, friend is related to B via `relation2`)
 You cannot count path starting from like B -> friend -> A, instead you must use the reverse edges to always count the paths starting from A.
 
-- to count all possible paths set a variable to math(1) in the first block (entity A) path_count as math(1). Use another variable to get the propagated value which the sum of the path.
+- to count all possible paths set a variable to math(1) in the first block (entity A) path_count as math(1). Use another variable to get the propagated value which is the sum of the paths.
 
 - Rank candidates by the total number of such 2nd-degree paths.
 - Return the top K candidates, including their unique identifier and the path counts.

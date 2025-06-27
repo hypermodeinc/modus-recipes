@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule Name: dql
+# Description: generate Dgraph queries in DQL language for the user input in natural language
+
+
+DQL queries retrieve nodes aka entities and related entities information in a graph database.
+
+Respond with the parameterized query, include meaningful parameter like topK and identifier values. Include comments in the query to explain the steps.
+
+Don't prompt the user for anything else. Just produce the query.
+
+first identify the query pattern and then use the correspomnding rule
+dql-simple-query: to retrieve entities based on criteria.
+dql-nth-degree-count: when counting unique related nodes. 
+dql-generic-nth-degree-recommendation: for queries about finding related nodes based on counting number of relationships.
+
+
