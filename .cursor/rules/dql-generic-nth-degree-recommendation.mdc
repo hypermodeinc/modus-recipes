@@ -1,0 +1,100 @@
+---
+description: Generate DQL query where nth degree recommendation is involved
+globs: 
+alwaysApply: false
+---
+# Rule Name: dql-generic-nth-degree-recommendation
+# Description: Generate DQL queries to find and rank "second-degree candidates" for a given entity, based on the number of 2nd-degree paths through a specified relation.
+
+
+# DQL Query Patterns
+
+DQL queries retrieve entities and related entities information in a graph database.
+
+Respond with the parameterized query, include meaningful parameter like topK and identifier values. Include comments in the query to explain the steps.
+
+Don't prompt the user for anything else. Just produce the query.
+
+## nth-degree-recommendation Generic Rule
+
+- Let **Entity A** be the starting entity, identified by a unique attribute (e.g., `attribute = value`).
+- Define **friends** of A as any entity related to A via a specified **relation** (e.g., `relation1`) or its reverse (e.g., `~relation1`).
+- Define **candidates** as entities that are related to A's friends via a specified **relation** (e.g., `relation2`), but are not directly related to A via `relation2` `relation2`, and are not A.
+- count the number of unique 2nd-degree paths between A and all candidate entities (**Entity B**), where a 2nd-degree path is:
+  - A → friend → B (A is related to friend via `relation1`, friend is related to B via `relation2`)
+If requested and if the relation has reverse also count the path using reverse edge:
+  - A <- friend -> B ( A is related to friend via `~relation1` the reverse edge of `relation1`, friend is related to B via `relation2`)
+You cannot count path starting from like B -> friend -> A, instead you must use the reverse edges to always count the paths starting from A.
+
+- to count all possible paths set a variable to math(1) in the first block (entity A) path_count as math(1). Use another variable to get the propagated value which the sum of the path.
+
+- Rank candidates by the total number of such 2nd-degree paths.
+- Return the top K candidates, including their unique identifier and the path counts.
+- Do not define unused variables in the query.
+- Use value variables for sorting and returning computed totals.
+- Always test the generated query on the target database before returning it.
+
+---
+
+## Example (Generic DQL Template)
+
+```dql
+query TopSecondDegreeCandidates($entityAttr: string = "VALUE") {
+  # 1. Find Entity A
+  A as var(func: eq(ATTRIBUTE, $entityAttr))
+
+  # 2. Find A's friends (uids only)
+  var(func: uid(A)) {
+    RELATION1 { f1 as uid }
+    ~RELATION1 { f2 as uid }
+  }
+
+  # 3. Find candidates (excluding A and A's direct relations)
+  var(func: uid(f1, f2)) {
+    RELATION2 @filter(NOT uid(A,f1,f2) {
+      candidate as uid
+    }
+  }
+
+  # 4. Variable propagation for A → friend → B
+  var(func: uid(A)) {
+    path_count as math(1)
+    RELATION1  {
+      RELATION2 @filter(uid(candidate)) {
+        path_to_B as math(path_count)
+      }
+    }
+    # optionally count path using reverse edge A <- friend -> B
+    ~RELATION1 {
+        RELATION2 @filter(uid(candidate)) {
+            path_to_B_reverse as math(path_count)
+        }
+    }
+  }
+
+  # 5. Add all paths
+  var(func: uid(candidate)) {
+    total_paths as math(path_to_B + path_to_B_reverse)
+  }
+
+  # 6. Aggregate and rank
+  result(func: uid(candidate), orderdesc: val(total_paths), first: 5) {
+    ATTRIBUTE
+    paths_A_to_B: val(path_to_B)
+    paths_B_to_A: val(path_to_A)
+    total_paths: val(total_paths)
+  }
+}
+```
+
+**Replace:**
+- `ATTRIBUTE` with the unique identifier attribute for the entity (e.g., `username`, `email`, etc.)
+- `RELATION1` and `RELATION2` with the relevant relation predicates (e.g., `follows`, `member_of`, etc.)
+- `VALUE` with the default or provided value for the entity attribute.
+
+---
+
+## Validation
+- The query must not define unused variables.
+- The query must use variable propagation for path counting.
+- The query must be tested and confirmed to work on the target database.
