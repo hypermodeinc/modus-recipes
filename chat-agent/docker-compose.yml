@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  # Dgraph Zero controls the cluster
+  zero:
+    image: dgraph/dgraph:latest
+    container_name: chat-dgraph-zero
+    volumes:
+      - ~/chat-dgraph:/dgraph
+    ports:
+      - 5080:5080
+      - 6080:6080
+    command: >
+      dgraph zero --my=zero:5080  --logtostderr -v=1
+
+  # Dgraph Alpha hosts the graph and indexes
+  alpha:
+    image: dgraph/dgraph:latest
+    container_name: chat-dgraph-alpha
+    volumes:
+      - ~/chat-dgraph:/dgraph
+    ports:
+      - 8080:8080
+      - 9080:9080
+    command: >
+      dgraph alpha --my=alpha:7080 --zero=zero:5080 --security whitelist=0.0.0.0/0 --logtostderr
+      -v=1

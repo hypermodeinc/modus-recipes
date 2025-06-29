@@ -107,58 +107,74 @@ func parseEntities(entities string) []Entity {
 }
 
 func save_fact(fact string, entities string, happened_on string) (*string, error) {
-
 	fmt.Println("Fact:", fact)
 	fmt.Println("Entities:", entities)
 	fmt.Println("Happened on:", happened_on)
+
 	// Parse entities string into an array of key-value pairs
 	entitiesArray := parseEntities(entities)
 
 	// Save a fact as a node in Dgraph with attributes sessionId, fact and timestamp
 	timestamp := time.Now().UTC().Format(time.RFC3339)
-	rdf := ""
-	queryBlock := "{"
-	// add each entity as a variable in the query
+
+	// Build query for finding existing entities
+	queryBlock := ""
+	if len(entitiesArray) > 0 {
+		queryBlock = "{\n"
+		for i, entity := range entitiesArray {
+			entityUrn := entity.entityType + "." + entity.name
+			entityVar := fmt.Sprintf("entity_%d", i)
+			queryBlock += fmt.Sprintf(`  %s as var(func: eq(entity.id, "%s"))`+"\n", entityVar, entityUrn)
+		}
+		queryBlock += "}"
+	}
+
+	// Build RDF mutation
+	rdf := fmt.Sprintf(`
+		<_:fact> <created_at> "%s" .
+		<_:fact> <fact> "%s" .`, timestamp, fact)
+
+	// Add entity relationships
 	for i, entity := range entitiesArray {
 		entityUrn := entity.entityType + "." + entity.name
 		entityVar := fmt.Sprintf("entity_%d", i)
-		queryBlock += fmt.Sprintf(`%s as var(func:eq(entity.id,"%s")) `, entityVar, entityUrn)
 		rdf += fmt.Sprintf(`
 		<_:fact> <fact.entity> uid(%s) .
 		uid(%s) <entity.id> "%s" .
 		uid(%s) <entity.type> "%s" .
-		uid(%s) <entity.name> "%s" .
-		`, entityVar, entityVar, entityUrn, entityVar, entity.entityType, entityVar, entity.name)
+		uid(%s) <entity.name> "%s" .`,
+			entityVar, entityVar, entityUrn, entityVar, entity.entityType, entityVar, entity.name)
 	}
 
-	queryBlock += `}`
-	query := dgraph.NewQuery(queryBlock)
-
-	rdf += fmt.Sprintf(`
-		<_:fact> <created_at> "%s" .
-		<_:fact> <fact> "%s" .
-		`, timestamp, fact)
 	// If the fact is associated with a date, add it to the RDF
 	if happened_on != "" {
-		// convert the YYYY-MM-DD format to a full ISO 8601 date
-		// Parse the date string into a time.Time object
 		_, err := time.Parse("2006-01-02", happened_on)
 		if err == nil {
 			rdf += fmt.Sprintf(`
-			<_:fact> <happened_on> "%s" .
-			`, happened_on)
+		<_:fact> <happened_on> "%s" .`, happened_on)
 		}
+	}
+
+	// Create query and mutation
+	var query *dgraph.Query
+	if queryBlock != "" {
+		query = dgraph.NewQuery(queryBlock)
+	} else {
+		query = dgraph.NewQuery("{}")
 	}
 
 	mutation := dgraph.NewMutation().WithSetNquads(rdf)
 
 	_, err := dgraph.ExecuteQuery(connection, query, mutation)
 	if err != nil {
+		fmt.Printf("Error executing DQL: %v\n", err)
+		fmt.Printf("Query: %s\n", queryBlock)
+		fmt.Printf("RDF: %s\n", rdf)
 		return nil, err
 	}
+
 	defaultResponse := "Fact saved"
 	return &defaultResponse, nil
-
 }
 
 func search_fact(terms string) (*string, error) {
