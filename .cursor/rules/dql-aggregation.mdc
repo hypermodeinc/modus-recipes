@@ -1,0 +1,363 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule Name: dql-aggregation
+# Description: Generate DQL queries for aggregation operations including counting, summing, averaging, and other mathematical operations on graph data.
+
+# DQL Aggregation Query Patterns
+
+DQL aggregation queries perform mathematical operations and calculations on graph data, including counting nodes, relationships, and computing statistical values.
+
+Follow [dql-language.mdc](mdc:.cursor/rules/dql-language.mdc) to generate valid DQL.
+
+Respond with the parameterized query, include meaningful parameters and identifier values. Include comments in the query to explain the aggregation steps.
+
+Don't prompt the user for anything else. Just produce the query.
+
+---
+
+## 1. Basic Counting Operations
+
+**Pattern**: Count entities, relationships, or specific attribute values.
+
+**Instructions**:
+- Use `count()` function to count nodes or relationships
+- Use `count(predicate)` to count specific relationships
+- Combine with filters to count subsets
+- Use `has()` to ensure entities have the predicate before counting
+
+**Generic Template**:
+```dql
+query countEntities($filterValue: string = "FILTER_VALUE") {
+  # Count total entities
+  totalCount(func: has(ENTITY.IDENTIFIER)) {
+    totalEntities: count(uid)
+  }
+  
+  # Count entities with specific criteria
+  filteredCount(func: has(ENTITY.ATTRIBUTE)) 
+    @filter(eq(ENTITY.FILTER_ATTRIBUTE, $filterValue)) {
+    filteredEntities: count(uid)
+  }
+  
+  # Count relationships per entity
+  entityRelationCounts(func: has(ENTITY.RELATION)) {
+    ENTITY.IDENTIFIER
+    relationCount: count(ENTITY.RELATION)
+  }
+}
+```
+
+**Replace**:
+- `ENTITY` with the entity type
+- `IDENTIFIER`, `ATTRIBUTE`, `FILTER_ATTRIBUTE` with actual attribute names
+- `RELATION` with relationship predicate
+- `FILTER_VALUE` with the filter criteria
+
+---
+
+## 2. Statistical Aggregations (Sum, Average, Min, Max)
+
+**Pattern**: Perform mathematical operations on numeric attributes.
+
+**Instructions**:
+- Use `sum()`, `avg()`, `min()`, `max()` functions
+- Apply to numeric predicates only
+- Combine with grouping for category-wise statistics
+- Use `val()` to reference computed values
+
+**Generic Template**:
+```dql
+query getStatistics($groupBy: string = "GROUP_VALUE") {
+  # Overall statistics
+  overallStats(func: has(ENTITY.NUMERIC_ATTRIBUTE)) {
+    totalSum: sum(val(ENTITY.NUMERIC_ATTRIBUTE))
+    average: avg(val(ENTITY.NUMERIC_ATTRIBUTE))
+    minimum: min(val(ENTITY.NUMERIC_ATTRIBUTE))
+    maximum: max(val(ENTITY.NUMERIC_ATTRIBUTE))
+    count: count(uid)
+  }
+  
+  # Grouped statistics
+  groupedStats(func: eq(ENTITY.GROUP_ATTRIBUTE, $groupBy)) {
+    ENTITY.GROUP_ATTRIBUTE
+    groupSum: sum(val(ENTITY.NUMERIC_ATTRIBUTE))
+    groupAvg: avg(val(ENTITY.NUMERIC_ATTRIBUTE))
+    groupCount: count(uid)
+    # Include entities in this group
+    ENTITY.RELATION {
+      RELATED_ENTITY.IDENTIFIER
+      RELATED_ENTITY.NUMERIC_ATTRIBUTE
+    }
+  }
+}
+```
+
+**Replace**:
+- `NUMERIC_ATTRIBUTE` with numeric predicate (e.g., `price`, `age`, `score`)
+- `GROUP_ATTRIBUTE` with grouping predicate (e.g., `category`, `status`)
+- `GROUP_VALUE` with the specific group to analyze
+
+---
+
+## 3. Hierarchical Aggregations
+
+**Pattern**: Aggregate data across hierarchical relationships (parent-child, category-subcategory).
+
+**Instructions**:
+- Use nested aggregations to roll up values
+- Combine parent and child counts/sums
+- Use variables to propagate values up the hierarchy
+- Include both individual and cumulative totals
+
+**Generic Template**:
+```dql
+query getHierarchicalAggregation($parentId: string = "PARENT_VALUE") {
+  # Parent level aggregation
+  parentAggregation(func: eq(PARENT_ENTITY.IDENTIFIER, $parentId)) {
+    PARENT_ENTITY.IDENTIFIER
+    PARENT_ENTITY.ATTRIBUTE
+    
+    # Direct children aggregation
+    directChildrenCount: count(PARENT_ENTITY.CHILD_RELATION)
+    directChildrenSum: sum(val(PARENT_ENTITY.CHILD_RELATION.NUMERIC_ATTRIBUTE))
+    
+    # Detailed children with their own aggregations
+    PARENT_ENTITY.CHILD_RELATION {
+      CHILD_ENTITY.IDENTIFIER
+      CHILD_ENTITY.NUMERIC_ATTRIBUTE
+      
+      # Grandchildren aggregation
+      grandchildrenCount: count(CHILD_ENTITY.GRANDCHILD_RELATION)
+      grandchildrenSum: sum(val(CHILD_ENTITY.GRANDCHILD_RELATION.NUMERIC_ATTRIBUTE))
+      
+      # Include grandchildren details
+      CHILD_ENTITY.GRANDCHILD_RELATION {
+        GRANDCHILD_ENTITY.IDENTIFIER
+        GRANDCHILD_ENTITY.NUMERIC_ATTRIBUTE
+      }
+    }
+  }
+}
+```
+
+**Replace**:
+- `PARENT_ENTITY`, `CHILD_ENTITY`, `GRANDCHILD_ENTITY` with entity types
+- `CHILD_RELATION`, `GRANDCHILD_RELATION` with relationship predicates
+- `NUMERIC_ATTRIBUTE` with the attribute to aggregate
+
+---
+
+## 4. Time-based Aggregations
+
+**Pattern**: Aggregate data by time periods (daily, monthly, yearly).
+
+**Instructions**:
+- Use date/time functions with aggregations
+- Group by time periods using date extraction
+- Use `ge()`, `le()` for date range filtering
+- Combine with other filters for specific time-based analysis
+
+**Generic Template**:
+```dql
+query getTimeBasedAggregation($startDate: string = "2024-01-01", $endDate: string = "2024-12-31") {
+  # Aggregation within date range
+  timeRangeStats(func: has(ENTITY.DATE_ATTRIBUTE)) 
+    @filter(ge(ENTITY.DATE_ATTRIBUTE, $startDate) AND le(ENTITY.DATE_ATTRIBUTE, $endDate)) {
+    
+    # Overall stats for the period
+    totalCount: count(uid)
+    totalSum: sum(val(ENTITY.NUMERIC_ATTRIBUTE))
+    avgValue: avg(val(ENTITY.NUMERIC_ATTRIBUTE))
+    
+    # Group by related entity (e.g., by category, user, etc.)
+    ENTITY.GROUP_RELATION {
+      GROUP_ENTITY.IDENTIFIER
+      periodCount: count(~ENTITY.GROUP_RELATION @filter(ge(ENTITY.DATE_ATTRIBUTE, $startDate) AND le(ENTITY.DATE_ATTRIBUTE, $endDate)))
+      periodSum: sum(val(~ENTITY.GROUP_RELATION.NUMERIC_ATTRIBUTE @filter(ge(ENTITY.DATE_ATTRIBUTE, $startDate) AND le(ENTITY.DATE_ATTRIBUTE, $endDate))))
+    }
+  }
+}
+```
+
+**Replace**:
+- `DATE_ATTRIBUTE` with date/datetime predicate
+- `GROUP_RELATION` with the relationship to group by
+- `GROUP_ENTITY` with the entity type to group by
+
+---
+
+## 5. Complex Multi-level Aggregations
+
+**Pattern**: Perform aggregations across multiple relationship levels with complex conditions.
+
+**Instructions**:
+- Use variables to collect UIDs at different levels
+- Apply multiple aggregation functions
+- Use `val()` for computed value references
+- Combine filtering with aggregation
+
+**Generic Template**:
+```dql
+query getComplexAggregation($param1: string = "VALUE1", $threshold: int = 100) {
+  # Step 1: Identify entities meeting criteria
+  var(func: eq(ENTITY1.ATTRIBUTE, $param1)) {
+    entity1_set as uid
+  }
+  
+  # Step 2: Find related entities and compute intermediate values
+  var(func: uid(entity1_set)) {
+    ENTITY1.RELATION1 {
+      intermediate_entities as uid
+      intermediate_value as ENTITY2.NUMERIC_ATTRIBUTE
+    }
+  }
+  
+  # Step 3: Aggregate intermediate values
+  var(func: uid(intermediate_entities)) {
+    total_intermediate as sum(val(intermediate_value))
+  }
+  
+  # Step 4: Final aggregation with conditions
+  complexAggregation(func: uid(entity1_set)) {
+    ENTITY1.IDENTIFIER
+    ENTITY1.ATTRIBUTE
+    
+    # Direct aggregations
+    directCount: count(ENTITY1.RELATION1)
+    directSum: sum(val(ENTITY1.RELATION1.NUMERIC_ATTRIBUTE))
+    
+    # Conditional aggregations
+    highValueCount: count(ENTITY1.RELATION1 @filter(gt(ENTITY2.NUMERIC_ATTRIBUTE, $threshold)))
+    
+    # Multi-level aggregations
+    ENTITY1.RELATION1 {
+      ENTITY2.IDENTIFIER
+      ENTITY2.NUMERIC_ATTRIBUTE
+      nestedCount: count(ENTITY2.RELATION2)
+      nestedSum: sum(val(ENTITY2.RELATION2.NUMERIC_ATTRIBUTE))
+    }
+    
+    # Reference computed totals
+    totalIntermediate: val(total_intermediate)
+  }
+}
+```
+
+---
+
+## 6. Ranking and Top-K Aggregations
+
+**Pattern**: Find top/bottom entities based on aggregated values.
+
+**Instructions**:
+- Use `orderdesc` or `orderasc` for sorting
+- Use `first` parameter to limit results
+- Combine aggregation with ranking
+- Use `val()` to sort by computed values
+
+**Generic Template**:
+```dql
+query getTopEntities($topK: int = 10, $minThreshold: int = 0) {
+  # Find entities with aggregated values
+  var(func: has(ENTITY.RELATION)) {
+    ENTITY.IDENTIFIER
+    aggregated_value as sum(val(ENTITY.RELATION.NUMERIC_ATTRIBUTE))
+  }
+  
+  # Get top K entities by aggregated value
+  topEntities(func: uid(aggregated_value), orderdesc: val(aggregated_value), first: $topK) 
+    @filter(gt(val(aggregated_value), $minThreshold)) {
+    
+    ENTITY.IDENTIFIER
+    ENTITY.ATTRIBUTE
+    totalValue: val(aggregated_value)
+    
+    # Show breakdown of the aggregated value
+    relationCount: count(ENTITY.RELATION)
+    avgValue: avg(val(ENTITY.RELATION.NUMERIC_ATTRIBUTE))
+    
+    # Include top contributing relationships
+    ENTITY.RELATION (orderdesc: RELATED_ENTITY.NUMERIC_ATTRIBUTE, first: 5) {
+      RELATED_ENTITY.IDENTIFIER
+      RELATED_ENTITY.NUMERIC_ATTRIBUTE
+    }
+  }
+}
+```
+
+---
+
+## 7. Conditional Aggregations
+
+**Pattern**: Perform aggregations with complex conditional logic.
+
+**Instructions**:
+- Use `@filter` within aggregation functions
+- Combine multiple conditions with `AND`, `OR`, `NOT`
+- Use `uid_in()` for relationship-based conditions
+- Apply different aggregations based on conditions
+
+**Generic Template**:
+```dql
+query getConditionalAggregation($condition1: string = "VALUE1", $condition2: int = 50) {
+  conditionalAggregation(func: has(ENTITY.IDENTIFIER)) {
+    ENTITY.IDENTIFIER
+    
+    # Total counts
+    totalRelations: count(ENTITY.RELATION)
+    
+    # Conditional counts
+    condition1Count: count(ENTITY.RELATION @filter(eq(RELATED_ENTITY.ATTRIBUTE1, $condition1)))
+    condition2Count: count(ENTITY.RELATION @filter(gt(RELATED_ENTITY.NUMERIC_ATTRIBUTE, $condition2)))
+    bothConditionsCount: count(ENTITY.RELATION @filter(eq(RELATED_ENTITY.ATTRIBUTE1, $condition1) AND gt(RELATED_ENTITY.NUMERIC_ATTRIBUTE, $condition2)))
+    
+    # Conditional sums
+    condition1Sum: sum(val(ENTITY.RELATION.NUMERIC_ATTRIBUTE @filter(eq(RELATED_ENTITY.ATTRIBUTE1, $condition1))))
+    condition2Sum: sum(val(ENTITY.RELATION.NUMERIC_ATTRIBUTE @filter(gt(RELATED_ENTITY.NUMERIC_ATTRIBUTE, $condition2))))
+    
+    # Conditional averages
+    condition1Avg: avg(val(ENTITY.RELATION.NUMERIC_ATTRIBUTE @filter(eq(RELATED_ENTITY.ATTRIBUTE1, $condition1))))
+    condition2Avg: avg(val(ENTITY.RELATION.NUMERIC_ATTRIBUTE @filter(gt(RELATED_ENTITY.NUMERIC_ATTRIBUTE, $condition2))))
+  }
+}
+```
+
+---
+
+## Validation Guidelines
+
+- Always validate that aggregation functions are applied to appropriate data types
+- Use meaningful parameter names and default values for thresholds and limits
+- Include comments explaining the aggregation logic
+- Consider performance implications of complex aggregations
+- Use variables efficiently to avoid redundant calculations
+- Test aggregation results with known data sets
+- Handle edge cases (empty results, null values)
+- Use appropriate root functions to minimize the initial result set
+
+---
+
+## Common Aggregation Functions
+
+- `count(predicate)` - Count relationships or nodes
+- `count(uid)` - Count nodes in current context
+- `sum(val(predicate))` - Sum numeric values
+- `avg(val(predicate))` - Average of numeric values
+- `min(val(predicate))` - Minimum numeric value
+- `max(val(predicate))` - Maximum numeric value
+- `val(variable)` - Reference computed values
+- `math(expression)` - Custom mathematical expressions
+
+---
+
+## Performance Considerations
+
+- Use `has(predicate)` to filter entities before aggregation
+- Apply filters early to reduce the dataset size
+- Use variables to avoid recomputing the same aggregations
+- Consider using `first` parameter to limit large result sets
+- Be cautious with deep nesting in aggregation queries
+- Use appropriate indexes on predicates used in aggregations

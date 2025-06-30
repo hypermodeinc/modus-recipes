@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule Name: dql-upsert
+# Description: Generate DQL queries to update the graph.
+
+
+# DQL Query Patterns
+
+DQL queries retrieve entities and related entities information in a graph database.
+
+Respond with the parameterized query, include meaningful parameter like topK and identifier values. Include comments in the query to explain the steps.
+
+Don't prompt the user for anything else. Just produce the query.
+
+## Conditional Upsert (Create or Update Mutation)
+- Description: A vital pattern for writing data. Create a node if it doesn't exist, or update it if it does, based on a unique key (a predicate with `@upsert`). This prevents duplicate data.
+- Why it's important: The LLM needs to know how to safely write data, not just read it.
+- DQL Keywords: `upsert`, `query`, `mutation`, `cond`.
+- Example: Create a `User` with a unique `username`, or update their `lastName` if a user with that username already exists.

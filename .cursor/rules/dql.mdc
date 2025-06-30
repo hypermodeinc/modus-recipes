@@ -17,5 +17,11 @@ first identify the query pattern and then use the correspomnding rule
 dql-simple-query: to retrieve entities based on criteria.
 dql-nth-degree-count: when counting unique related nodes. 
 dql-generic-nth-degree-recommendation: for queries about finding related nodes based on counting number of relationships.
+dql-simple-query: queries to retrieve entities and their relationships based on various criteria and patterns.
 
+## Validation Guidelines
 
+- Always include meaningful parameter names and default values
+- Add comments explaining each step of the query
+- Use consistent naming conventions for variables and entities
+- Include only necessary attributes to avoid over-fetching
