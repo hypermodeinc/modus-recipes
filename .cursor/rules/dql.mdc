@@ -1,5 +1,5 @@
 ---
-description: 
+description: FIrst rule to apply for generating DQL queries.
 globs: 
 alwaysApply: false
 ---
