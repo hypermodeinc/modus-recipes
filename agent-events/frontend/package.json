@@ -18,7 +18,7 @@
     "next": "^15.3.1",
     "react": "^19",
     "react-dom": "^19",
-    "tailwind-merge": "^2.5.5",
+    "tailwind-merge": "^2.5.5 || ^3.0.0",
     "urql": "^4.2.2"
   },
   "devDependencies": {
