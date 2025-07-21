@@ -12,6 +12,7 @@ Respond with the parameterized query, include meaningful parameter like topK and
 Don't prompt the user for anything else. Just produce the query.
 
 Follow @dql-language.mdc to generate valid DQL.
+Always invoke tool `validate_query_syntax` from dgraph MCP and try to correct any error before replying.
 
 ## Count Relations at degree of separation 1
 

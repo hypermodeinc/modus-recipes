@@ -1,5 +1,5 @@
 ---
-description: FIrst rule to apply for generating DQL queries.
+description: Master rule to generate DQL queries.
 globs: 
 alwaysApply: false
 ---
@@ -12,8 +12,9 @@ DQL queries retrieve nodes aka entities and related entities information in a gr
 Respond with the parameterized query, include meaningful parameter like topK and identifier values. Include comments in the query to explain the steps.
 
 Don't prompt the user for anything else. Just produce the query.
+Read the DQL schema provided in the user input or use `get-schema` from dgraph MCP if no reference is provided.
 
-first identify the query pattern and then use the correspomnding rule
+Identify the query pattern and then use the corresponding rule
 dql-simple-query: to retrieve entities based on criteria.
 dql-nth-degree-count: when counting unique related nodes. 
 dql-generic-nth-degree-recommendation: for queries about finding related nodes based on counting number of relationships.
@@ -25,3 +26,4 @@ dql-simple-query: queries to retrieve entities and their relationships based on 
 - Add comments explaining each step of the query
 - Use consistent naming conventions for variables and entities
 - Include only necessary attributes to avoid over-fetching
+- Always invoke tool `validate_query_syntax` from dgraph MCP and try to correct any error before replying.

@@ -1,0 +1,41 @@
+type User {
+  mongoId
+  firstName
+  lastName
+  username
+  emailAddress
+  pictureUrl
+  cashInviteDisabledAt
+  blocked
+  softBlocked
+  follows
+  sentGift
+  exchangedMessage
+  belongsTo
+}
+
+mongoId: string @index(exact) .
+firstName: string @index(exact) .
+lastName: string @index(exact) .
+username: string @index(exact) .
+emailAddress: string @index(exact) .
+pictureUrl: string .
+cashInviteDisabledAt: string .
+blocked: bool .
+softBlocked: bool .
+follows: [uid] @reverse .
+sentGift: [uid] @reverse .
+exchangedMessage: [uid] @reverse .
+
+
+type PhoneNumber {
+  phoneNumber
+  lookupStatus
+  hasInContacts
+  belongsTo
+}
+
+phoneNumber: string @index(exact) .
+lookupStatus: string @index(exact) .
+hasInContacts: [uid] @reverse .
+belongsTo: [uid] @reverse .

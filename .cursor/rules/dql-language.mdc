@@ -37,7 +37,7 @@ Query parameters
 - may have a default value
 - may be mandatory by suffixing the type with character `!`.
 - Mandatory parameters can’t have a default value.
-Variables must be used in the query.
+Query parameters must be used in the query.
 
 
 A named query block has 
@@ -47,5 +47,14 @@ A named query block has
 - optional pagination specification using `first:N` to limit the number of data to fetch,`offset:N` to skip the first N element ,`after:0x01` to fetch after a given node `uid`.
 
 
-Rules
-all defined variables are either used directly in a func: uid(...) or referenced in the output.
+## CRITICAL RULES FOR VAR BLOCKS AND VARIABLES
+
+### 1. Variable Usage Validation
+- **NEVER declare variables that are not used in subsequent blocks**
+- Every variable declared with `as` must be referenced later with `uid(variable)` or `val(variable)`
+- If a variable is not used, remove the variable declaration entirely
+
+### 2. Var Block Optimization
+- **In `var` blocks, ONLY include variable declarations (using `as`)**
+- **DO NOT fetch attributes or relationships unless they are needed for the variable calculation**
+- Var blocks are for computation only, not for data retrieval
