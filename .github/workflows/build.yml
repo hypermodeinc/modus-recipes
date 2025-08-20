@@ -28,7 +28,7 @@ jobs:
       dirs: ${{ steps.get-dirs.outputs.dirs }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Search for modus.json files
         id: get-dirs
@@ -46,7 +46,7 @@ jobs:
         working-directory: ${{ matrix.dir }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node
         uses: actions/setup-node@v4
