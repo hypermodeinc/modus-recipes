@@ -37,7 +37,7 @@ jobs:
   build:
     needs: get-dirs
     name: build
-    runs-on: warp-ubuntu-latest-x64-4x
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         dir: ${{ fromJson(needs.get-dirs.outputs.dirs) }}
