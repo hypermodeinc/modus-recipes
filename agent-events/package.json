@@ -1,27 +1,27 @@
 {
   "name": "agent-events-example",
   "version": "0.0.0",
-  "packageManager": "pnpm@10.6.0",
+  "packageManager": "pnpm@10.17.1",
   "scripts": {
     "dev:frontend": "pnpm --filter \"frontend\" dev",
     "dev:backend": "cd ./modus && modus dev",
     "build": "pnpm -r build"
   },
   "devDependencies": {
-    "@babel/cli": "7.27.2",
-    "@babel/core": "7.27.7",
-    "@babel/preset-env": "7.27.2",
+    "@babel/cli": "7.28.3",
+    "@babel/core": "7.28.4",
+    "@babel/preset-env": "7.28.3",
     "@babel/preset-typescript": "7.27.1",
-    "@babel/runtime": "7.27.6",
-    "@jest/globals": "30.0.5",
+    "@babel/runtime": "7.28.4",
+    "@jest/globals": "30.2.0",
     "@types/debug": "^4.1.12",
     "@types/jest": "^29.0.0 || ^30.0.0",
-    "@types/node": "22.15.29",
+    "@types/node": "22.18.8",
     "@types/papaparse": "^5.3.15",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "jest": "^29.0.0 || ^30.0.0",
-    "typescript": "5.8.3",
+    "typescript": "5.9.3",
     "next": "^15.3.1"
   },
   "pnpm": {
